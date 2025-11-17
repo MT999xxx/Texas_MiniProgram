@@ -1,0 +1,10 @@
+<view class="container">
+  <view class="hero">
+    <text class="title">德州扑克主题酒吧</text>
+    <text class="subtitle">提前预约赛桌，入场即开局</text>
+  </view>
+  <view class="actions">
+    <button bindtap="goReservation" class="primary">桌位预约</button>
+    <button bindtap="goMenu">店内菜单</button>
+  </view>
+</view>

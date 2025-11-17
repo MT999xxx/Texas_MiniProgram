@@ -1,0 +1,29 @@
+<view class="container">
+  <view class="form-card">
+    <view class="form-item">
+      <text>姓名</text>
+      <input placeholder="请输入姓名" bindinput="onInput" data-field="customerName" value="{{form.customerName}}" />
+    </view>
+    <view class="form-item">
+      <text>手机</text>
+      <input placeholder="请输入手机号" bindinput="onInput" data-field="phone" value="{{form.phone}}" />
+    </view>
+    <view class="form-item">
+      <text>桌位</text>
+      <picker mode="selector" range="{{tableNames}}" bindchange="onPickTable">
+        <view class="picker">{{selectedTableName || '选择桌位'}}</view>
+      </picker>
+    </view>
+    <view class="form-item">
+      <text>时间</text>
+      <picker mode="datetime" bindchange="onPickTime" value="{{form.reservedAt}}">
+        <view class="picker">{{form.reservedAt || '选择时间'}}</view>
+      </picker>
+    </view>
+    <view class="form-item">
+      <text>备注</text>
+      <textarea placeholder="可填写偏好等信息" bindinput="onInput" data-field="note" value="{{form.note}}" />
+    </view>
+    <button class="primary" bindtap="submit" loading="{{loading}}">提交预约</button>
+  </view>
+</view>

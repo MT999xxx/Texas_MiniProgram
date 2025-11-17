@@ -1,0 +1,15 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/reservation/index"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#111827",
+    "navigationBarTitleText": "桌位预约",
+    "navigationBarTextStyle": "white",
+    "backgroundTextStyle": "light",
+    "backgroundColor": "#0f172a"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

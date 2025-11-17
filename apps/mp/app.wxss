@@ -1,0 +1,8 @@
+page {
+  background-color: #0f172a;
+  color: #fff;
+}
+
+.container {
+  padding: 24rpx;
+}

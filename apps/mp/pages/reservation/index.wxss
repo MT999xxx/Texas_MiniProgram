@@ -1,0 +1,24 @@
+.form-card {
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 24rpx;
+  padding: 32rpx;
+  color: #fff;
+}
+
+.form-item {
+  margin-bottom: 32rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.picker {
+  padding: 20rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16rpx;
+}
+
+.primary {
+  background: linear-gradient(90deg, #f472b6, #f97316);
+  color: #fff;
+  border: none;
+}
