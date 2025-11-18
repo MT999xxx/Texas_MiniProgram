@@ -8,6 +8,9 @@ import { OrdersModule } from '../orders/orders.module';
 import { LoyaltyModule } from '../loyalty/loyalty.module';
 import { RedisModule } from '../redis/redis.module';
 import { AuthModule } from '../auth/auth.module';
+import { CouponsModule } from '../coupons/coupons.module';
+import { EventsModule } from '../events/events.module';
+import { PaymentModule } from '../payment/payment.module';
 import { databaseConfig } from '../config/database.config';
 
 @Module({
@@ -21,6 +24,9 @@ import { databaseConfig } from '../config/database.config';
     MembershipModule,
     OrdersModule,
     LoyaltyModule,
+    CouponsModule,
+    EventsModule,
+    PaymentModule,
   ],
 })
 export class AppModule {}

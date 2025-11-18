@@ -22,6 +22,10 @@ export class MemberEntity {
   @Column({ length: 48, nullable: true })
   nickname?: string;
 
+  @ApiPropertyOptional({ description: '头像' })
+  @Column({ nullable: true })
+  avatar?: string;
+
   @ApiPropertyOptional({ type: () => MembershipLevelEntity })
   @ManyToOne(() => MembershipLevelEntity, (level) => level.members, { nullable: true })
   @JoinColumn({ name: 'levelCode' })

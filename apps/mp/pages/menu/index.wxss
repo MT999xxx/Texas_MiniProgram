@@ -362,3 +362,276 @@
   display: flex;
   align-items: center;
 }
+
+/* 优惠券选择区域 */
+.coupon-section {
+  margin: 16rpx 0;
+  padding: 24rpx 32rpx;
+  border-top: 1rpx solid #334155;
+}
+
+.coupon-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.coupon-header text:first-child {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #f1f5f9;
+}
+
+.coupon-action {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.select-coupon-text {
+  font-size: 28rpx;
+  color: #fbbf24;
+}
+
+.no-coupon-text {
+  font-size: 28rpx;
+  color: #94a3b8;
+}
+
+.arrow {
+  font-size: 28rpx;
+  color: #fbbf24;
+}
+
+.selected-coupon {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  background: rgba(251, 191, 36, 0.1);
+  border: 2rpx solid rgba(251, 191, 36, 0.3);
+  border-radius: 12rpx;
+}
+
+.coupon-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.coupon-name {
+  font-size: 28rpx;
+  color: #fbbf24;
+  font-weight: bold;
+}
+
+.coupon-desc {
+  font-size: 24rpx;
+  color: rgba(251, 191, 36, 0.8);
+}
+
+.coupon-remove {
+  font-size: 26rpx;
+  color: #94a3b8;
+  padding: 8rpx 16rpx;
+}
+
+/* 价格汇总 */
+.price-summary {
+  margin: 16rpx 0;
+  padding: 24rpx 32rpx;
+  border-top: 1rpx solid #334155;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.price-row:last-child {
+  margin-bottom: 0;
+}
+
+.price-row .label {
+  font-size: 28rpx;
+  color: #cbd5e1;
+}
+
+.price-row .value {
+  font-size: 28rpx;
+  color: #f1f5f9;
+}
+
+.price-row .discount {
+  font-size: 28rpx;
+  color: #fbbf24;
+}
+
+.price-row.final-price .label {
+  font-weight: bold;
+  font-size: 30rpx;
+}
+
+.price-row.final-price .value {
+  font-weight: bold;
+  font-size: 32rpx;
+  color: #fbbf24;
+}
+
+/* 优惠券选择弹窗 */
+.coupon-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.coupon-modal.show {
+  display: flex;
+}
+
+.coupon-modal-content {
+  width: 90%;
+  max-width: 600rpx;
+  max-height: 80vh;
+  background: #1e293b;
+  border-radius: 20rpx;
+  display: flex;
+  flex-direction: column;
+  animation: zoom-in 0.3s ease-out;
+}
+
+@keyframes zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx;
+  border-bottom: 1rpx solid #334155;
+}
+
+.modal-header text {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #f1f5f9;
+}
+
+.close-btn {
+  font-size: 40rpx;
+  color: #94a3b8;
+  width: 40rpx;
+  height: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.coupon-list {
+  flex: 1;
+  padding: 16rpx;
+}
+
+.coupon-option {
+  display: flex;
+  margin-bottom: 16rpx;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 12rpx;
+  overflow: hidden;
+  border: 2rpx solid transparent;
+}
+
+.coupon-option:active {
+  border-color: rgba(251, 191, 36, 0.5);
+}
+
+.coupon-option:last-child {
+  margin-bottom: 0;
+}
+
+.coupon-option .coupon-left {
+  width: 120rpx;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.coupon-option .coupon-left::after {
+  content: '';
+  position: absolute;
+  right: -10rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20rpx;
+  height: 20rpx;
+  background: #1e293b;
+  border-radius: 50%;
+}
+
+.coupon-amount {
+  text-align: center;
+  color: #1e293b;
+}
+
+.amount {
+  display: block;
+  font-size: 40rpx;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.unit {
+  font-size: 20rpx;
+  margin-top: 4rpx;
+}
+
+.coupon-option .coupon-right {
+  flex: 1;
+  padding: 24rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.coupon-option .coupon-name {
+  font-size: 28rpx;
+  color: #f1f5f9;
+  font-weight: bold;
+}
+
+.coupon-condition {
+  font-size: 24rpx;
+  color: #cbd5e1;
+}
+
+.coupon-validity {
+  font-size: 22rpx;
+  color: #94a3b8;
+}
+
+.no-coupons {
+  text-align: center;
+  padding: 60rpx 0;
+  color: #94a3b8;
+  font-size: 28rpx;
+}

@@ -1,0 +1,107 @@
+<view class="recharge-container">
+  <!-- 顶部用户信息 -->
+  <view class="user-info-section">
+    <view class="user-avatar">
+      <image
+        src="{{userInfo.avatar || '/assets/default-avatar.png'}}"
+        mode="aspectFill"
+      />
+    </view>
+    <view class="user-details">
+      <text class="user-name">{{userInfo.nickname || '未登录'}}</text>
+      <view class="current-points">
+        <text class="points-label">当前积分：</text>
+        <text class="points-value">{{userInfo.points || 0}}</text>
+      </view>
+    </view>
+    <view class="history-btn" bindtap="viewRechargeHistory">
+      <text>记录</text>
+    </view>
+  </view>
+
+  <!-- 充值套餐列表 -->
+  <view class="packages-section">
+    <view class="section-title">
+      <text>选择充值套餐</text>
+    </view>
+
+    <view wx:if="{{loading}}" class="loading">
+      <text>加载中...</text>
+    </view>
+
+    <scroll-view wx:else scroll-y class="packages-scroll">
+      <view
+        wx:for="{{packages}}"
+        wx:key="id"
+        class="package-card {{item.isRecommended ? 'recommended' : ''}}"
+        bindtap="selectPackage"
+        data-id="{{item.id}}"
+      >
+        <!-- 推荐标签 -->
+        <view wx:if="{{item.isRecommended}}" class="recommend-badge">
+          <text>推荐</text>
+        </view>
+
+        <!-- 套餐头部 -->
+        <view class="package-header">
+          <view class="package-info">
+            <text class="package-name">{{item.name}}</text>
+            <text class="package-desc">{{item.description}}</text>
+          </view>
+          <view class="package-price">
+            <text class="price-symbol">¥</text>
+            <text class="price-value">{{item.price}}</text>
+          </view>
+        </view>
+
+        <!-- 积分详情 -->
+        <view class="points-breakdown">
+          <view class="points-row">
+            <text class="points-type">基础积分</text>
+            <text class="points-amount">{{item.points}}</text>
+          </view>
+          <view wx:if="{{item.bonusPoints > 0}}" class="points-row bonus">
+            <text class="points-type">奖励积分</text>
+            <text class="points-amount">+{{item.bonusPoints}}</text>
+          </view>
+          <view class="points-row total">
+            <text class="points-type">总计积分</text>
+            <text class="points-amount total-value">{{item.totalPoints}}</text>
+          </view>
+        </view>
+
+        <!-- 优惠信息 -->
+        <view wx:if="{{item.bonusPoints > 0}}" class="discount-info">
+          <text class="discount-text">额外赠送{{item.discountPercent}}%积分</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 支付说明 -->
+  <view class="payment-notice">
+    <view class="notice-title">
+      <text>💡 充值说明</text>
+    </view>
+    <view class="notice-content">
+      <text>• 支持微信支付，安全便捷</text>
+      <text>• 充值后积分立即到账</text>
+      <text>• 积分永不过期，可用于游戏和消费</text>
+      <text>• 充值越多，奖励积分越多</text>
+    </view>
+  </view>
+
+  <!-- 底部安全提示 -->
+  <view class="security-tip">
+    <text class="security-icon">🔒</text>
+    <text class="security-text">支付安全由微信保障</text>
+  </view>
+</view>
+
+<!-- 支付中遮罩 -->
+<view wx:if="{{paymentLoading}}" class="payment-loading">
+  <view class="loading-content">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">正在创建支付订单...</text>
+  </view>
+</view>

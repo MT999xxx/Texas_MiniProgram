@@ -5,6 +5,10 @@
     "pages/reservation/index",
     "pages/reservation-list/index",
     "pages/menu/index",
+    "pages/order-list/index",
+    "pages/order-detail/index",
+    "pages/coupons/index",
+    "pages/events/index",
     "pages/member/index",
     "pages/points/index",
     "pages/ranking/index"

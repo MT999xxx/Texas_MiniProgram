@@ -272,3 +272,54 @@
   font-size: 28rpx;
   color: #64748b;
 }
+
+/* 登录提示卡片 */
+.login-prompt-card {
+  margin-top: 32rpx;
+  padding: 32rpx;
+  background: rgba(30, 41, 59, 0.5);
+  border: 2rpx solid rgba(251, 191, 36, 0.2);
+  border-radius: 16rpx;
+  margin-bottom: 32rpx;
+}
+
+.login-prompt-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.prompt-icon {
+  font-size: 64rpx;
+  opacity: 0.6;
+}
+
+.prompt-title {
+  font-size: 32rpx;
+  color: #f1f5f9;
+  font-weight: bold;
+}
+
+.prompt-desc {
+  font-size: 26rpx;
+  color: #64748b;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.btn-login {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #1e293b;
+  border: none;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  padding: 20rpx 48rpx;
+  margin-top: 16rpx;
+}
+
+.btn-login:active {
+  opacity: 0.8;
+  transform: scale(0.95);
+}

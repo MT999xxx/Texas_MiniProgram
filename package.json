@@ -11,5 +11,9 @@
     "lint:server": "pnpm --filter server lint",
     "dev:admin": "pnpm --filter admin dev",
     "build:admin": "pnpm --filter admin build"
+  },
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "wechatpay-node-v3": "^2.2.1"
   }
 }

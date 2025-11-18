@@ -1,0 +1,127 @@
+<view class="container">
+  <!-- 标签页切换 -->
+  <view class="tabs">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="status"
+      class="tab-item {{currentTab === item.status ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-status="{{item.status}}"
+    >
+      <text class="tab-text">{{item.label}}</text>
+      <view wx:if="{{currentTab === item.status}}" class="tab-indicator"></view>
+    </view>
+  </view>
+
+  <!-- 优惠券列表 -->
+  <view class="list-container">
+    <view wx:if="{{loading}}" class="loading-box">
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <view wx:elif="{{coupons.length === 0 && currentTab === 'available'}}" class="empty-box">
+      <text class="empty-icon">🎫</text>
+      <text class="empty-text">暂无可领取的优惠券</text>
+    </view>
+
+    <view wx:elif="{{coupons.length === 0}}" class="empty-box">
+      <text class="empty-icon">💳</text>
+      <text class="empty-text">暂无{{currentTabLabel}}优惠券</text>
+      <button wx:if="{{currentTab !== 'available'}}" class="btn-goto-available" bindtap="gotoAvailable">领取优惠券</button>
+    </view>
+
+    <view wx:else class="coupon-list">
+      <!-- 可领取优惠券 -->
+      <view wx:if="{{currentTab === 'available'}}" wx:for="{{coupons}}" wx:key="id" class="coupon-card available-coupon">
+        <view class="coupon-left">
+          <view class="coupon-amount">
+            <text wx:if="{{item.type === 'AMOUNT'}}" class="amount-value">¥{{item.value}}</text>
+            <text wx:elif="{{item.type === 'DISCOUNT'}}" class="amount-value">{{item.value}}折</text>
+            <text wx:elif="{{item.type === 'PERCENTAGE'}}" class="amount-value">{{item.value}}%</text>
+            <text class="amount-label">优惠券</text>
+          </view>
+          <view class="coupon-type type-available">可领取</view>
+        </view>
+
+        <view class="coupon-right">
+          <view class="coupon-header">
+            <text class="coupon-name">{{item.name}}</text>
+            <view wx:if="{{item.minMemberLevel > 1}}" class="member-level-tag">
+              V{{item.minMemberLevel}}专享
+            </view>
+          </view>
+
+          <view wx:if="{{item.description}}" class="coupon-desc">{{item.description}}</view>
+
+          <view class="coupon-condition">
+            <text wx:if="{{item.minAmount > 0}}">满{{item.minAmount}}元可用</text>
+            <text wx:else>无门槛</text>
+          </view>
+
+          <view class="coupon-validity">
+            <text>{{item.validityText}}</text>
+          </view>
+
+          <view class="coupon-stock">
+            <text>剩余 {{item.totalQuantity - item.claimedQuantity}} / {{item.totalQuantity}}</text>
+          </view>
+
+          <view class="coupon-actions">
+            <button
+              class="btn-claim {{item.canClaim ? '' : 'disabled'}}"
+              bindtap="claimCoupon"
+              data-id="{{item.id}}"
+              disabled="{{!item.canClaim}}"
+            >
+              {{item.claimText}}
+            </button>
+          </view>
+        </view>
+      </view>
+
+      <!-- 我的优惠券 -->
+      <view wx:else wx:for="{{coupons}}" wx:key="id" class="coupon-card my-coupon">
+        <view class="coupon-left">
+          <view class="coupon-amount">
+            <text wx:if="{{item.coupon.type === 'AMOUNT'}}" class="amount-value">¥{{item.coupon.value}}</text>
+            <text wx:elif="{{item.coupon.type === 'DISCOUNT'}}" class="amount-value">{{item.coupon.value}}折</text>
+            <text wx:elif="{{item.coupon.type === 'PERCENTAGE'}}" class="amount-value">{{item.coupon.value}}%</text>
+            <text class="amount-label">优惠券</text>
+          </view>
+          <view class="coupon-type type-{{item.status}}">{{item.statusText}}</view>
+        </view>
+
+        <view class="coupon-right">
+          <view class="coupon-header">
+            <text class="coupon-name">{{item.coupon.name}}</text>
+            <text class="coupon-code">{{item.code}}</text>
+          </view>
+
+          <view wx:if="{{item.coupon.description}}" class="coupon-desc">{{item.coupon.description}}</view>
+
+          <view class="coupon-condition">
+            <text wx:if="{{item.coupon.minAmount > 0}}">满{{item.coupon.minAmount}}元可用</text>
+            <text wx:else>无门槛</text>
+          </view>
+
+          <view class="coupon-time">
+            <view class="time-row">
+              <text class="time-label">有效期:</text>
+              <text class="time-value">{{item.validityText}}</text>
+            </view>
+            <view wx:if="{{item.usedAt}}" class="time-row">
+              <text class="time-label">使用时间:</text>
+              <text class="time-value">{{item.usedAtText}}</text>
+            </view>
+          </view>
+
+          <view wx:if="{{item.status === 'AVAILABLE'}}" class="coupon-actions">
+            <button class="btn-use" bindtap="useCoupon" data-id="{{item.id}}">
+              立即使用
+            </button>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

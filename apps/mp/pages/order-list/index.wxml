@@ -1,0 +1,119 @@
+<view class="container">
+  <!-- 标签页切换 -->
+  <view class="tabs">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="status"
+      class="tab-item {{currentTab === item.status ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-status="{{item.status}}"
+    >
+      <text class="tab-text">{{item.label}}</text>
+      <view wx:if="{{currentTab === item.status}}" class="tab-indicator"></view>
+    </view>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="list-container">
+    <view wx:if="{{loading}}" class="loading-box">
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <view wx:elif="{{orders.length === 0}}" class="empty-box">
+      <text class="empty-icon">📋</text>
+      <text class="empty-text">暂无订单记录</text>
+      <button class="btn-goto-menu" bindtap="gotoMenu">去点餐</button>
+    </view>
+
+    <view wx:else class="order-list">
+      <view
+        wx:for="{{orders}}"
+        wx:key="id"
+        class="order-item"
+        bindtap="viewDetail"
+        data-id="{{item.id}}"
+      >
+        <!-- 订单头部 -->
+        <view class="order-header">
+          <view class="order-info">
+            <text class="order-number">订单号: {{item.orderNumber}}</text>
+            <text class="order-time">{{item.createdAtText}}</text>
+          </view>
+          <view class="status-badge status-{{item.status}}">
+            {{item.statusText}}
+          </view>
+        </view>
+
+        <!-- 餐厅信息 -->
+        <view wx:if="{{item.table}}" class="location-info">
+          <text class="location-icon">📍</text>
+          <text class="location-text">{{item.table.name}}</text>
+          <text wx:if="{{item.reservation}}" class="reservation-tag">预约</text>
+        </view>
+
+        <!-- 商品列表 -->
+        <view class="items-container">
+          <view
+            wx:for="{{item.items}}"
+            wx:for-item="product"
+            wx:key="id"
+            class="item-row"
+          >
+            <view class="item-info">
+              <text class="item-name">{{product.menuItem.name}}</text>
+              <text class="item-desc">{{product.menuItem.description}}</text>
+            </view>
+            <view class="item-quantity">×{{product.quantity}}</view>
+            <view class="item-price">¥{{product.amount}}</view>
+          </view>
+        </view>
+
+        <!-- 订单总计 -->
+        <view class="order-total">
+          <view class="total-info">
+            <text class="total-label">共{{item.totalQuantity}}件商品</text>
+            <text class="total-amount">合计: ¥{{item.totalAmount}}</text>
+          </view>
+        </view>
+
+        <!-- 操作按钮 -->
+        <view class="action-buttons" wx:if="{{item.status === 'PENDING'}}">
+          <button
+            class="btn-cancel"
+            catchtap="cancelOrder"
+            data-id="{{item.id}}"
+          >
+            取消订单
+          </button>
+          <button
+            class="btn-pay"
+            catchtap="payOrder"
+            data-id="{{item.id}}"
+          >
+            立即支付
+          </button>
+        </view>
+
+        <view class="action-buttons" wx:elif="{{item.status === 'PAID' || item.status === 'IN_PROGRESS'}}">
+          <button
+            class="btn-contact"
+            catchtap="contactService"
+            data-id="{{item.id}}"
+          >
+            联系客服
+          </button>
+        </view>
+
+        <view class="action-buttons" wx:elif="{{item.status === 'COMPLETED'}}">
+          <button
+            class="btn-reorder"
+            catchtap="reorder"
+            data-id="{{item.id}}"
+          >
+            再来一单
+          </button>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

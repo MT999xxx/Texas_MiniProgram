@@ -1,0 +1,99 @@
+<view class="history-container">
+  <!-- 头部信息 -->
+  <view class="header-section">
+    <view class="page-title">
+      <text>充值记录</text>
+    </view>
+    <view class="recharge-btn" bindtap="goToRecharge">
+      <text>充值</text>
+    </view>
+  </view>
+
+  <!-- 记录列表 -->
+  <view class="history-content">
+    <scroll-view
+      scroll-y
+      refresher-enabled
+      refresher-triggered="{{refreshing}}"
+      bindrefresherrefresh="onRefresh"
+      bindscrolltolower="loadRechargeHistory"
+      class="history-scroll"
+    >
+      <view wx:for="{{rechargeHistory}}" wx:key="id" class="record-card">
+        <!-- 记录头部 -->
+        <view class="record-header">
+          <view class="package-info">
+            <text class="package-name">{{item.package.name}}</text>
+            <text class="record-time">{{item.timeText}}</text>
+          </view>
+          <view class="status-info">
+            <view class="status-badge status-{{item.status}}">
+              <text>{{item.statusText}}</text>
+            </view>
+            <text class="amount-text">¥{{item.amount}}</text>
+          </view>
+        </view>
+
+        <!-- 积分详情 -->
+        <view class="points-details">
+          <view class="points-row">
+            <text class="label">基础积分：</text>
+            <text class="value">{{item.points}}</text>
+          </view>
+          <view wx:if="{{item.bonusPoints > 0}}" class="points-row bonus">
+            <text class="label">奖励积分：</text>
+            <text class="value">+{{item.bonusPoints}}</text>
+          </view>
+          <view class="points-row total">
+            <text class="label">总计积分：</text>
+            <text class="value total-value">{{item.points + item.bonusPoints}}</text>
+          </view>
+        </view>
+
+        <!-- 操作按钮 -->
+        <view class="record-actions">
+          <button
+            class="action-btn detail-btn"
+            bindtap="viewRechargeDetail"
+            data-id="{{item.id}}"
+          >
+            查看详情
+          </button>
+          <button
+            wx:if="{{item.status === 'PENDING'}}"
+            class="action-btn pay-btn"
+            bindtap="continuePay"
+            data-id="{{item.id}}"
+          >
+            继续支付
+          </button>
+        </view>
+
+        <!-- 完成时间 -->
+        <view wx:if="{{item.completedTimeText && item.status === 'SUCCESS'}}" class="completed-time">
+          <text class="completed-label">完成时间：</text>
+          <text class="completed-value">{{item.completedTimeText}}</text>
+        </view>
+      </view>
+
+      <!-- 空状态 -->
+      <view wx:if="{{rechargeHistory.length === 0 && !loading}}" class="empty-state">
+        <text class="empty-icon">💳</text>
+        <text class="empty-text">暂无充值记录</text>
+        <button class="empty-btn" bindtap="goToRecharge">
+          立即充值
+        </button>
+      </view>
+
+      <!-- 加载更多 -->
+      <view wx:if="{{loading}}" class="loading-more">
+        <text>加载中...</text>
+      </view>
+
+      <!-- 没有更多 -->
+      <view wx:if="{{!hasMore && rechargeHistory.length > 0}}" class="no-more">
+        <text>没有更多记录了</text>
+      </view>
+    </scroll-view>
+  </view>
+</view>

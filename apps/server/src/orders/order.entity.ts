@@ -12,10 +12,12 @@ import { MemberEntity } from '../membership/member.entity';
 import { ReservationEntity } from '../reservation/reservation.entity';
 import { TableEntity } from '../tables/table.entity';
 import { OrderItemEntity } from './order-item.entity';
+import { UserCouponEntity } from '../coupons/user-coupon.entity';
 
 export enum OrderStatus {
   PENDING = 'PENDING',
   PAID = 'PAID',
+  PAYMENT_FAILED = 'PAYMENT_FAILED',
   IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
@@ -26,6 +28,10 @@ export class OrderEntity {
   @ApiProperty({ format: 'uuid' })
   @PrimaryGeneratedColumn('uuid')
   id!: string;
+
+  @ApiProperty({ description: '订单号' })
+  @Column({ unique: true })
+  orderNumber!: string;
 
   @ApiPropertyOptional({ type: () => MemberEntity })
   @ManyToOne(() => MemberEntity, (member) => member.orders, { nullable: true, eager: true })
@@ -39,13 +45,33 @@ export class OrderEntity {
   @ManyToOne(() => TableEntity, { nullable: true, eager: true })
   table?: TableEntity;
 
-  @ApiProperty({ description: '总金额' })
+  @ApiPropertyOptional({ type: () => UserCouponEntity })
+  @ManyToOne(() => UserCouponEntity, { nullable: true })
+  userCoupon?: UserCouponEntity;
+
+  @ApiProperty({ description: '商品原价总额' })
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  originalAmount!: number;
+
+  @ApiProperty({ description: '优惠券折扣金额' })
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  discountAmount!: number;
+
+  @ApiProperty({ description: '实付总金额' })
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   totalAmount!: number;
 
   @ApiProperty({ enum: OrderStatus })
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING })
   status!: OrderStatus;
+
+  @ApiPropertyOptional({ description: '支付时间' })
+  @Column({ nullable: true })
+  paidAt?: Date;
+
+  @ApiPropertyOptional({ description: '备注' })
+  @Column({ nullable: true })
+  notes?: string;
 
   @ApiProperty({ type: () => [OrderItemEntity] })
   @OneToMany(() => OrderItemEntity, (item) => item.order, { cascade: true, eager: true })

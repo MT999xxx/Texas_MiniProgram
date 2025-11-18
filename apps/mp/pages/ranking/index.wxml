@@ -57,7 +57,7 @@
       </view>
 
       <!-- 当前用户排名 -->
-      <view wx:if="{{currentUserRank && currentUserRank.rank > 3}}" class="my-rank-card">
+      <view wx:if="{{isLoggedIn && currentUserRank && currentUserRank.rank > 3}}" class="my-rank-card">
         <view class="my-rank-header">
           <text class="my-rank-title">我的排名</text>
         </view>
@@ -72,6 +72,16 @@
             <text class="points-value">{{currentUserRank.points}}</text>
             <text class="points-label">积分</text>
           </view>
+        </view>
+      </view>
+
+      <!-- 未登录提示 -->
+      <view wx:if="{{!isLoggedIn}}" class="login-prompt-card">
+        <view class="login-prompt-content">
+          <text class="prompt-icon">🔐</text>
+          <text class="prompt-title">登录查看个人排名</text>
+          <text class="prompt-desc">登录后即可查看您在排行榜中的位置</text>
+          <button class="btn-login" bindtap="goToLogin">立即登录</button>
         </view>
       </view>
 

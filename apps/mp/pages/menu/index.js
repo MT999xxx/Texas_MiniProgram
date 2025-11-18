@@ -10,24 +10,111 @@ Page({
     cart: {}, // { itemId: count }
     totalCount: 0,
     totalPrice: 0,
+    originalPrice: 0, // 原价
+    discountAmount: 0, // 优惠金额
     showCartModal: false,
     cartItems: [], // 购物车商品列表
     loading: true,
     isLoggedIn: false,
-    isGuest: false
+    isGuest: false,
+    userInfo: null,
+    selectedCoupon: null, // 选中的优惠券
+    availableCoupons: [], // 可用优惠券
+    showCouponModal: false
   },
 
-  async onLoad() {
+  async onLoad(options) {
     await this.checkLoginStatus();
+
+    // 检查是否有传递的优惠券信息
+    const app = getApp();
+    if (app.globalData.selectedCoupon) {
+      this.setData({ selectedCoupon: app.globalData.selectedCoupon });
+      // 清除全局数据
+      app.globalData.selectedCoupon = null;
+    }
+
+    // 处理再来一单功能
+    if (options.reorder) {
+      try {
+        const reorderItems = JSON.parse(decodeURIComponent(options.reorder));
+        this.handleReorderItems(reorderItems);
+      } catch (error) {
+        console.error('解析再来一单数据失败:', error);
+      }
+    }
+
     await this.loadCategories();
     await this.loadMenuItems();
+
+    // 如果已登录，加载可用优惠券
+    if (this.data.isLoggedIn) {
+      await this.loadAvailableCoupons();
+    }
+  },
+
+  // 处理再来一单商品
+  handleReorderItems(reorderItems) {
+    wx.showModal({
+      title: '再来一单',
+      content: `将为您添加${reorderItems.length}个商品到购物车`,
+      confirmText: '确认',
+      success: (res) => {
+        if (res.confirm) {
+          const cart = {};
+          reorderItems.forEach(item => {
+            cart[item.id] = item.quantity;
+          });
+
+          this.setData({ cart });
+          this.updateCartSummary();
+
+          wx.showToast({
+            title: '商品已添加到购物车',
+            icon: 'success'
+          });
+        }
+      }
+    });
   },
 
   // 检查登录状态
   async checkLoginStatus() {
     const isLoggedIn = await authManager.checkLogin();
     const isGuest = wx.getStorageSync('guestMode');
-    this.setData({ isLoggedIn, isGuest });
+    const userInfo = authManager.userInfo;
+    this.setData({ isLoggedIn, isGuest, userInfo });
+
+    // 如果登录状态改变，重新加载可用优惠券
+    if (isLoggedIn) {
+      await this.loadAvailableCoupons();
+    }
+  },
+
+  // 加载可用优惠券
+  async loadAvailableCoupons() {
+    if (!this.data.userInfo || !this.data.userInfo.id) {
+      return;
+    }
+
+    try {
+      const coupons = await request({
+        url: `/coupons/my-coupons/${this.data.userInfo.id}`,
+        method: 'GET',
+        data: { status: 'AVAILABLE' }
+      });
+
+      // 过滤可用的优惠券
+      const availableCoupons = coupons.filter(coupon => {
+        const now = new Date();
+        const endTime = new Date(coupon.endTime);
+        return endTime > now;
+      });
+
+      this.setData({ availableCoupons });
+    } catch (error) {
+      console.error('加载可用优惠券失败:', error);
+    }
   },
 
   // 加载分类列表
@@ -136,9 +223,9 @@ Page({
 
   // 更新购物车汇总
   updateCartSummary() {
-    const { cart, menuItems } = this.data;
+    const { cart, menuItems, selectedCoupon } = this.data;
     let totalCount = 0;
-    let totalPrice = 0;
+    let originalPrice = 0;
     const cartItems = [];
 
     // 创建商品ID到商品信息的映射
@@ -149,14 +236,14 @@ Page({
       });
     });
 
-    // 计算总数和总价
+    // 计算总数和原价
     Object.keys(cart).forEach(itemId => {
       const count = cart[itemId];
       const item = itemMap[itemId];
 
       if (item && count > 0) {
         totalCount += count;
-        totalPrice += item.price * count;
+        originalPrice += item.price * count;
         cartItems.push({
           id: itemId,
           name: item.name,
@@ -166,11 +253,53 @@ Page({
       }
     });
 
+    // 计算优惠券折扣
+    let discountAmount = 0;
+    let finalPrice = originalPrice;
+
+    if (selectedCoupon && originalPrice > 0) {
+      discountAmount = this.calculateCouponDiscount(selectedCoupon, originalPrice);
+      finalPrice = Math.max(0, originalPrice - discountAmount);
+    }
+
     this.setData({
       totalCount,
-      totalPrice: totalPrice.toFixed(2),
+      originalPrice: originalPrice.toFixed(2),
+      discountAmount: discountAmount.toFixed(2),
+      totalPrice: finalPrice.toFixed(2),
       cartItems
     });
+  },
+
+  // 计算优惠券折扣金额
+  calculateCouponDiscount(coupon, orderAmount) {
+    if (!coupon || !coupon.coupon) {
+      return 0;
+    }
+
+    const couponInfo = coupon.coupon;
+
+    // 检查最低消费要求
+    if (couponInfo.minAmount && orderAmount < couponInfo.minAmount) {
+      return 0;
+    }
+
+    switch (couponInfo.type) {
+      case 'AMOUNT':
+        // 满减券
+        return Math.min(couponInfo.value, orderAmount);
+
+      case 'DISCOUNT':
+        // 折扣券 (例如：8折，value为0.8)
+        return orderAmount * (1 - couponInfo.value);
+
+      case 'PERCENTAGE':
+        // 百分比折扣 (例如：20%折扣，value为20)
+        return orderAmount * (couponInfo.value / 100);
+
+      default:
+        return 0;
+    }
   },
 
   // 显示购物车详情
@@ -188,6 +317,67 @@ Page({
   // 阻止事件冒泡
   stopPropagation() {
     // 什么都不做，只是阻止冒泡
+  },
+
+  // 显示优惠券选择modal
+  showCouponModal() {
+    if (!this.data.isLoggedIn) {
+      wx.showToast({
+        title: '请先登录',
+        icon: 'none'
+      });
+      return;
+    }
+
+    if (this.data.availableCoupons.length === 0) {
+      wx.showToast({
+        title: '暂无可用优惠券',
+        icon: 'none'
+      });
+      return;
+    }
+
+    this.setData({ showCouponModal: true });
+  },
+
+  // 隐藏优惠券选择modal
+  hideCouponModal() {
+    this.setData({ showCouponModal: false });
+  },
+
+  // 选择优惠券
+  selectCoupon(e) {
+    const couponId = e.currentTarget.dataset.id;
+    const coupon = this.data.availableCoupons.find(c => c.id === couponId);
+
+    if (coupon) {
+      // 检查是否满足使用条件
+      const minAmount = coupon.coupon?.minAmount || 0;
+      if (minAmount > 0 && this.data.originalPrice < minAmount) {
+        wx.showToast({
+          title: `需满${minAmount}元才能使用`,
+          icon: 'none'
+        });
+        return;
+      }
+
+      this.setData({
+        selectedCoupon: coupon,
+        showCouponModal: false
+      });
+      this.updateCartSummary();
+
+      wx.showToast({
+        title: '优惠券已选择',
+        icon: 'success'
+      });
+    }
+  },
+
+  // 取消选择优惠券
+  unselectCoupon() {
+    this.setData({ selectedCoupon: null });
+    this.updateCartSummary();
   },
 
   // 清空购物车
@@ -264,16 +454,10 @@ Page({
 
   // 创建订单
   async createOrder() {
-    const { cartItems } = this.data;
+    const { cartItems, selectedCoupon } = this.data;
 
     try {
       wx.showLoading({ title: '提交订单中...' });
-
-      // 获取用户信息
-      const userInfo = authManager.userInfo;
-      if (!userInfo || !userInfo.id) {
-        throw new Error('用户信息无效');
-      }
 
       // 构造订单数据
       const orderItems = cartItems.map(item => ({
@@ -283,10 +467,22 @@ Page({
       }));
 
       const orderData = {
-        customerId: userInfo.id, // 使用实际的用户ID
         items: orderItems,
-        note: ''
+        note: '',
+        originalAmount: parseFloat(this.data.originalPrice),
+        finalAmount: parseFloat(this.data.totalPrice),
+        discountAmount: parseFloat(this.data.discountAmount)
       };
+
+      // 如果已登录，添加会员ID
+      if (this.data.userInfo && this.data.userInfo.id) {
+        orderData.memberId = this.data.userInfo.id;
+      }
+
+      // 如果有选择优惠券，添加优惠券信息
+      if (selectedCoupon) {
+        orderData.userCouponId = selectedCoupon.id;
+      }
 
       const order = await request({
         url: '/orders',
@@ -302,27 +498,54 @@ Page({
         icon: 'success'
       });
 
-      // 清空购物车
+      // 清空购物车和优惠券选择
       this.setData({
         cart: {},
         totalCount: 0,
         totalPrice: 0,
+        originalPrice: 0,
+        discountAmount: 0,
         cartItems: [],
+        selectedCoupon: null,
         showCartModal: false
       });
 
-      // 可以跳转到订单详情页面
+      // 刷新可用优惠券列表（因为可能使用了一张）
+      if (this.data.isLoggedIn) {
+        await this.loadAvailableCoupons();
+      }
+
+      // 跳转到订单详情页面
       setTimeout(() => {
         wx.navigateTo({
-          url: `/pages/order-detail/index?orderId=${order.id}`
+          url: `/pages/order-detail/index?id=${order.id}`,
+          fail: () => {
+            // 如果页面不存在，跳转到订单列表
+            wx.navigateTo({
+              url: '/pages/order-list/index'
+            });
+          }
         });
       }, 1500);
 
     } catch (error) {
       wx.hideLoading();
       console.error('下单失败:', error);
+
+      let errorMessage = '下单失败，请重试';
+      if (error.message.includes('优惠券')) {
+        errorMessage = '优惠券使用失败';
+        // 重新加载可用优惠券
+        if (this.data.isLoggedIn) {
+          await this.loadAvailableCoupons();
+        }
+        // 清除选中的优惠券
+        this.setData({ selectedCoupon: null });
+        this.updateCartSummary();
+      }
+
       wx.showToast({
-        title: '下单失败，请重试',
+        title: errorMessage,
         icon: 'none'
       });
     }

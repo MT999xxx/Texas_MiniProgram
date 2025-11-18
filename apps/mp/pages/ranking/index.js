@@ -1,4 +1,5 @@
 const { request } = require('../../utils/request');
+const authManager = require('../../utils/auth');
 
 Page({
   data: {
@@ -11,11 +12,26 @@ Page({
     rankings: [],
     currentUserRank: null,
     loading: false,
-    refreshing: false
+    refreshing: false,
+    userInfo: null,
+    isLoggedIn: false
   },
 
   async onLoad() {
+    await this.checkLoginStatus();
     await this.loadRankings();
+  },
+
+  async onShow() {
+    await this.checkLoginStatus();
+    await this.loadRankings();
+  },
+
+  // 检查登录状态
+  async checkLoginStatus() {
+    const isLoggedIn = await authManager.checkLogin();
+    const userInfo = authManager.userInfo;
+    this.setData({ isLoggedIn, userInfo });
   },
 
   // 加载排行榜数据
@@ -25,20 +41,43 @@ Page({
     this.setData({ loading: true });
 
     try {
-      const { currentTab } = this.data;
+      const { currentTab, userInfo, isLoggedIn } = this.data;
 
-      // 调用后端接口
-      /* 实际接口示例：
-      const result = await request({
-        url: '/loyalty/leaderboard',
-        method: 'GET',
-        data: { type: currentTab }
-      });
-      const { rankings, currentUserRank } = result;
-      */
+      if (isLoggedIn && userInfo?.id) {
+        // 已登录用户：同时获取排行榜和用户排名
+        const result = await request({
+          url: `/loyalty/leaderboard-with-user/${userInfo.id}`,
+          method: 'GET',
+          data: { type: currentTab, limit: 50 }
+        });
 
-      // 使用模拟数据
-      const mockData = this.getMockRankings(currentTab);
+        this.setData({
+          rankings: result.rankings || [],
+          currentUserRank: result.currentUserRank,
+          loading: false,
+          refreshing: false
+        });
+      } else {
+        // 未登录用户：只获取排行榜
+        const result = await request({
+          url: '/loyalty/leaderboard',
+          method: 'GET',
+          data: { type: currentTab, limit: 50 }
+        });
+
+        this.setData({
+          rankings: result.rankings || [],
+          currentUserRank: null,
+          loading: false,
+          refreshing: false
+        });
+      }
+    } catch (error) {
+      console.error('加载排行榜失败:', error);
+
+      // 如果API失败，回退到模拟数据
+      console.log('回退到模拟数据');
+      const mockData = this.getMockRankings(this.data.currentTab);
 
       this.setData({
         rankings: mockData.rankings,
@@ -46,20 +85,16 @@ Page({
         loading: false,
         refreshing: false
       });
-    } catch (error) {
-      console.error('加载排行榜失败:', error);
-      this.setData({
-        loading: false,
-        refreshing: false
-      });
+
       wx.showToast({
-        title: '加载失败',
-        icon: 'none'
+        title: '使用模拟数据',
+        icon: 'none',
+        duration: 1000
       });
     }
   },
 
-  // 获取模拟数据
+  // 获取模拟数据（作为备份）
   getMockRankings(type) {
     const basePoints = type === 'total' ? 10000 : type === 'weekly' ? 500 : 800;
     const nicknames = [
@@ -74,6 +109,7 @@ Page({
     const rankings = nicknames.map((nickname, index) => {
       const points = Math.max(basePoints - index * (basePoints / 30), 0);
       return {
+        rank: index + 1,
         id: `user-${index}`,
         nickname,
         avatar: '',
@@ -84,13 +120,13 @@ Page({
     });
 
     // 当前用户排名
-    const currentUserRank = {
+    const currentUserRank = this.data.isLoggedIn ? {
       rank: 11,
-      nickname: '德州新星',
-      avatar: '',
+      nickname: this.data.userInfo?.nickname || '德州新星',
+      avatar: this.data.userInfo?.avatar || '',
       points: rankings[10]?.points || 0,
       levelName: 'V2 银卡会员'
-    };
+    } : null;
 
     return { rankings, currentUserRank };
   },
@@ -119,6 +155,13 @@ Page({
   async onPullDownRefresh() {
     await this.onRefresh();
     wx.stopPullDownRefresh();
+  },
+
+  // 前往登录
+  goToLogin() {
+    wx.navigateTo({
+      url: '/pages/login/index?redirect=' + encodeURIComponent('/pages/ranking/index')
+    });
   },
 
   // 分享

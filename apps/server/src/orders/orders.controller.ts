@@ -1,8 +1,9 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { OrderStatus } from './order.entity';
 
 @ApiTags('Orders')
 @Controller('orders')
@@ -18,8 +19,18 @@ export class OrdersController {
 
   @Get()
   @ApiOkResponse({ description: '订单列表' })
-  list() {
-    return this.ordersService.list();
+  list(
+    @Query('status') status?: OrderStatus,
+    @Query('memberId') memberId?: string,
+    @Query('tableId') tableId?: string,
+  ) {
+    return this.ordersService.list({ status, memberId, tableId });
+  }
+
+  @Get(':id')
+  @ApiOkResponse({ description: '订单详情' })
+  getById(@Param('id') id: string) {
+    return this.ordersService.findById(id);
   }
 
   @Patch(':id/status')

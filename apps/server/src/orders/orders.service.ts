@@ -12,6 +12,8 @@ import { TableService } from '../tables/table.service';
 import { ReservationService } from '../reservation/reservation.service';
 import { MembershipService } from '../membership/membership.service';
 import { LoyaltyService } from '../loyalty/loyalty.service';
+import { CouponsService } from '../coupons/coupons.service';
+import { UserCouponEntity, UserCouponStatus } from '../coupons/user-coupon.entity';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 
 @Injectable()
@@ -27,11 +29,14 @@ export class OrdersService {
     private readonly reservationRepo: Repository<ReservationEntity>,
     @InjectRepository(TableEntity)
     private readonly tableRepo: Repository<TableEntity>,
+    @InjectRepository(UserCouponEntity)
+    private readonly userCouponRepo: Repository<UserCouponEntity>,
     private readonly redisService: RedisService,
     private readonly tableService: TableService,
     private readonly reservationService: ReservationService,
     private readonly membershipService: MembershipService,
     private readonly loyaltyService: LoyaltyService,
+    private readonly couponsService: CouponsService,
   ) {}
 
   async create(dto: CreateOrderDto) {
@@ -66,8 +71,31 @@ export class OrdersService {
       if (!member) throw new NotFoundException('Member not found');
     }
 
+    // 验证并处理优惠券
+    let userCoupon: UserCouponEntity | undefined;
+    if (dto.userCouponId) {
+      userCoupon = await this.userCouponRepo.findOne({
+        where: { id: dto.userCouponId, member: { id: dto.memberId } },
+        relations: ['coupon', 'member'],
+      });
+
+      if (!userCoupon) {
+        throw new NotFoundException('User coupon not found');
+      }
+
+      if (userCoupon.status !== UserCouponStatus.AVAILABLE) {
+        throw new BadRequestException('Coupon is not available');
+      }
+
+      // 检查优惠券是否过期
+      const now = new Date();
+      if (userCoupon.endTime < now) {
+        throw new BadRequestException('Coupon has expired');
+      }
+    }
+
     const items: OrderItemEntity[] = [];
-    let totalAmount = 0;
+    let originalAmount = 0;
     for (const itemDto of dto.items) {
       const menuItem = menuItems.find((m) => m.id === itemDto.menuItemId)!;
       if (menuItem.stock < itemDto.quantity) {
@@ -78,7 +106,7 @@ export class OrdersService {
         menuItem.status = 'SOLD_OUT' as any;
       }
       const amount = Number(menuItem.price) * itemDto.quantity;
-      totalAmount += amount;
+      originalAmount += amount;
       items.push(
         this.orderItemRepo.create({
           menuItem,
@@ -89,14 +117,39 @@ export class OrdersService {
     }
     await this.menuRepo.save(menuItems);
 
+    // 计算优惠券折扣
+    let discountAmount = 0;
+    let finalAmount = originalAmount;
+
+    if (userCoupon) {
+      // 检查最低消费要求
+      if (userCoupon.coupon.minAmount && originalAmount < userCoupon.coupon.minAmount) {
+        throw new BadRequestException(`Minimum amount ${userCoupon.coupon.minAmount} required to use this coupon`);
+      }
+
+      // 计算折扣金额
+      discountAmount = this.couponsService.calculateDiscount(userCoupon, originalAmount);
+      finalAmount = Math.max(0, originalAmount - discountAmount);
+
+      // 标记优惠券为已使用
+      userCoupon.status = UserCouponStatus.USED;
+      userCoupon.usedAt = new Date();
+      await this.userCouponRepo.save(userCoupon);
+    }
+
     const order = this.orderRepo.create({
+      orderNumber: this.generateOrderNumber(),
       member,
       reservation,
       table,
-      totalAmount,
+      userCoupon,
+      originalAmount: dto.originalAmount || originalAmount,
+      discountAmount: dto.discountAmount || discountAmount,
+      totalAmount: dto.finalAmount || finalAmount,
       status: OrderStatus.PENDING,
       items,
     });
+
     const saved = await this.orderRepo.save(order);
     await this.redisService.getClient().set(`order:${saved.id}:status`, saved.status);
     if (table) {
@@ -105,8 +158,30 @@ export class OrdersService {
     return saved;
   }
 
-  list() {
-    return this.orderRepo.find({ order: { createdAt: 'DESC' } });
+  list(filter?: { status?: OrderStatus; memberId?: string; tableId?: string }) {
+    const where: any = {};
+    if (filter?.status) where.status = filter.status;
+    if (filter?.memberId) where.member = { id: filter.memberId };
+    if (filter?.tableId) where.table = { id: filter.tableId };
+
+    return this.orderRepo.find({
+      where,
+      relations: ['member', 'table', 'reservation', 'items', 'items.menuItem'],
+      order: { createdAt: 'DESC' }
+    });
+  }
+
+  async findById(id: string) {
+    const order = await this.orderRepo.findOne({
+      where: { id },
+      relations: ['member', 'table', 'reservation', 'items', 'items.menuItem', 'items.menuItem.category'],
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    return order;
   }
 
   async updateStatus(id: string, dto: UpdateOrderStatusDto) {
@@ -143,5 +218,62 @@ export class OrdersService {
       }
     }
     await this.menuRepo.save(Array.from(menuMap.values()));
+  }
+
+  // 生成订单号
+  private generateOrderNumber(): string {
+    const now = new Date();
+    const year = now.getFullYear().toString().slice(-2);
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `TXP${year}${month}${day}${hours}${minutes}${seconds}${random}`;
+  }
+
+  // 更新订单支付状态
+  async markAsPaid(orderId: string): Promise<OrderEntity> {
+    const order = await this.findById(orderId);
+    if (order.status !== OrderStatus.PENDING) {
+      throw new BadRequestException('订单状态不允许支付');
+    }
+
+    order.status = OrderStatus.PAID;
+    order.paidAt = new Date();
+    const saved = await this.orderRepo.save(order);
+
+    await this.redisService.getClient().set(`order:${saved.id}:status`, saved.status);
+
+    // 给会员奖励积分
+    if (order.member) {
+      await this.loyaltyService.awardPointsForOrder(saved);
+    }
+
+    return saved;
+  }
+
+  // 标记订单支付失败
+  async markAsPaymentFailed(orderId: string): Promise<OrderEntity> {
+    const order = await this.findById(orderId);
+    order.status = OrderStatus.PAYMENT_FAILED;
+    const saved = await this.orderRepo.save(order);
+    await this.redisService.getClient().set(`order:${saved.id}:status`, saved.status);
+    return saved;
+  }
+
+  // 根据订单号查找订单
+  async findByOrderNumber(orderNumber: string): Promise<OrderEntity> {
+    const order = await this.orderRepo.findOne({
+      where: { orderNumber },
+      relations: ['member', 'table', 'reservation', 'items', 'items.menuItem'],
+    });
+
+    if (!order) {
+      throw new NotFoundException('订单不存在');
+    }
+
+    return order;
   }
 }
