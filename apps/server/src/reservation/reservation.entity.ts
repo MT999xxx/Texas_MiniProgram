@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { TableEntity } from '../tables/table.entity';
 import { OrderEntity } from '../orders/order.entity';
+import { MemberEntity } from '../membership/member.entity';
 
 export enum ReservationStatus {
   PENDING = 'PENDING',
@@ -32,6 +33,10 @@ export class ReservationEntity {
   @Column({ length: 32 })
   phone!: string;
 
+  @ApiProperty({ description: '就餐人数' })
+  @Column({ type: 'int', default: 1 })
+  partySize!: number;
+
   @ApiProperty({ enum: ReservationStatus })
   @Column({ type: 'enum', enum: ReservationStatus, default: ReservationStatus.PENDING })
   status!: ReservationStatus;
@@ -47,6 +52,13 @@ export class ReservationEntity {
   @ApiProperty({ type: () => TableEntity })
   @ManyToOne(() => TableEntity, (table) => table.reservations, { eager: true })
   table!: TableEntity;
+
+  @ApiPropertyOptional({ type: () => MemberEntity })
+  @ManyToOne(() => MemberEntity, { nullable: true })
+  member?: MemberEntity;
+
+  @Column({ name: 'member_id', nullable: true })
+  memberId?: string;
 
   @ApiPropertyOptional({ type: () => [OrderEntity] })
   @OneToMany(() => OrderEntity, (order) => order.reservation)

@@ -13,7 +13,7 @@ import { LoyaltyTransactionEntity } from './src/loyalty/loyalty-transaction.enti
 
 dotenv.config();
 
-export const AppDataSource = new DataSource({
+const AppDataSource = new DataSource({
   type: 'mysql',
   host: process.env.DB_HOST || '127.0.0.1',
   port: Number(process.env.DB_PORT || 3306),

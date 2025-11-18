@@ -36,7 +36,7 @@ export class MenuService {
       price: dto.price,
       stock: dto.stock,
       status: dto.status ?? MenuItemStatus.ON_SALE,
-      desc: dto.desc,
+      description: dto.desc,
     });
     return this.itemRepo.save(item);
   }

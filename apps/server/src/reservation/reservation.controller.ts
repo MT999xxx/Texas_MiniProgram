@@ -18,8 +18,12 @@ export class ReservationController {
 
   @Get()
   @ApiOkResponse({ description: '预约列表' })
-  list(@Query('status') status?: ReservationStatus, @Query('tableId') tableId?: string) {
-    return this.reservationService.list({ status, tableId });
+  list(
+    @Query('status') status?: ReservationStatus,
+    @Query('tableId') tableId?: string,
+    @Query('memberId') memberId?: string,
+  ) {
+    return this.reservationService.list({ status, tableId, memberId });
   }
 
   @Patch(':id/status')

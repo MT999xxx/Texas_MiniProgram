@@ -1,0 +1,274 @@
+.ranking-container {
+  min-height: 100vh;
+  background: #0f172a;
+}
+
+/* 标签栏 */
+.ranking-tabs {
+  display: flex;
+  background: #1e293b;
+  padding: 16rpx 32rpx;
+  gap: 32rpx;
+  border-bottom: 1rpx solid #334155;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 0;
+  border-bottom: 3rpx solid transparent;
+}
+
+.tab-item.active {
+  border-bottom-color: #fbbf24;
+}
+
+.tab-text {
+  font-size: 30rpx;
+  color: #64748b;
+}
+
+.tab-item.active .tab-text {
+  color: #fbbf24;
+  font-weight: bold;
+}
+
+/* 前三名 */
+.top-three {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 48rpx 32rpx 32rpx;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+}
+
+.rank-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+  flex: 1;
+  position: relative;
+}
+
+.rank-1 {
+  margin: 0 16rpx;
+}
+
+.crown {
+  font-size: 48rpx;
+  position: absolute;
+  top: -40rpx;
+  animation: float 2s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10rpx);
+  }
+}
+
+.rank-badge {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 8rpx;
+}
+
+.rank-badge.gold {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  box-shadow: 0 4rpx 16rpx rgba(251, 191, 36, 0.5);
+  width: 56rpx;
+  height: 56rpx;
+  font-size: 28rpx;
+}
+
+.rank-badge.silver {
+  background: linear-gradient(135deg, #cbd5e1, #94a3b8);
+  box-shadow: 0 4rpx 16rpx rgba(148, 163, 184, 0.5);
+}
+
+.rank-badge.bronze {
+  background: linear-gradient(135deg, #fb923c, #f97316);
+  box-shadow: 0 4rpx 16rpx rgba(249, 115, 22, 0.5);
+}
+
+.avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  border: 3rpx solid #334155;
+}
+
+.avatar.large {
+  width: 120rpx;
+  height: 120rpx;
+  border: 4rpx solid #fbbf24;
+  box-shadow: 0 8rpx 24rpx rgba(251, 191, 36, 0.3);
+}
+
+.rank-item .nickname {
+  font-size: 28rpx;
+  color: #cbd5e1;
+  max-width: 160rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rank-1 .nickname {
+  font-size: 32rpx;
+  color: #fbbf24;
+  font-weight: bold;
+}
+
+.rank-item .points {
+  font-size: 24rpx;
+  color: #64748b;
+  font-weight: bold;
+}
+
+.rank-1 .points {
+  font-size: 28rpx;
+  color: #fbbf24;
+}
+
+/* 排名列表 */
+.ranking-list {
+  padding: 0 32rpx 32rpx;
+}
+
+.ranking-list scroll-view {
+  height: calc(100vh - 500rpx);
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  padding: 24rpx;
+  background: #1e293b;
+  border-radius: 16rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
+}
+
+.list-item.current-user {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.1));
+  border: 2rpx solid rgba(251, 191, 36, 0.3);
+}
+
+.rank-number {
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #64748b;
+  margin-right: 16rpx;
+}
+
+.list-item.current-user .rank-number {
+  color: #fbbf24;
+}
+
+.user-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin-right: 24rpx;
+  border: 2rpx solid #334155;
+}
+
+.user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.user-nickname {
+  font-size: 30rpx;
+  color: #f1f5f9;
+  font-weight: 500;
+}
+
+.user-level {
+  font-size: 24rpx;
+  color: #64748b;
+}
+
+.user-points {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4rpx;
+}
+
+.points-value {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #fbbf24;
+}
+
+.points-label {
+  font-size: 20rpx;
+  color: #64748b;
+}
+
+/* 我的排名卡片 */
+.my-rank-card {
+  margin-top: 32rpx;
+  padding-top: 32rpx;
+  border-top: 1rpx solid #334155;
+}
+
+.my-rank-header {
+  margin-bottom: 16rpx;
+}
+
+.my-rank-title {
+  font-size: 28rpx;
+  color: #fbbf24;
+  font-weight: bold;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 32rpx;
+  gap: 16rpx;
+}
+
+.empty-icon {
+  font-size: 96rpx;
+  opacity: 0.3;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #64748b;
+}
+
+/* 加载中 */
+.loading {
+  padding: 48rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #64748b;
+}

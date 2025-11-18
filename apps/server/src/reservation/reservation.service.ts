@@ -28,9 +28,11 @@ export class ReservationService {
     const entity = this.repo.create({
       customerName: dto.customerName,
       phone: dto.phone,
+      partySize: dto.partySize,
       reservedAt: new Date(dto.reservedAt),
       note: dto.note,
       table,
+      memberId: dto.memberId,
       status: ReservationStatus.PENDING,
     });
     const saved = await this.repo.save(entity);
@@ -59,14 +61,15 @@ export class ReservationService {
     return saved;
   }
 
-  list(filter?: { status?: ReservationStatus; tableId?: string }): Promise<ReservationEntity[]> {
+  list(filter?: { status?: ReservationStatus; tableId?: string; memberId?: string }): Promise<ReservationEntity[]> {
     const where: any = {};
     if (filter?.status) where.status = filter.status;
     if (filter?.tableId) where.table = { id: filter.tableId };
+    if (filter?.memberId) where.memberId = filter.memberId;
     return this.repo.find({
       where,
-      relations: ['table'],
-      order: { reservedAt: 'ASC' },
+      relations: ['table', 'member'],
+      order: { reservedAt: 'DESC' },
     });
   }
 }

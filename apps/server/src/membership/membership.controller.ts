@@ -36,6 +36,54 @@ export class MembershipController {
     return this.membershipService.listMembers(levelCode);
   }
 
+  @Get('members/current')
+  @ApiOkResponse({ description: '获取当前会员信息' })
+  async getCurrentMember(@Query('userId') userId?: string) {
+    // 在实际应用中，userId应该从JWT token或session中获取
+    // 这里为了演示，允许通过query参数传递
+    // 如果没有userId，返回一个默认的测试用户
+    if (!userId) {
+      const members = await this.membershipService.listMembers();
+      if (members.length > 0) {
+        return members[0];
+      }
+      return {
+        id: 'test-user-001',
+        userId: 'test-user-001',
+        nickname: '德州爱好者6228',
+        phone: '138****8000',
+        points: 1280,
+        level: {
+          level: 1,
+          name: '普通会员',
+          minPoints: 0,
+          nextLevelPoints: 500
+        },
+        currentExp: 0,
+        nextLevelExp: 500
+      };
+    }
+
+    const member = await this.membershipService.findMemberById(userId);
+    if (!member) {
+      return {
+        id: userId,
+        userId,
+        nickname: '新用户',
+        phone: '',
+        points: 0,
+        level: {
+          level: 1,
+          name: '普通会员',
+          minPoints: 0,
+          nextLevelPoints: 500
+        }
+      };
+    }
+
+    return member;
+  }
+
   @Patch('members/:id/points')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: '积分调整成功' })

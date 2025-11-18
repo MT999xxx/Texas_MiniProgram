@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsDateString, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 import { ReservationStatus } from '../reservation.entity';
 
 export class CreateReservationDto {
@@ -15,6 +15,11 @@ export class CreateReservationDto {
   @MaxLength(32)
   phone!: string;
 
+  @ApiProperty({ description: '就餐人数' })
+  @IsInt()
+  @Min(1)
+  partySize!: number;
+
   @ApiProperty({ description: '桌位ID' })
   @IsString()
   @IsNotEmpty()
@@ -23,6 +28,11 @@ export class CreateReservationDto {
   @ApiProperty({ description: '预约时间', type: String, format: 'date-time' })
   @IsDateString()
   reservedAt!: string;
+
+  @ApiPropertyOptional({ description: '会员ID' })
+  @IsString()
+  @IsOptional()
+  memberId?: string;
 
   @ApiPropertyOptional({ description: '备注', maxLength: 200 })
   @IsString()

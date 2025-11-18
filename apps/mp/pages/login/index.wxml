@@ -1,0 +1,86 @@
+<view class="login-container">
+  <!-- 背景 -->
+  <view class="bg-overlay">
+    <view class="bg-pattern"></view>
+  </view>
+
+  <!-- 主要内容 -->
+  <view class="main-content">
+    <!-- Logo区域 -->
+    <view class="logo-section">
+      <view class="logo">
+        <text class="logo-text">tusk</text>
+      </view>
+      <text class="app-name">德州扑克主题酒吧</text>
+      <text class="app-desc">重庆店-尖子tusk</text>
+    </view>
+
+    <!-- 登录卡片 -->
+    <view class="login-card">
+      <view class="card-header">
+        <text class="welcome-title">欢迎来到德州</text>
+        <text class="welcome-subtitle">请授权登录以获得完整体验</text>
+      </view>
+
+      <!-- 登录按钮 -->
+      <button
+        class="login-btn"
+        open-type="getUserProfile"
+        bindgetuserprofile="onGetUserProfile"
+        wx:if="{{!loading}}"
+      >
+        <view class="btn-content">
+          <text class="btn-icon">🎯</text>
+          <text class="btn-text">微信授权登录</text>
+        </view>
+      </button>
+
+      <!-- 加载状态 -->
+      <view class="login-btn loading" wx:if="{{loading}}">
+        <view class="btn-content">
+          <text class="loading-icon">⏳</text>
+          <text class="btn-text">登录中...</text>
+        </view>
+      </view>
+
+      <!-- 权益说明 -->
+      <view class="benefits">
+        <text class="benefits-title">登录后可享受：</text>
+        <view class="benefit-item">
+          <text class="benefit-icon">🎲</text>
+          <text class="benefit-text">预约桌位，提前锁定座位</text>
+        </view>
+        <view class="benefit-item">
+          <text class="benefit-icon">🍸</text>
+          <text class="benefit-text">在线点餐，免排队等待</text>
+        </view>
+        <view class="benefit-item">
+          <text class="benefit-icon">💎</text>
+          <text class="benefit-text">积分奖励，兑换精美礼品</text>
+        </view>
+        <view class="benefit-item">
+          <text class="benefit-icon">🏆</text>
+          <text class="benefit-text">排行榜竞技，争夺德州之王</text>
+        </view>
+      </view>
+
+      <!-- 协议 -->
+      <view class="agreement">
+        <text class="agreement-text">登录即表示同意</text>
+        <text class="agreement-link" bindtap="showUserAgreement">《用户协议》</text>
+        <text class="agreement-text">和</text>
+        <text class="agreement-link" bindtap="showPrivacyPolicy">《隐私政策》</text>
+      </view>
+    </view>
+
+    <!-- 底部装饰 -->
+    <view class="footer">
+      <text class="footer-text">Powered by tusk</text>
+    </view>
+  </view>
+
+  <!-- 游客模式提示 -->
+  <view class="guest-tip" wx:if="{{showGuestTip}}">
+    <text class="guest-link" bindtap="continueAsGuest">暂不登录，以游客身份体验</text>
+  </view>
+</view>

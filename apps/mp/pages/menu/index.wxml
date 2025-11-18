@@ -1,0 +1,109 @@
+<view class="menu-container">
+  <!-- 头部 -->
+  <view class="header">
+    <view class="store-info">
+      <text class="store-name">重庆店-尖子tusk</text>
+      <text class="status">营业中 08:00-02:00</text>
+    </view>
+  </view>
+
+  <!-- 分类和菜单 -->
+  <view class="content">
+    <!-- 左侧分类 -->
+    <scroll-view class="category-list" scroll-y>
+      <view
+        wx:for="{{categories}}"
+        wx:key="id"
+        class="category-item {{currentCategory === item.id ? 'active' : ''}}"
+        bindtap="selectCategory"
+        data-id="{{item.id}}"
+      >
+        <text>{{item.name}}</text>
+      </view>
+    </scroll-view>
+
+    <!-- 右侧菜品 -->
+    <scroll-view class="menu-list" scroll-y scroll-into-view="{{scrollIntoView}}">
+      <view wx:for="{{menuItems}}" wx:key="id" class="menu-section" id="cat-{{item.categoryId}}">
+        <view class="section-title">{{item.categoryName}}</view>
+        <view class="items">
+          <view wx:for="{{item.items}}" wx:key="id" wx:for-item="dish" class="menu-item">
+            <view class="item-info">
+              <view class="item-header">
+                <text class="item-name">{{dish.name}}</text>
+                <view wx:if="{{dish.status === 'SOLD_OUT'}}" class="sold-out-tag">已售罄</view>
+              </view>
+              <text class="item-desc">{{dish.description || ''}}</text>
+              <view class="item-footer">
+                <text class="price">¥ {{dish.price}}</text>
+                <view class="stock-info" wx:if="{{dish.stock < 10 && dish.stock > 0}}">
+                  <text>仅剩{{dish.stock}}份</text>
+                </view>
+              </view>
+            </view>
+            <view class="item-action">
+              <view wx:if="{{dish.status !== 'SOLD_OUT'}}" class="counter">
+                <view
+                  wx:if="{{cart[dish.id] > 0}}"
+                  class="btn-minus"
+                  bindtap="decreaseItem"
+                  data-id="{{dish.id}}"
+                >-</view>
+                <text wx:if="{{cart[dish.id] > 0}}" class="count">{{cart[dish.id]}}</text>
+                <view
+                  class="btn-plus"
+                  bindtap="increaseItem"
+                  data-id="{{dish.id}}"
+                  data-price="{{dish.price}}"
+                  data-name="{{dish.name}}"
+                >+</view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 购物车栏 -->
+  <view class="cart-bar" bindtap="showCart" wx:if="{{totalCount > 0}}">
+    <view class="cart-info">
+      <view class="cart-icon-wrapper">
+        <view class="cart-badge">{{totalCount}}</view>
+        <text class="cart-icon">🛒</text>
+      </view>
+      <view class="cart-price">
+        <text class="total">¥{{totalPrice}}</text>
+        <text class="delivery-tip">已选{{totalCount}}件</text>
+      </view>
+    </view>
+    <view class="checkout-btn" bindtap="checkout" catchtap="checkout">
+      去结算
+    </view>
+  </view>
+
+  <!-- 购物车弹窗 -->
+  <view class="cart-modal {{showCartModal ? 'show' : ''}}" catchtap="hideCart">
+    <view class="cart-content" catchtap="stopPropagation">
+      <view class="cart-header">
+        <text>已选商品</text>
+        <text class="clear-btn" bindtap="clearCart">清空</text>
+      </view>
+      <scroll-view class="cart-items" scroll-y>
+        <view wx:for="{{cartItems}}" wx:key="id" class="cart-item">
+          <view class="item-left">
+            <text class="item-name">{{item.name}}</text>
+            <text class="item-price">¥{{item.price}}</text>
+          </view>
+          <view class="item-right">
+            <view class="counter">
+              <view class="btn-minus" bindtap="decreaseItem" data-id="{{item.id}}">-</view>
+              <text class="count">{{item.count}}</text>
+              <view class="btn-plus" bindtap="increaseItem" data-id="{{item.id}}" data-price="{{item.price}}" data-name="{{item.name}}">+</view>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+</view>

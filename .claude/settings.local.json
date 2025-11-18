@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree /F /A \"F:\\waibao\\Texas_MiniProgram\")",
+      "Bash(pnpm add @nestjs/jwt @nestjs/passport passport passport-jwt axios)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

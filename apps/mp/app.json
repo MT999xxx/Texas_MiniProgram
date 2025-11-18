@@ -1,11 +1,17 @@
 {
   "pages": [
     "pages/home/index",
-    "pages/reservation/index"
+    "pages/login/index",
+    "pages/reservation/index",
+    "pages/reservation-list/index",
+    "pages/menu/index",
+    "pages/member/index",
+    "pages/points/index",
+    "pages/ranking/index"
   ],
   "window": {
     "navigationBarBackgroundColor": "#111827",
-    "navigationBarTitleText": "桌位预约",
+    "navigationBarTitleText": "德州扑克主题酒吧",
     "navigationBarTextStyle": "white",
     "backgroundTextStyle": "light",
     "backgroundColor": "#0f172a"

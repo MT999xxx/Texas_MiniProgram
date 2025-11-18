@@ -1,0 +1,389 @@
+.points-container {
+  min-height: 100vh;
+  background: #0f172a;
+  padding-bottom: 32rpx;
+}
+
+/* 积分概览 */
+.points-overview {
+  padding: 32rpx;
+}
+
+.overview-card {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-radius: 24rpx;
+  padding: 48rpx 32rpx;
+  text-align: center;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.overview-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 400rpx;
+  height: 400rpx;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.1) 0%, transparent 70%);
+}
+
+.total-points {
+  margin-bottom: 32rpx;
+  position: relative;
+}
+
+.points-value {
+  display: block;
+  font-size: 88rpx;
+  font-weight: bold;
+  color: #fbbf24;
+  margin-bottom: 8rpx;
+}
+
+.points-label {
+  font-size: 28rpx;
+  color: #94a3b8;
+}
+
+.points-trend {
+  display: flex;
+  justify-content: space-around;
+  position: relative;
+}
+
+.trend-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.trend-value {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #10b981;
+}
+
+.trend-value.used {
+  color: #f59e0b;
+}
+
+.trend-label {
+  font-size: 24rpx;
+  color: #64748b;
+}
+
+/* 功能区 */
+.function-area {
+  display: flex;
+  justify-content: space-around;
+  padding: 0 32rpx 32rpx;
+}
+
+.function-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+  padding: 24rpx;
+  background: #1e293b;
+  border-radius: 16rpx;
+  flex: 1;
+  margin: 0 8rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
+}
+
+.function-icon {
+  font-size: 48rpx;
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(251, 191, 36, 0.1);
+  border-radius: 50%;
+}
+
+.function-text {
+  font-size: 24rpx;
+  color: #cbd5e1;
+  text-align: center;
+}
+
+/* 积分明细 */
+.points-details {
+  background: #1e293b;
+  margin: 0 32rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.details-header {
+  padding: 32rpx 24rpx 16rpx;
+  border-bottom: 1rpx solid #334155;
+}
+
+.header-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #f1f5f9;
+  display: block;
+  margin-bottom: 24rpx;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 32rpx;
+}
+
+.tab-item {
+  padding: 8rpx 16rpx;
+  font-size: 28rpx;
+  color: #64748b;
+  border-bottom: 2rpx solid transparent;
+}
+
+.tab-item.active {
+  color: #fbbf24;
+  border-bottom-color: #fbbf24;
+}
+
+.details-list {
+  max-height: 600rpx;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 32rpx;
+  gap: 16rpx;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  opacity: 0.3;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #64748b;
+}
+
+/* 交易记录 */
+.transaction-item {
+  padding: 24rpx;
+  border-bottom: 1rpx solid #334155;
+}
+
+.transaction-item:last-child {
+  border-bottom: none;
+}
+
+.transaction-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.transaction-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.transaction-title {
+  font-size: 30rpx;
+  color: #f1f5f9;
+  font-weight: 500;
+}
+
+.transaction-amount {
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.transaction-amount.earned {
+  color: #10b981;
+}
+
+.transaction-amount.used {
+  color: #f59e0b;
+}
+
+.transaction-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.transaction-date {
+  font-size: 24rpx;
+  color: #64748b;
+}
+
+.transaction-status {
+  font-size: 22rpx;
+  padding: 4rpx 12rpx;
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  border-radius: 8rpx;
+}
+
+/* 加载更多 */
+.load-more, .loading {
+  padding: 32rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #64748b;
+}
+
+/* 弹窗样式 */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  width: 90%;
+  max-height: 80vh;
+  background: #1e293b;
+  border-radius: 16rpx;
+  overflow: hidden;
+  animation: modal-in 0.3s ease-out;
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx;
+  border-bottom: 1rpx solid #334155;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #f1f5f9;
+}
+
+.modal-close {
+  font-size: 48rpx;
+  color: #64748b;
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-body {
+  max-height: 60vh;
+  padding: 0 32rpx 32rpx;
+}
+
+/* 规则样式 */
+.rules-section {
+  margin-bottom: 32rpx;
+}
+
+.section-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #fbbf24;
+  margin-bottom: 16rpx;
+}
+
+.rule-item {
+  margin-bottom: 12rpx;
+}
+
+.rule-text {
+  font-size: 28rpx;
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+/* 兑换商品样式 */
+.exchange-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #334155;
+}
+
+.exchange-item:last-child {
+  border-bottom: none;
+}
+
+.exchange-info {
+  flex: 1;
+  margin-right: 16rpx;
+}
+
+.exchange-title {
+  display: block;
+  font-size: 30rpx;
+  color: #f1f5f9;
+  margin-bottom: 8rpx;
+}
+
+.exchange-desc {
+  display: block;
+  font-size: 24rpx;
+  color: #64748b;
+  margin-bottom: 8rpx;
+}
+
+.exchange-points {
+  font-size: 28rpx;
+  color: #fbbf24;
+  font-weight: bold;
+}
+
+.exchange-btn {
+  padding: 16rpx 32rpx;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #1e293b;
+  font-size: 24rpx;
+  font-weight: bold;
+  border-radius: 32rpx;
+  border: none;
+}
+
+.exchange-btn.disabled {
+  background: #374151;
+  color: #6b7280;
+}
+
+.exchange-btn::after {
+  border: none;
+}

@@ -1,0 +1,94 @@
+<view class="container">
+  <!-- 标签页切换 -->
+  <view class="tabs">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="status"
+      class="tab-item {{currentTab === item.status ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-status="{{item.status}}"
+    >
+      <text class="tab-text">{{item.label}}</text>
+      <view wx:if="{{currentTab === item.status}}" class="tab-indicator"></view>
+    </view>
+  </view>
+
+  <!-- 预约列表 -->
+  <view class="list-container">
+    <view wx:if="{{loading}}" class="loading-box">
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <view wx:elif="{{reservations.length === 0}}" class="empty-box">
+      <text class="empty-icon">📝</text>
+      <text class="empty-text">暂无预约记录</text>
+      <button class="btn-goto-reserve" bindtap="gotoReserve">立即预约</button>
+    </view>
+
+    <view wx:else class="reservation-list">
+      <view
+        wx:for="{{reservations}}"
+        wx:key="id"
+        class="reservation-item"
+        bindtap="viewDetail"
+        data-id="{{item.id}}"
+      >
+        <!-- 状态标签 -->
+        <view class="status-badge status-{{item.status}}">
+          {{item.statusText}}
+        </view>
+
+        <!-- 预约信息 -->
+        <view class="reservation-content">
+          <view class="info-row">
+            <text class="icon">🗓</text>
+            <text class="label">预约时间：</text>
+            <text class="value">{{item.reservedAtText}}</text>
+          </view>
+
+          <view class="info-row">
+            <text class="icon">📍</text>
+            <text class="label">桌台：</text>
+            <text class="value">{{item.table.name}}</text>
+            <text class="capacity">({{item.table.capacity}}人座)</text>
+          </view>
+
+          <view class="info-row">
+            <text class="icon">👥</text>
+            <text class="label">就餐人数：</text>
+            <text class="value">{{item.partySize}}人</text>
+          </view>
+
+          <view class="info-row">
+            <text class="icon">👤</text>
+            <text class="label">联系人：</text>
+            <text class="value">{{item.customerName}}</text>
+            <text class="phone">{{item.phone}}</text>
+          </view>
+
+          <view wx:if="{{item.note}}" class="info-row">
+            <text class="icon">💬</text>
+            <text class="label">备注：</text>
+            <text class="value note-text">{{item.note}}</text>
+          </view>
+        </view>
+
+        <!-- 操作按钮 -->
+        <view class="action-buttons" wx:if="{{item.status === 'PENDING' || item.status === 'CONFIRMED'}}">
+          <button
+            class="btn-cancel"
+            catchtap="cancelReservation"
+            data-id="{{item.id}}"
+          >
+            取消预约
+          </button>
+        </view>
+
+        <!-- 预约时间 -->
+        <view class="created-time">
+          <text class="time-label">预约于 {{item.createdAtText}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

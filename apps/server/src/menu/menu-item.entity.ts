@@ -35,8 +35,8 @@ export class MenuItemEntity {
   status!: MenuItemStatus;
 
   @ApiPropertyOptional({ description: '说明' })
-  @Column({ length: 120, nullable: true })
-  desc?: string;
+  @Column({ length: 120, nullable: true, name: 'description' })
+  description?: string;
 
   @ApiProperty({ type: String, format: 'date-time' })
   @CreateDateColumn()
