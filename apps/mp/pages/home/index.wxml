@@ -1,31 +1,31 @@
 <view class="home-page">
-  <view class="hero-banner">
-    <image class="hero-bg" src="/images/首页背景蛇.png" mode="aspectFill" />
-    <view class="hero-overlay"></view>
-    <view class="hero-content">
+  <image class="page-bg" src="/images/首页背景蛇.png" mode="aspectFill" />
+  <view class="page-overlay"></view>
+
+  <view class="home-content">
+    <view class="hero-banner">
       <text class="hero-tag">重庆店·尖牙 tusk</text>
       <text class="hero-title">tusk</text>
       <text class="hero-welcome">欢迎到德州生存者 Husk</text>
       <text class="hero-sub">预约赛桌 · 品味酒香 · 决战巅峰</text>
     </view>
-  </view>
 
-  <view class="quick-actions">
-    <view
-      class="quick-card {{index === 0 ? 'primary' : 'secondary'}}"
-      wx:for="{{quickActions}}"
-      wx:key="title"
-      bindtap="handleQuickAction"
-      data-url="{{item.url}}"
-    >
-      <view class="quick-info">
-        <text class="quick-title">{{item.title}}</text>
-        <text class="quick-sub">{{item.subtitle}}</text>
+    <view class="quick-actions">
+      <view
+        class="quick-card {{index === 0 ? 'primary' : 'secondary'}}"
+        wx:for="{{quickActions}}"
+        wx:key="title"
+        bindtap="handleQuickAction"
+        data-url="{{item.url}}"
+      >
+        <view class="quick-info">
+          <text class="quick-title">{{item.title}}</text>
+          <text class="quick-sub">{{item.subtitle}}</text>
+        </view>
+        <text class="quick-icon">{{item.icon}}</text>
       </view>
-      <text class="quick-icon">{{item.icon}}</text>
     </view>
   </view>
-
 </view>
 
 <view class="tab-bar">
