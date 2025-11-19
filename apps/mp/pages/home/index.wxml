@@ -1,102 +1,48 @@
-<view class="home-container">
-  <!-- 头部 banner -->
+<view class="home-page">
   <view class="hero-banner">
-    <view class="hero-bg">
-      <image class="bg-image" src="/assets/poker-bg.jpg" mode="aspectFill" />
-      <view class="hero-overlay"></view>
-    </view>
+    <image class="hero-bg" src="/images/首页背景蛇.png" mode="aspectFill" />
+    <view class="hero-overlay"></view>
     <view class="hero-content">
-      <view class="logo-section">
-        <text class="logo-text">tusk</text>
-        <text class="store-name">重庆店-尖子tusk</text>
-      </view>
-      <text class="slogan">欢迎到德州生存者Husk</text>
-      <text class="sub-slogan">预约赛桌 · 品味酒香 · 决战巅峰</text>
+      <text class="hero-tag">重庆店·尖牙 tusk</text>
+      <text class="hero-title">tusk</text>
+      <text class="hero-welcome">欢迎到德州生存者 Husk</text>
+      <text class="hero-sub">预约赛桌 · 品味酒香 · 决战巅峰</text>
     </view>
   </view>
 
-  <!-- 快捷功能卡片 -->
   <view class="quick-actions">
-    <view class="action-card primary" bindtap="goReservation">
-      <view class="card-icon">🎯</view>
-      <view class="card-info">
-        <text class="card-title">桌位预约</text>
-        <text class="card-desc">Reservation</text>
+    <view
+      class="quick-card {{index === 0 ? 'primary' : 'secondary'}}"
+      wx:for="{{quickActions}}"
+      wx:key="title"
+      bindtap="handleQuickAction"
+      data-url="{{item.url}}"
+    >
+      <view class="quick-info">
+        <text class="quick-title">{{item.title}}</text>
+        <text class="quick-sub">{{item.subtitle}}</text>
       </view>
-      <view class="card-arrow">›</view>
-    </view>
-
-    <view class="action-card secondary" bindtap="goMenu">
-      <view class="card-icon">🍺</view>
-      <view class="card-info">
-        <text class="card-title">点餐</text>
-        <text class="card-desc">Order Now</text>
-      </view>
-      <view class="card-arrow">›</view>
+      <text class="quick-icon">{{item.icon}}</text>
     </view>
   </view>
 
-  <!-- 功能入口 -->
-  <view class="function-grid">
-    <view class="grid-item" bindtap="navigateTo" data-url="/pages/menu/index">
-      <view class="grid-icon">🍸</view>
-      <text class="grid-text">点单</text>
-    </view>
-
-    <view class="grid-item" bindtap="navigateTo" data-url="/pages/reservation/index">
-      <view class="grid-icon">📅</view>
-      <text class="grid-text">预约</text>
-    </view>
-
-    <view class="grid-item" bindtap="navigateTo" data-url="/pages/ranking/index">
-      <view class="grid-icon">📊</view>
-      <text class="grid-text">排行榜</text>
-    </view>
-
-    <view class="grid-item" bindtap="navigateTo" data-url="/pages/member/index">
-      <view class="grid-icon">👤</view>
-      <text class="grid-text">会员</text>
-    </view>
-  </view>
-
-  <!-- 活动公告 -->
-  <view class="announcements">
-    <view class="section-header">
-      <text class="section-title">最新活动</text>
-      <text class="section-more" bindtap="viewAllAnnouncements">更多 ›</text>
-    </view>
-    <view class="announcement-list">
-      <view wx:for="{{announcements}}" wx:key="id" class="announcement-item" bindtap="viewAnnouncement" data-id="{{item.id}}">
-        <view class="announcement-tag">{{item.tag}}</view>
-        <text class="announcement-title">{{item.title}}</text>
-        <text class="announcement-time">{{item.time}}</text>
-      </view>
-    </view>
-  </view>
-
-  <!-- 底部导航栏占位 -->
-  <view class="bottom-placeholder"></view>
 </view>
 
-<!-- 底部导航 -->
 <view class="tab-bar">
-  <view class="tab-item active" bindtap="switchTab" data-tab="home">
-    <view class="tab-icon">🏠</view>
+  <view class="tab-item active">
+    <text class="tab-icon">🏠</text>
     <text class="tab-text">首页</text>
   </view>
-
-  <view class="tab-item" bindtap="switchTab" data-tab="table">
-    <view class="tab-icon">🎲</view>
+  <view class="tab-item">
+    <text class="tab-icon">🎲</text>
     <text class="tab-text">桌面</text>
   </view>
-
-  <view class="tab-item" bindtap="switchTab" data-tab="ranking">
-    <view class="tab-icon">📊</view>
+  <view class="tab-item">
+    <text class="tab-icon">📊</text>
     <text class="tab-text">排行榜</text>
   </view>
-
-  <view class="tab-item" bindtap="switchTab" data-tab="member">
-    <view class="tab-icon">👤</view>
+  <view class="tab-item">
+    <text class="tab-icon">👤</text>
     <text class="tab-text">会员</text>
   </view>
 </view>

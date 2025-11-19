@@ -32,12 +32,13 @@
 
     <view wx:else class="coupon-list">
       <!-- 可领取优惠券 -->
-      <view wx:if="{{currentTab === 'available'}}" wx:for="{{coupons}}" wx:key="id" class="coupon-card available-coupon">
-        <view class="coupon-left">
-          <view class="coupon-amount">
-            <text wx:if="{{item.type === 'AMOUNT'}}" class="amount-value">¥{{item.value}}</text>
-            <text wx:elif="{{item.type === 'DISCOUNT'}}" class="amount-value">{{item.value}}折</text>
-            <text wx:elif="{{item.type === 'PERCENTAGE'}}" class="amount-value">{{item.value}}%</text>
+      <block wx:if="{{currentTab === 'available'}}">
+        <view wx:for="{{coupons}}" wx:key="id" class="coupon-card available-coupon">
+          <view class="coupon-left">
+            <view class="coupon-amount">
+              <text wx:if="{{item.type === 'AMOUNT'}}" class="amount-value">¥{{item.value}}</text>
+              <text wx:elif="{{item.type === 'DISCOUNT'}}" class="amount-value">{{item.value}}折</text>
+              <text wx:elif="{{item.type === 'PERCENTAGE'}}" class="amount-value">{{item.value}}%</text>
             <text class="amount-label">优惠券</text>
           </view>
           <view class="coupon-type type-available">可领取</view>
@@ -77,10 +78,12 @@
             </button>
           </view>
         </view>
-      </view>
+        </view>
+      </block>
 
       <!-- 我的优惠券 -->
-      <view wx:else wx:for="{{coupons}}" wx:key="id" class="coupon-card my-coupon">
+      <block wx:else>
+        <view wx:for="{{coupons}}" wx:key="id" class="coupon-card my-coupon">
         <view class="coupon-left">
           <view class="coupon-amount">
             <text wx:if="{{item.coupon.type === 'AMOUNT'}}" class="amount-value">¥{{item.coupon.value}}</text>
@@ -122,6 +125,7 @@
           </view>
         </view>
       </view>
+      </block>
     </view>
   </view>
 </view>

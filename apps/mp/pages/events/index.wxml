@@ -53,15 +53,12 @@
               <text class="detail-text">{{item.location || '德州主题酒吧'}}</text>
             </view>
 
-            <view class="detail-row" wx:if="{{item.maxParticipants > 0}}">
+              <view class="detail-row" wx:if="{{item.maxParticipants > 0}}">
               <text class="detail-icon">👥</text>
               <text class="detail-text">{{item.currentParticipants}}/{{item.maxParticipants}}人</text>
               <view class="participants-progress">
                 <view class="progress-bar">
-                  <view
-                    class="progress-fill"
-                    style="width: {{(item.currentParticipants / item.maxParticipants * 100).toFixed(0)}}%"
-                  ></view>
+                  <view class="progress-fill" style="width: {{(item.currentParticipants / item.maxParticipants * 100) + '%'}}"></view>
                 </view>
               </view>
             </view>
@@ -105,7 +102,7 @@
       <!-- 空状态 -->
       <view wx:if="{{events.length === 0 && !loading}}" class="empty-state">
         <text class="empty-icon">🎪</text>
-        <text class="empty-text">暂无{{tabs.find(t => t.value === currentTab).label}}活动</text>
+        <text class="empty-text">暂无{{currentTabLabel}}活动</text>
       </view>
 
       <!-- 加载状态 -->

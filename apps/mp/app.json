@@ -14,7 +14,7 @@
     "pages/ranking/index"
   ],
   "window": {
-    "navigationBarBackgroundColor": "#111827",
+    "navigationBarBackgroundColor": "#1c1c1e",
     "navigationBarTitleText": "德州扑克主题酒吧",
     "navigationBarTextStyle": "white",
     "backgroundTextStyle": "light",
