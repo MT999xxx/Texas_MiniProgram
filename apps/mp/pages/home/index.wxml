@@ -1,48 +1,56 @@
-<view class="home-page">
-  <image class="page-bg" src="/images/首页背景蛇.png" mode="aspectFill" />
-  <view class="page-overlay"></view>
+<view class="container">
+  <image class="bg-image" src="/images/耗子.png" mode="aspectFill" />
+  
+  <view class="bg-overlay"></view>
 
-  <view class="home-content">
-    <view class="hero-banner">
-      <text class="hero-tag">重庆店·尖牙 tusk</text>
-      <text class="hero-title">tusk</text>
-      <text class="hero-welcome">欢迎到德州生存者 Husk</text>
-      <text class="hero-sub">预约赛桌 · 品味酒香 · 决战巅峰</text>
+  <view class="header-area">
+    <view class="store-info">
+      <text class="store-name">重庆店-尖牙tusk ></text>
     </view>
-
-    <view class="quick-actions">
-      <view
-        class="quick-card {{index === 0 ? 'primary' : 'secondary'}}"
-        wx:for="{{quickActions}}"
-        wx:key="title"
-        bindtap="handleQuickAction"
-        data-url="{{item.url}}"
-      >
-        <view class="quick-info">
-          <text class="quick-title">{{item.title}}</text>
-          <text class="quick-sub">{{item.subtitle}}</text>
-        </view>
-        <text class="quick-icon">{{item.icon}}</text>
-      </view>
+    <view class="notice-btn">
+      <text>本店须知</text>
     </view>
   </view>
-</view>
 
-<view class="tab-bar">
-  <view class="tab-item active">
-    <text class="tab-icon">🏠</text>
-    <text class="tab-text">首页</text>
+  <view class="center-area">
+    <text class="brand-title">TUSK</text>
+    
+    <view class="welcome-box">
+      <text class="welcome-text">欢迎来到尖牙tusk</text>
+    </view>
   </view>
-  <view class="tab-item">
-    <text class="tab-icon">🎲</text>
-    <text class="tab-text">桌面</text>
+
+  <view class="bottom-panel">
+    <view class="action-item" bindtap="goToMenu">
+      <image class="action-icon" src="/images/点餐.png" mode="aspectFit" />
+      <text class="action-title">点餐</text>
+      <text class="action-subtitle">Order</text>
+    </view>
+
+    <view class="action-item" bindtap="goToReservation">
+      <image class="action-icon" src="/images/预约.png" mode="aspectFit" />
+      <text class="action-title">预约</text>
+      <text class="action-subtitle">Reservation</text>
+    </view>
   </view>
-  <view class="tab-item">
-    <text class="tab-icon">📊</text>
-    <text class="tab-text">排行榜</text>
+
+  <view class="custom-tab-bar">
+    <view class="tab-item active" bindtap="switchTab" data-index="0">
+      <view class="tab-icon-bg">🏠</view> 
+      <text>首页</text>
+    </view>
+    <view class="tab-item" bindtap="switchTab" data-index="1">
+      <view class="tab-icon">🎲</view>
+      <text>桌面</text>
+    </view>
+    <view class="tab-item" bindtap="switchTab" data-index="2">
+      <view class="tab-icon">📊</view>
+      <text>排行榜</text>
+    </view>
+    <view class="tab-item" bindtap="switchTab" data-index="3">
+      <view class="tab-icon">👤</view>
+      <text>会员</text>
+    </view>
   </view>
-  <view class="tab-item">
-    <text class="tab-icon">👤</text>
-    <text class="tab-text">会员</text>
-  </view>
+
 </view>

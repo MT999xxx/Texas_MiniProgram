@@ -1,223 +1,243 @@
-.home-page {
-  position: relative;
-  min-height: 100vh;
-  overflow: hidden;
-  background: #1c1c1e;
-  padding-bottom: 160rpx;
+/* pages/home/index.wxss */
+page {
+  background-color: #000;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, sans-serif;
 }
 
-.page-bg {
+.container {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 背景图全屏铺满 */
+.bg-image {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.45;
+  z-index: 0;
 }
 
-.page-overlay {
+/* 遮罩层：让背景变暗，文字更亮 */
+.bg-overlay {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(3, 4, 7, 0.9), rgba(3, 4, 7, 0.95));
-}
-
-.home-content {
-  position: relative;
-  z-index: 1;
-  padding: 32rpx;
-  display: flex;
-  flex-direction: column;
-  gap: 24rpx;
-}
-
-.hero-banner {
-  border-radius: 28rpx;
-  padding: 40rpx;
-  background: rgba(18, 23, 36, 0.8);
-  box-shadow: 0 20rpx 40rpx rgba(0, 0, 0, 0.35);
-}
-
-.hero-tag {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 26rpx;
-}
-
-.hero-title {
-  font-size: 100rpx;
-  font-family: Georgia, 'Times New Roman', serif;
-  color: #fbbf24;
-  margin: 18rpx 0 8rpx;
-}
-
-.hero-welcome {
-  font-size: 34rpx;
-  color: #f8fafc;
-  font-weight: 600;
-}
-
-.hero-sub {
-  font-size: 26rpx;
-  color: rgba(255, 255, 255, 0.7);
-  margin-top: 6rpx;
-}
-
-.quick-actions {
-  display: flex;
-  gap: 20rpx;
-}
-
-.quick-card {
-  flex: 1;
-  border-radius: 24rpx;
-  padding: 28rpx 24rpx;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 16rpx 30rpx rgba(0, 0, 0, 0.35);
-}
-
-.quick-card.primary {
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: #1c0f02;
-}
-
-.quick-card.secondary {
-  background: linear-gradient(135deg, rgba(71, 85, 105, 0.9), rgba(30, 41, 59, 0.9));
-  color: #f8fafc;
-}
-
-.quick-title {
-  font-size: 32rpx;
-  font-weight: 700;
-}
-
-.quick-sub {
-  font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.quick-icon {
-  font-size: 44rpx;
-}
-
-.tool-grid {
-  background: rgba(17, 20, 28, 0.9);
-  border-radius: 28rpx;
-  padding: 28rpx;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20rpx;
-  box-shadow: inset 0 0 0 1rpx rgba(255, 255, 255, 0.04);
-}
-
-.tool-item {
-  text-align: center;
-  padding: 16rpx 10rpx;
-  border-radius: 20rpx;
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.tool-icon {
-  font-size: 34rpx;
-}
-
-.tool-label {
-  margin-top: 12rpx;
-  font-size: 26rpx;
-  font-weight: 600;
-  color: #f1f5f9;
-}
-
-.tool-desc {
-  font-size: 22rpx;
-  color: rgba(255, 255, 255, 0.65);
-}
-
-.section {
-  background: rgba(16, 18, 26, 0.95);
-  border-radius: 28rpx;
-  padding: 24rpx;
-  box-shadow: 0 20rpx 35rpx rgba(0, 0, 0, 0.4);
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16rpx;
-}
-
-.section-title {
-  font-size: 30rpx;
-  color: #f8fafc;
-  font-weight: 700;
-}
-
-.section-more {
-  font-size: 24rpx;
-  color: #fbbf24;
-}
-
-.activity-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16rpx;
-}
-
-.activity-item {
-  display: flex;
-  gap: 16rpx;
-  align-items: center;
-  padding: 18rpx 20rpx;
-  border-radius: 20rpx;
-  background: rgba(12, 13, 20, 0.9);
-  border: 1rpx solid rgba(255, 255, 255, 0.04);
-}
-
-.activity-tag {
-  padding: 6rpx 16rpx;
-  border-radius: 999rpx;
-  background: rgba(251, 191, 36, 0.2);
-  color: #fbbf24;
-  font-size: 22rpx;
-}
-
-.activity-title {
-  display: block;
-  font-size: 28rpx;
-  color: #f8fafc;
-}
-
-.activity-time {
-  font-size: 22rpx;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.tab-bar {
-  position: fixed;
-  bottom: 0;
+  top: 0;
   left: 0;
-  right: 0;
-  height: 120rpx;
-  background: #141622;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.45); /* 45% 黑色遮罩 */
+  z-index: 1;
+}
+
+/* --- 1. 头部区域 --- */
+.header-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 0 40rpx;
+  padding-top: calc(20rpx + env(safe-area-inset-top)); 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+.store-name {
+  color: #FFD700; /* 亮金色 */
+  font-size: 34rpx;
+  font-weight: 900;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+}
+
+.notice-btn {
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 2rpx solid #FFD700;
+  padding: 10rpx 30rpx;
+  border-radius: 40rpx;
+}
+
+.notice-btn text {
+  color: #FFD700;
+  font-size: 24rpx;
+  font-weight: bold;
+}
+
+/* --- 2. 中间核心区域 --- */
+.center-area {
+  position: absolute;
+  top: 38%; /* 稍微往上提一点，给下面留空间 */
+  left: 50%;
+  transform: translate(-53%, -50%);
+  
+  width: 100%; /* 关键：改为100%，让内部子元素来控制宽度 */
+  
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 巨大的 TUSK (明亮、粗壮) */
+.brand-title {
+  font-size: 220rpx; /* 字体超大 */
+  font-weight: 900;
+  color: #FFC107; /* 鲜亮金色 */
+  letter-spacing: 8rpx;
+  line-height: 0.8;
+  margin-bottom: 10rpx;
+  font-style: italic;
+  text-shadow: 0 10rpx 20rpx rgba(0,0,0,0.6);
+  transform: skewX(-10deg); /* 强制斜体 */
+}
+
+/* 欢迎黑盒子 */
+.welcome-box {
+  /* 1. 宽度与下面保持一致 */
+  width: 90%; 
+  
+  background-color: #262322;
+  border-radius: 30rpx; /* 圆角稍微大一点 */
+  padding: 40rpx 50rpx; /* 增加内边距 */
+  
+  /* 布局 */
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* 垂直居中 */
+  
+  box-sizing: border-box;
+  margin-top: 10rpx; /* 离TUSK近一点 */
+  margin-left: auto; /* 左右自动居中 */
+  margin-right: auto;
+  
+  box-shadow: 0 10rpx 20rpx rgba(0,0,0,0.5);
+}
+
+/* 欢迎语字体变大 */
+.welcome-text {
+  color: #DDDDDD;
+  font-size: 40rpx; /* 增大字体 (原28rpx) */
+  font-weight: bold; /* 加粗 */
+  letter-spacing: 20rpx; /* 字间距 */
+  text-align: center;
+
+}
+
+
+
+
+.nickname-btn text {
+  color: #FFD700;
+  font-size: 26rpx;
+  font-weight: bold;
+}
+
+/* --- 3. 底部操作面板 --- */
+.bottom-panel {
+  /* ====== 核心定位 ====== */
+  position: absolute;
+  left: 50%;
+  transform: translateX(-53%); /* 修正为 -50% 实现完美居中 */
+  z-index: 10;
   display: flex;
   justify-content: space-around;
+  box-sizing: border-box;
+
+  /* ====== 尺寸和位置 ====== */
+  
+  /* 1. 宽度：锁定为 90%，与上面 welcome-box 对齐 */
+  width: 90%;  
+
+  /* 2. 高度 */
+  height: 500rpx; 
+
+  /* 3. 位置：悬浮 */
+  bottom: 210rpx;     
+
+  /* 4. 内边距 */
+  padding-top: 80rpx; 
+
+  /* ====== 样式 ====== */
+  background-color: #262322;
+  
+  /* 因为悬浮了，建议四个角都变圆，像一张卡片 */
+  border-radius: 50rpx; 
+  
+  /* 增加阴影，更有层次感 */
+  box-shadow: 0 10rpx 30rpx rgba(0,0,0,0.6);
+}
+
+.action-item {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  border-top: 1rpx solid rgba(255, 255, 255, 0.08);
-  padding-bottom: env(safe-area-inset-bottom);
+  width: 250rpx;
+}
+
+/* 图标大大大 */
+.action-icon {
+  width: 150rpx; /* 显著放大 */
+  height: 150rpx;
+  margin-bottom: 20rpx;
+}
+
+.action-title {
+  color: #FFC107;
+  font-size: 40rpx;
+  font-weight: 900;
+  margin-bottom: 6rpx;
+}
+
+.action-subtitle {
+  color: #666;
+  font-size: 24rpx;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+/* --- 4. 底部导航栏修复 (您之前缺失的部分) --- */
+.custom-tab-bar {
+  position: fixed; /* 关键：固定在底部 */
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60rpx; /* 足够的高度 */
+  background-color: #262322; /* 纯黑底色 */
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  padding-top: 20rpx;
+  padding-bottom: env(safe-area-inset-bottom); /* 适配全面屏 */
+  z-index: 999; /* 确保在最上层 */
+  border-top: 1rpx solid #222;
 }
 
 .tab-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: rgba(255, 255, 255, 0.5);
+  justify-content: center;
+  flex: 1;
+}
+
+.tab-icon-bg, .tab-icon {
+  font-size: 48rpx; /* 图标大小 */
+  margin-bottom: 8rpx;
+  color: #666;
+}
+
+.tab-item text {
   font-size: 22rpx;
+  color: #666;
 }
 
-.tab-item.active {
-  color: #fbbf24;
-}
-
-.tab-icon {
-  font-size: 36rpx;
+/* 激活状态 */
+.tab-item.active .tab-icon-bg, 
+.tab-item.active .tab-icon,
+.tab-item.active text {
+  color: #FFD700; /* 金色 */
 }

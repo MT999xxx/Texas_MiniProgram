@@ -1,49 +1,55 @@
+// pages/home/index.js
 Page({
   data: {
-    quickActions: [
-      { title: '桌位预约', subtitle: 'Reservation', icon: '🎯', url: '/pages/reservation/index' },
-      { title: '点餐', subtitle: 'Order Now', icon: '🍺', url: '/pages/menu/index' },
-    ],
-    tools: [
-      { label: '点单', desc: 'Order', icon: '🍸', url: '/pages/menu/index' },
-      { label: '预约', desc: 'Booking', icon: '📅', url: '/pages/reservation/index' },
-      { label: '排行榜', desc: 'Ranking', icon: '📊', url: '/pages/ranking/index' },
-      { label: '会员', desc: 'Members', icon: '👤', url: '/pages/member/index' },
-    ],
-    activities: [
-      { tag: '活动', title: '周末德州扑克大赛火热报名中', time: '2 小时前' },
-      { tag: '福利', title: '新会员注册即送 200 积分', time: '1 天前' },
-      { tag: '通知', title: '本周五店内装修，暂停营业一天', time: '3 天前' },
-    ],
+    // 如果需要动态数据可以在这里添加
   },
 
-  handleQuickAction(e) {
-    const url = e.currentTarget.dataset.url;
-    this.navigate(url);
+  onLoad: function (options) {
+    // 页面加载逻辑
   },
 
-  navigateTo(e) {
-    const url = e.currentTarget.dataset.url;
-    this.navigate(url);
-  },
-
-  navigate(url) {
-    if (!url) return;
+  // 跳转到点餐页面
+  goToMenu: function() {
     wx.navigateTo({
-      url,
-      fail: () => {
-        wx.showToast({
-          title: '页面开发中',
-          icon: 'none',
-        });
-      },
+      url: '/pages/menu/menu', // 请确保路径正确
+      fail: (err) => { console.error("跳转失败", err); }
     });
   },
 
-  viewAllActivities() {
-    wx.showToast({
-      title: '更多活动尽请期待',
-      icon: 'none',
+  // 跳转到预约页面
+  goToReservation: function() {
+    wx.switchTab({
+      url: '/pages/table/table', // 假设这是 tabBar 页面
+      fail: (err) => { 
+        // 如果跳转失败，尝试用 navigateTo (防止它是非tabBar页面)
+        console.log("switchTab失败，尝试navigateTo");
+        wx.navigateTo({ url: '/pages/table/table' });
+      }
     });
   },
+
+  // 更新昵称
+  updateNickname: function() {
+    wx.showToast({
+      title: '功能开发中',
+      icon: 'none'
+    });
+  },
+
+  // 底部导航栏点击处理 (因为是自定义 view，需要手动处理跳转)
+  switchTab: function(e) {
+    const index = e.currentTarget.dataset.index;
+    const urls = [
+      '/pages/home/index',      // 0: 首页
+      '/pages/table/table',     // 1: 桌面
+      '/pages/ranking/ranking', // 2: 排行榜
+      '/pages/member/member'    // 3: 会员
+    ];
+    
+    // 如果点击的不是当前页，则跳转
+    // 注意：实际项目中建议使用微信原生的 tabBar 配置 app.json，体验更好
+    if (index !== 0) {
+       wx.switchTab({ url: urls[index] });
+    }
+  }
 });
