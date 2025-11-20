@@ -36,19 +36,19 @@
 
   <view class="custom-tab-bar">
     <view class="tab-item active" bindtap="switchTab" data-index="0">
-      <view class="tab-icon-bg">🏠</view> 
+      <image class="tab-icon-img" src="/images/首页图标.png" mode="aspectFit" />
       <text>首页</text>
     </view>
     <view class="tab-item" bindtap="switchTab" data-index="1">
-      <view class="tab-icon">🎲</view>
+      <image class="tab-icon-img" src="/images/桌面图标.png" mode="aspectFit" />
       <text>桌面</text>
     </view>
     <view class="tab-item" bindtap="switchTab" data-index="2">
-      <view class="tab-icon">📊</view>
+      <image class="tab-icon-img" src="/images/排行榜图标.png" mode="aspectFit" />
       <text>排行榜</text>
     </view>
     <view class="tab-item" bindtap="switchTab" data-index="3">
-      <view class="tab-icon">👤</view>
+      <image class="tab-icon-img" src="/images/会员图标.png" mode="aspectFit" />
       <text>会员</text>
     </view>
   </view>
