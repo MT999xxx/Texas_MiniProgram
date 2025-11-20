@@ -1,6 +1,7 @@
 {
     "navigationBarTitleText": "桌面",
-    "navigationStyle": "custom",
+    "navigationBarBackgroundColor": "#121212",
+    "navigationBarTextStyle": "white",
     "usingComponents": {
         "tab-bar": "/components/tab-bar/index"
     }

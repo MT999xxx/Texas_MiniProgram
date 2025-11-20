@@ -1,13 +1,13 @@
 /* pages/table/index.wxss */
 page {
-  background-color: #1c1c1e; /* 深色背景 */
+  background-color: #121212; /* 更深邃的黑色背景 */
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, sans-serif;
   color: #fff;
-  padding-bottom: 120rpx; /* 给底部导航栏留空间 */
+  padding-bottom: 120rpx;
 }
 
 .container {
-  padding: 0 30rpx;
+  padding: 0 24rpx; /* 稍微减小左右边距 */
 }
 
 /* --- 1. 顶部导航栏 --- */
@@ -15,35 +15,37 @@ page {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20rpx 0;
-  margin-top: env(safe-area-inset-top);
+  padding: 20rpx 0; /* 恢复正常 padding */
+  /* margin-top: env(safe-area-inset-top);  原生导航栏已处理顶部安全区 */
 }
 
 .store-name {
   color: #FFD700;
-  font-size: 32rpx;
-  font-weight: bold;
+  font-size: 34rpx;
+  font-weight: 900;
+  letter-spacing: 1rpx;
 }
 
 .rule-btn {
-  background-color: #2c2c2e;
+  background-color: rgba(255, 215, 0, 0.1);
   color: #FFD700;
-  font-size: 24rpx;
-  padding: 10rpx 24rpx;
+  font-size: 22rpx;
+  padding: 8rpx 20rpx;
   border-radius: 30rpx;
   border: 1rpx solid #FFD700;
+  font-weight: 500;
 }
 
 /* --- 2. 赛事桌通用样式 --- */
 .table-section {
-  margin-top: 30rpx;
+  margin-top: 20rpx;
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20rpx;
+  margin-bottom: 16rpx;
 }
 
 .title-group {
@@ -53,51 +55,62 @@ page {
 
 .main-title {
   color: #FFD700;
-  font-size: 36rpx;
-  font-weight: bold;
+  font-size: 38rpx;
+  font-weight: 900;
   margin-right: 16rpx;
+  text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.5);
 }
 
 .update-time {
   color: #666;
-  font-size: 24rpx;
+  font-size: 22rpx;
+  font-weight: 400;
 }
 
 .status-badge {
   display: flex;
   align-items: center;
   color: #fff;
-  font-size: 24rpx;
+  font-size: 22rpx;
+  background: rgba(255,255,255,0.1);
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
 }
 
 .status-dot {
-  width: 12rpx;
-  height: 12rpx;
+  width: 10rpx;
+  height: 10rpx;
   background-color: #4CAF50;
   border-radius: 50%;
   margin-right: 8rpx;
+  box-shadow: 0 0 8rpx #4CAF50;
 }
 
-/* 信息卡片 */
+/* 信息卡片 - 黑金风格 */
 .info-card {
-  background-color: #2c2c2e;
-  border-radius: 16rpx;
-  padding: 20rpx;
+  background: linear-gradient(145deg, #1e1e1e, #252525);
+  border-radius: 20rpx;
+  padding: 24rpx 40rpx;
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 30rpx;
+  margin-bottom: 20rpx;
+  border: 1rpx solid #333;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.3);
 }
 
 .info-item {
   display: flex;
   align-items: center;
+  flex: 1;
+  justify-content: center;
 }
 
 .info-icon {
-  width: 40rpx;
-  height: 40rpx;
+  width: 36rpx;
+  height: 36rpx;
   margin-right: 16rpx;
+  opacity: 0.8;
 }
 
 .info-text {
@@ -107,44 +120,51 @@ page {
 
 .label {
   color: #888;
-  font-size: 22rpx;
+  font-size: 20rpx;
+  margin-bottom: 2rpx;
 }
 
 .value {
   color: #fff;
-  font-size: 28rpx;
+  font-size: 30rpx;
   font-weight: bold;
+  letter-spacing: 1rpx;
 }
 
 .divider {
   width: 2rpx;
-  height: 40rpx;
+  height: 50rpx;
   background-color: #444;
+  margin: 0 20rpx;
 }
 
 /* --- 3. 牌桌区域 (核心) --- */
 .poker-table-container {
   position: relative;
   width: 100%;
-  height: 600rpx; /* 根据背景图比例调整 */
-  margin-bottom: 40rpx;
+  height: 720rpx; /* 显著增加高度，放大显示区域 */
+  margin-bottom: 30rpx;
+  background: radial-gradient(circle at center, #2a2a2a 0%, #121212 70%);
+  border-radius: 40rpx;
+  overflow: hidden;
 }
 
 .table-bg {
-  width: 100%;
+  width: 100%; /* 放大背景图至 100% */
   height: auto;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 0;
+  opacity: 0.9;
 }
 
-/* 座位通用样式 */
+/* 座位通用样式 - 保持尺寸 */
 .seat {
   position: absolute;
-  width: 100rpx;
-  height: 140rpx;
+  width: 90rpx;
+  height: 120rpx;
   border-radius: 12rpx;
   display: flex;
   flex-direction: column;
@@ -156,46 +176,47 @@ page {
 
 /* 空座位样式 */
 .seat.empty {
-  border: 1rpx dashed #666;
-  background-color: rgba(0,0,0,0.3);
+  border: 1rpx dashed #444;
+  background-color: rgba(0,0,0,0.2);
 }
 
 .chair-icon {
-  font-size: 40rpx;
+  font-size: 32rpx;
   margin-bottom: 4rpx;
-  color: #666;
+  color: #555;
 }
 
 .seat-label {
-  color: #666;
-  font-size: 20rpx;
+  color: #555;
+  font-size: 18rpx;
 }
 
 /* 占用座位样式 */
 .seat.reserved, .seat.playing {
-  border: 2rpx solid #FFD700; /* 默认金色边框 */
+  border: 2rpx solid #FFD700;
   background-color: #1a1a1a;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.5);
 }
 
 .seat.reserved {
-  border-color: #409EFF; /* 预约蓝色边框 */
+  border-color: #409EFF;
 }
 
 .seat.playing {
-  border-color: #67C23A; /* 游戏中绿色边框 */
+  border-color: #67C23A;
 }
 
 .avatar {
-  width: 60rpx;
-  height: 60rpx;
+  width: 56rpx;
+  height: 56rpx;
   border-radius: 50%;
-  margin-bottom: 4rpx;
+  margin-bottom: 6rpx;
   border: 2rpx solid #333;
 }
 
 .nickname {
   color: #fff;
-  font-size: 20rpx;
+  font-size: 18rpx;
   max-width: 90%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -204,10 +225,11 @@ page {
 }
 
 .status-tag {
-  font-size: 18rpx;
+  font-size: 16rpx;
   padding: 2rpx 8rpx;
-  border-radius: 10rpx;
+  border-radius: 8rpx;
   color: #fff;
+  line-height: 1.2;
 }
 
 .reserved-tag {
@@ -221,48 +243,41 @@ page {
 /* 座位号标记 */
 .seat-number {
   position: absolute;
-  top: -10rpx;
-  left: -10rpx;
-  width: 28rpx;
-  height: 28rpx;
+  top: -12rpx;
+  left: -12rpx;
+  width: 24rpx;
+  height: 24rpx;
   background-color: #FFD700;
   color: #000;
-  font-size: 18rpx;
+  font-size: 16rpx;
   border-radius: 50%;
   text-align: center;
-  line-height: 28rpx;
-  font-weight: bold;
+  line-height: 24rpx;
+  font-weight: 900;
+  border: 2rpx solid #000;
 }
 
-/* --- 座位定位 (9人桌) --- */
+/* --- 座位定位 (9人桌) - 适配大桌 --- */
 /* 
    布局逻辑：
-   1号: 右上
-   2号: 右中上
-   3号: 右中下
-   4号: 右下
-   5号: 下中
-   6号: 左下
-   7号: 左中下
-   8号: 左中上
-   9号: 左上
+   随着桌子放大，座位向外扩散
 */
 
-/* 顶部左右 */
-.seat-1 { top: 10%; right: 18%; }
-.seat-9 { top: 10%; left: 18%; }
+/* 上方左右 */
+.seat-1 { top: 8%; right: 15%; }
+.seat-9 { top: 8%; left: 15%; }
 
 /* 中间偏上 */
-.seat-2 { top: 30%; right: 2%; }
-.seat-8 { top: 30%; left: 2%; }
+.seat-2 { top: 32%; right: 2%; }
+.seat-8 { top: 32%; left: 2%; }
 
 /* 中间偏下 */
-.seat-3 { top: 55%; right: 2%; }
-.seat-7 { top: 55%; left: 2%; }
+.seat-3 { top: 58%; right: 2%; }
+.seat-7 { top: 58%; left: 2%; }
 
 /* 底部左右 */
-.seat-4 { bottom: 10%; right: 18%; }
-.seat-6 { bottom: 10%; left: 18%; }
+.seat-4 { bottom: 10%; right: 15%; }
+.seat-6 { bottom: 10%; left: 15%; }
 
 /* 底部正中 */
 .seat-5 { bottom: 2%; left: 50%; transform: translateX(-50%); }
@@ -270,37 +285,44 @@ page {
 
 /* --- 4. 副赛事桌 & 候补 --- */
 .sub-section {
-  margin-top: 60rpx;
-  border: 1rpx solid #FFD700;
+  margin-top: 40rpx;
+  border: 1rpx solid #333;
   border-radius: 20rpx;
-  padding: 20rpx;
-  background-color: #222;
+  padding: 24rpx;
+  background: linear-gradient(145deg, #1e1e1e, #252525);
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.3);
 }
 
 .waiting-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 20rpx;
+  margin-top: 24rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #333;
 }
 
 .avatar-list {
   display: flex;
+  padding-left: 10rpx;
 }
 
 .waiting-avatar {
-  width: 60rpx;
-  height: 60rpx;
+  width: 56rpx;
+  height: 56rpx;
   border-radius: 50%;
-  border: 2rpx solid #fff;
-  margin-right: -20rpx; /* 头像重叠效果 */
+  border: 2rpx solid #222;
+  margin-right: -16rpx;
+  box-shadow: 0 2rpx 4rpx rgba(0,0,0,0.5);
 }
 
 .wait-btn {
-  background-color: #333;
-  color: #FFD700;
-  border: 1rpx solid #FFD700;
-  padding: 10rpx 30rpx;
+  background: linear-gradient(90deg, #FFD700, #FFC107);
+  color: #000;
+  border: none;
+  padding: 12rpx 36rpx;
   border-radius: 30rpx;
   font-size: 26rpx;
+  font-weight: bold;
+  box-shadow: 0 4rpx 10rpx rgba(255, 215, 0, 0.3);
 }
