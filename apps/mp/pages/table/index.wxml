@@ -95,23 +95,6 @@
   </view>
 
   <!-- 底部导航栏 -->
-  <view class="custom-tab-bar">
-    <view class="tab-item" bindtap="switchTab" data-index="0">
-      <image class="tab-icon-img" src="/images/首页图标.png" mode="aspectFit" />
-      <text>首页</text>
-    </view>
-    <view class="tab-item active" bindtap="switchTab" data-index="1">
-      <image class="tab-icon-img" src="/images/桌面图标.png" mode="aspectFit" />
-      <text>桌面</text>
-    </view>
-    <view class="tab-item" bindtap="switchTab" data-index="2">
-      <image class="tab-icon-img" src="/images/排行榜图标.png" mode="aspectFit" />
-      <text>排行榜</text>
-    </view>
-    <view class="tab-item" bindtap="switchTab" data-index="3">
-      <image class="tab-icon-img" src="/images/会员图标.png" mode="aspectFit" />
-      <text>会员</text>
-    </view>
-  </view>
+  <tab-bar selected="1"></tab-bar>
 
 </view>

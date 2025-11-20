@@ -152,7 +152,7 @@ page {
   width: 90%;  
 
   /* 2. 高度 */
-  height: 500rpx; 
+  height: 550rpx; 
 
   /* 3. 位置：悬浮 */
   bottom: 210rpx;     
@@ -196,47 +196,4 @@ page {
   font-size: 24rpx;
   font-weight: 500;
   text-transform: uppercase;
-}
-
-/* --- 4. 底部导航栏修复 (您之前缺失的部分) --- */
-.custom-tab-bar {
-  position: fixed; /* 关键：固定在底部 */
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 60rpx; /* 足够的高度 */
-  background-color: #262322; /* 纯黑底色 */
-  display: flex;
-  justify-content: space-around;
-  align-items: flex-start;
-  padding-top: 20rpx;
-  padding-bottom: env(safe-area-inset-bottom); /* 适配全面屏 */
-  z-index: 999; /* 确保在最上层 */
-  border-top: 1rpx solid #222;
-}
-
-.tab-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-}
-
-.tab-icon-img {
-  width: 130rpx;
-  height: 80rpx;
-  margin-bottom: 8rpx;
-}
-
-.tab-item text {
-  font-size: 22rpx;
-  color: #666;
-}
-
-/* 激活状态 */
-.tab-item.active .tab-icon-bg, 
-.tab-item.active .tab-icon,
-.tab-item.active text {
-  color: #FFD700; /* 金色 */
 }
