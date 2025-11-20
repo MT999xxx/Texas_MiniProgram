@@ -9,7 +9,7 @@ Page({
   },
 
   // 跳转到点餐页面
-  goToMenu: function() {
+  goToMenu: function () {
     wx.navigateTo({
       url: '/pages/menu/menu', // 请确保路径正确
       fail: (err) => { console.error("跳转失败", err); }
@@ -17,10 +17,10 @@ Page({
   },
 
   // 跳转到预约页面
-  goToReservation: function() {
+  goToReservation: function () {
     wx.switchTab({
       url: '/pages/table/table', // 假设这是 tabBar 页面
-      fail: (err) => { 
+      fail: (err) => {
         // 如果跳转失败，尝试用 navigateTo (防止它是非tabBar页面)
         console.log("switchTab失败，尝试navigateTo");
         wx.navigateTo({ url: '/pages/table/table' });
@@ -29,7 +29,7 @@ Page({
   },
 
   // 更新昵称
-  updateNickname: function() {
+  updateNickname: function () {
     wx.showToast({
       title: '功能开发中',
       icon: 'none'
@@ -37,19 +37,19 @@ Page({
   },
 
   // 底部导航栏点击处理 (因为是自定义 view，需要手动处理跳转)
-  switchTab: function(e) {
+  switchTab: function (e) {
     const index = e.currentTarget.dataset.index;
     const urls = [
       '/pages/home/index',      // 0: 首页
-      '/pages/table/table',     // 1: 桌面
+      '/pages/table/index',     // 1: 桌面
       '/pages/ranking/ranking', // 2: 排行榜
       '/pages/member/member'    // 3: 会员
     ];
-    
+
     // 如果点击的不是当前页，则跳转
-    // 注意：实际项目中建议使用微信原生的 tabBar 配置 app.json，体验更好
     if (index !== 0) {
-       wx.switchTab({ url: urls[index] });
+      // 使用 redirectTo 避免页面栈堆积，模拟 Tab 切换体验
+      wx.redirectTo({ url: urls[index] });
     }
   }
 });

@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/home/index",
+    "pages/table/index",
     "pages/login/index",
     "pages/reservation/index",
     "pages/reservation-list/index",

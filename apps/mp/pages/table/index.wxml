@@ -1,0 +1,117 @@
+<view class="container">
+  
+  <!-- 1. 顶部导航栏 -->
+  <view class="header-bar">
+    <view class="store-name">重庆店-尖牙tusk ></view>
+    <view class="rule-btn">预约规则与牌桌礼仪</view>
+  </view>
+
+  <!-- 2. 主赛事桌区域 -->
+  <view class="table-section">
+    <!-- 标题行 -->
+    <view class="section-header">
+      <view class="title-group">
+        <text class="main-title">{{mainTable.name}}</text>
+        <text class="update-time">更新时间 {{mainTable.updateTime}}</text>
+      </view>
+      <view class="status-badge">
+        <view class="status-dot"></view>
+        <text>{{mainTable.status}}</text>
+      </view>
+    </view>
+
+    <!-- 信息卡片 -->
+    <view class="info-card">
+      <view class="info-item">
+        <image class="info-icon" src="/images/桌面图标.png" /> <!-- 暂时用这个图标代替筹码 -->
+        <view class="info-text">
+          <text class="label">基础积分</text>
+          <text class="value">{{mainTable.score}}</text>
+        </view>
+      </view>
+      <view class="divider"></view>
+      <view class="info-item">
+        <image class="info-icon" src="/images/会员图标.png" /> <!-- 暂时用这个图标代替人像 -->
+        <view class="info-text">
+          <text class="label">座位</text>
+          <text class="value">{{mainTable.occupied}}/{{mainTable.total}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 牌桌视图 (核心) -->
+    <view class="poker-table-container">
+      <image class="table-bg" src="/images/圆桌背景.png" mode="widthFix" />
+      
+      <!-- 9个座位 -->
+      <block wx:for="{{seats}}" wx:key="id">
+        <view class="seat seat-{{item.seatNum}} {{item.status}}">
+          
+          <!-- 座位号标记 -->
+          <view class="seat-number">{{item.seatNum}}</view>
+
+          <!-- 空闲状态 -->
+          <block wx:if="{{item.status === 'empty'}}">
+            <view class="chair-icon">🪑</view>
+            <text class="seat-label">空座位</text>
+          </block>
+
+          <!-- 已预约/游戏中 -->
+          <block wx:else>
+            <image class="avatar" src="{{item.avatar}}" />
+            <text class="nickname">{{item.name}}</text>
+            <view class="status-tag {{item.status === 'playing' ? 'playing-tag' : 'reserved-tag'}}">
+              {{item.status === 'playing' ? '游戏中' : '已预约'}}
+            </view>
+          </block>
+
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 3. 副赛事桌区域 -->
+  <view class="table-section sub-section">
+    <view class="section-header">
+      <view class="title-group">
+        <text class="main-title">{{subTable.name}}</text>
+        <text class="update-time">更新时间 {{subTable.updateTime}}</text>
+      </view>
+      <view class="status-badge">
+        <view class="status-dot"></view>
+        <text>{{subTable.status}}</text>
+      </view>
+    </view>
+
+    <!-- 底部候桌栏 -->
+    <view class="waiting-bar">
+      <view class="avatar-list">
+        <block wx:for="{{waitingList}}" wx:key="*this">
+          <image class="waiting-avatar" src="{{item}}" />
+        </block>
+      </view>
+      <view class="wait-btn">候桌</view>
+    </view>
+  </view>
+
+  <!-- 底部导航栏 -->
+  <view class="custom-tab-bar">
+    <view class="tab-item" bindtap="switchTab" data-index="0">
+      <image class="tab-icon-img" src="/images/首页图标.png" mode="aspectFit" />
+      <text>首页</text>
+    </view>
+    <view class="tab-item active" bindtap="switchTab" data-index="1">
+      <image class="tab-icon-img" src="/images/桌面图标.png" mode="aspectFit" />
+      <text>桌面</text>
+    </view>
+    <view class="tab-item" bindtap="switchTab" data-index="2">
+      <image class="tab-icon-img" src="/images/排行榜图标.png" mode="aspectFit" />
+      <text>排行榜</text>
+    </view>
+    <view class="tab-item" bindtap="switchTab" data-index="3">
+      <image class="tab-icon-img" src="/images/会员图标.png" mode="aspectFit" />
+      <text>会员</text>
+    </view>
+  </view>
+
+</view>
