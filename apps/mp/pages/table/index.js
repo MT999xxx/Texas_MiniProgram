@@ -27,8 +27,23 @@ Page({
         subTable: {
             name: '副赛事桌',
             updateTime: '08:32:01',
-            status: '进行中'
+            status: '进行中',
+            score: '20/40',
+            occupied: 0,
+            total: 9
         },
+        // 副赛事桌座位数据 (9个座位，全空示例)
+        subSeats: [
+            { id: 1, status: 'empty', name: '', avatar: '', seatNum: 1 },
+            { id: 2, status: 'empty', name: '', avatar: '', seatNum: 2 },
+            { id: 3, status: 'empty', name: '', avatar: '', seatNum: 3 },
+            { id: 4, status: 'empty', name: '', avatar: '', seatNum: 4 },
+            { id: 5, status: 'empty', name: '', avatar: '', seatNum: 5 },
+            { id: 6, status: 'empty', name: '', avatar: '', seatNum: 6 },
+            { id: 7, status: 'empty', name: '', avatar: '', seatNum: 7 },
+            { id: 8, status: 'empty', name: '', avatar: '', seatNum: 8 },
+            { id: 9, status: 'empty', name: '', avatar: '', seatNum: 9 },
+        ],
         // 候补列表头像 (模拟)
         waitingList: [
             '/images/会员图标.png',

@@ -83,6 +83,55 @@
       </view>
     </view>
 
+    <!-- 信息卡片 (副桌) -->
+    <view class="info-card">
+      <view class="info-item">
+        <image class="info-icon" src="/images/桌面图标.png" />
+        <view class="info-text">
+          <text class="label">基础积分</text>
+          <text class="value">{{subTable.score}}</text>
+        </view>
+      </view>
+      <view class="divider"></view>
+      <view class="info-item">
+        <image class="info-icon" src="/images/会员图标.png" />
+        <view class="info-text">
+          <text class="label">座位</text>
+          <text class="value">{{subTable.occupied}}/{{subTable.total}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 牌桌视图 (副桌) -->
+    <view class="poker-table-container">
+      <image class="table-bg" src="/images/圆桌背景.png" mode="widthFix" />
+      
+      <!-- 9个座位 (副桌) -->
+      <block wx:for="{{subSeats}}" wx:key="id">
+        <view class="seat seat-{{item.seatNum}} {{item.status}}">
+          
+          <!-- 座位号标记 -->
+          <view class="seat-number">{{item.seatNum}}</view>
+
+          <!-- 空闲状态 -->
+          <block wx:if="{{item.status === 'empty'}}">
+            <view class="chair-icon">🪑</view>
+            <text class="seat-label">空座位</text>
+          </block>
+
+          <!-- 已预约/游戏中 -->
+          <block wx:else>
+            <image class="avatar" src="{{item.avatar}}" />
+            <text class="nickname">{{item.name}}</text>
+            <view class="status-tag {{item.status === 'playing' ? 'playing-tag' : 'reserved-tag'}}">
+              {{item.status === 'playing' ? '游戏中' : '已预约'}}
+            </view>
+          </block>
+
+        </view>
+      </block>
+    </view>
+
     <!-- 底部候桌栏 -->
     <view class="waiting-bar">
       <view class="avatar-list">
