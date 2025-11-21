@@ -41,7 +41,7 @@
 
     <!-- 牌桌视图 (核心) -->
     <view class="poker-table-container">
-      <image class="table-bg" src="/images/圆桌背景.png" mode="widthFix" />
+      <image class="table-bg" src="/images/圆桌背景2.png" mode="widthFix" />
       
       <!-- 9个座位 -->
       <block wx:for="{{seats}}" wx:key="id">
@@ -104,7 +104,7 @@
 
     <!-- 牌桌视图 (副桌) -->
     <view class="poker-table-container">
-      <image class="table-bg" src="/images/圆桌背景.png" mode="widthFix" />
+      <image class="table-bg" src="/images/圆桌背景2.png" mode="widthFix" />
       
       <!-- 9个座位 (副桌) -->
       <block wx:for="{{subSeats}}" wx:key="id">

@@ -37,7 +37,7 @@ page {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 95%;
   padding: 0 40rpx;
   padding-top: calc(20rpx + env(safe-area-inset-top)); 
   display: flex;
@@ -174,14 +174,14 @@ page {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 250rpx;
+  width: 500rpx;
 }
 
 /* 图标大大大 */
 .action-icon {
-  width: 150rpx; /* 显著放大 */
-  height: 150rpx;
-  margin-bottom: 20rpx;
+  width: 300rpx; /* 显著放大 */
+  height: 300rpx;
+  margin-bottom: 50rpx;
 }
 
 .action-title {

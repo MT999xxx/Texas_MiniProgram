@@ -1,98 +1,48 @@
-<view class="ranking-container">
-  <!-- 顶部标签 -->
-  <view class="ranking-tabs">
-    <view
-      wx:for="{{tabs}}"
-      wx:key="value"
-      class="tab-item {{currentTab === item.value ? 'active' : ''}}"
-      bindtap="switchTab"
-      data-tab="{{item.value}}"
-    >
-      <text class="tab-text">{{item.label}}</text>
+<view class="container">
+  
+  <!-- 1. 橙色头部区域 -->
+  <view class="header-section">
+    <view class="store-label">重庆店 ></view>
+    <view class="page-title">排行榜</view>
+    <view class="date-range">20251108至20251122</view>
+
+    <!-- Tab 栏 -->
+    <view class="tab-header">
+      <view class="tab-item {{currentTab === 0 ? 'active' : ''}}" bindtap="switchRankingTab" data-index="0">
+        半月榜
+        <view class="tab-indicator" wx:if="{{currentTab === 0}}"></view>
+      </view>
+      <view class="tab-item {{currentTab === 1 ? 'active' : ''}}" bindtap="switchRankingTab" data-index="1">
+        年榜
+        <view class="tab-indicator" wx:if="{{currentTab === 1}}"></view>
+      </view>
+      <view class="tab-item {{currentTab === 2 ? 'active' : ''}}" bindtap="switchRankingTab" data-index="2">
+        冠军榜
+        <view class="tab-indicator" wx:if="{{currentTab === 2}}"></view>
+      </view>
     </view>
   </view>
 
-  <!-- 前三名榜单 -->
-  <view class="top-three">
-    <!-- 第二名 -->
-    <view class="rank-item rank-2" wx:if="{{rankings.length > 1}}">
-      <view class="rank-badge silver">2</view>
-      <image class="avatar" src="{{rankings[1].avatar || '/assets/default-avatar.png'}}" mode="aspectFill" />
-      <text class="nickname">{{rankings[1].nickname}}</text>
-      <text class="points">{{rankings[1].points}}分</text>
-    </view>
-
-    <!-- 第一名 -->
-    <view class="rank-item rank-1" wx:if="{{rankings.length > 0}}">
-      <view class="crown">👑</view>
-      <view class="rank-badge gold">1</view>
-      <image class="avatar large" src="{{rankings[0].avatar || '/assets/default-avatar.png'}}" mode="aspectFill" />
-      <text class="nickname">{{rankings[0].nickname}}</text>
-      <text class="points">{{rankings[0].points}}分</text>
-    </view>
-
-    <!-- 第三名 -->
-    <view class="rank-item rank-3" wx:if="{{rankings.length > 2}}">
-      <view class="rank-badge bronze">3</view>
-      <image class="avatar" src="{{rankings[2].avatar || '/assets/default-avatar.png'}}" mode="aspectFill" />
-      <text class="nickname">{{rankings[2].nickname}}</text>
-      <text class="points">{{rankings[2].points}}分</text>
-    </view>
+  <!-- 2. 排行榜列表区域 -->
+  <view class="ranking-list-container">
+    <block wx:for="{{rankingList}}" wx:key="rank">
+      <view class="ranking-item">
+        <!-- 排名 -->
+        <view class="rank-num">{{item.rank}}</view>
+        
+        <!-- 头像 -->
+        <image class="rank-avatar" src="{{item.avatar}}" />
+        
+        <!-- 信息 -->
+        <view class="rank-info">
+          <text class="rank-name">{{item.name}}</text>
+          <text class="rank-score">{{item.score}}积分</text>
+        </view>
+      </view>
+    </block>
   </view>
 
-  <!-- 其他排名列表 -->
-  <view class="ranking-list">
-    <scroll-view scroll-y refresher-enabled refresher-triggered="{{refreshing}}" bindrefresherrefresh="onRefresh">
-      <view wx:for="{{rankings}}" wx:key="id" wx:if="{{index >= 3}}" class="list-item {{item.isCurrentUser ? 'current-user' : ''}}">
-        <view class="rank-number">{{index + 1}}</view>
-        <image class="user-avatar" src="{{item.avatar || '/assets/default-avatar.png'}}" mode="aspectFill" />
-        <view class="user-info">
-          <text class="user-nickname">{{item.nickname}}</text>
-          <text class="user-level">{{item.levelName || 'V1 普通会员'}}</text>
-        </view>
-        <view class="user-points">
-          <text class="points-value">{{item.points}}</text>
-          <text class="points-label">积分</text>
-        </view>
-      </view>
+  <!-- 底部导航栏 -->
+  <tab-bar selected="2"></tab-bar>
 
-      <!-- 当前用户排名 -->
-      <view wx:if="{{isLoggedIn && currentUserRank && currentUserRank.rank > 3}}" class="my-rank-card">
-        <view class="my-rank-header">
-          <text class="my-rank-title">我的排名</text>
-        </view>
-        <view class="list-item current-user">
-          <view class="rank-number">{{currentUserRank.rank}}</view>
-          <image class="user-avatar" src="{{currentUserRank.avatar || '/assets/default-avatar.png'}}" mode="aspectFill" />
-          <view class="user-info">
-            <text class="user-nickname">{{currentUserRank.nickname}}</text>
-            <text class="user-level">{{currentUserRank.levelName || 'V1 普通会员'}}</text>
-          </view>
-          <view class="user-points">
-            <text class="points-value">{{currentUserRank.points}}</text>
-            <text class="points-label">积分</text>
-          </view>
-        </view>
-      </view>
-
-      <!-- 未登录提示 -->
-      <view wx:if="{{!isLoggedIn}}" class="login-prompt-card">
-        <view class="login-prompt-content">
-          <text class="prompt-icon">🔐</text>
-          <text class="prompt-title">登录查看个人排名</text>
-          <text class="prompt-desc">登录后即可查看您在排行榜中的位置</text>
-          <button class="btn-login" bindtap="goToLogin">立即登录</button>
-        </view>
-      </view>
-
-      <view wx:if="{{rankings.length === 0 && !loading}}" class="empty-state">
-        <text class="empty-icon">🏆</text>
-        <text class="empty-text">暂无排行数据</text>
-      </view>
-
-      <view wx:if="{{loading}}" class="loading">
-        <text>加载中...</text>
-      </view>
-    </scroll-view>
-  </view>
 </view>
