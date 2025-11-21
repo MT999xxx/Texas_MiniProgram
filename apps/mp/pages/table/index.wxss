@@ -143,7 +143,7 @@ page {
   position: relative;
   width: auto;
   height: 1060rpx; /* 放大 15% (原920) */
-  margin-bottom: 40rpx;
+  margin-bottom: 0; /* 去除底部边距 */
   background: radial-gradient(circle at center, #2a2a2a 0%, #030304 70%);
   border-radius: 50rpx;
   overflow: hidden;
@@ -285,7 +285,7 @@ page {
 
 /* --- 4. 副赛事桌 & 候补 --- */
 .sub-section {
-  margin-top: 2rpx;
+  margin-top: 0; /* 去除顶部边距 */
   border: 1rpx solid #030304;
   border-radius: 30rpx;
   padding: 30rpx;
