@@ -11,19 +11,17 @@ Page({
   // 跳转到点餐页面
   goToMenu: function () {
     wx.navigateTo({
-      url: '/pages/menu/menu', // 请确保路径正确
+      url: '/pages/menu/index',
       fail: (err) => { console.error("跳转失败", err); }
     });
   },
 
   // 跳转到预约页面
   goToReservation: function () {
-    wx.switchTab({
-      url: '/pages/table/table', // 假设这是 tabBar 页面
+    wx.redirectTo({
+      url: '/pages/table/index',
       fail: (err) => {
-        // 如果跳转失败，尝试用 navigateTo (防止它是非tabBar页面)
-        console.log("switchTab失败，尝试navigateTo");
-        wx.navigateTo({ url: '/pages/table/table' });
+        console.log("跳转失败", err);
       }
     });
   },
@@ -42,8 +40,8 @@ Page({
     const urls = [
       '/pages/home/index',      // 0: 首页
       '/pages/table/index',     // 1: 桌面
-      '/pages/ranking/ranking', // 2: 排行榜
-      '/pages/member/member'    // 3: 会员
+      '/pages/ranking/index',   // 2: 排行榜
+      '/pages/member/index'     // 3: 会员
     ];
 
     // 如果点击的不是当前页，则跳转

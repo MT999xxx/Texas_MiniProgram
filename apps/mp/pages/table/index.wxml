@@ -3,7 +3,7 @@
   <!-- 1. 顶部导航栏 -->
   <view class="header-bar">
     <view class="store-name">重庆店-尖牙tusk ></view>
-    <view class="rule-btn">预约规则与牌桌礼仪</view>
+    <view class="rule-btn" bindtap="showRules">预约规则与牌桌礼仪</view>
   </view>
 
   <!-- 2. 主赛事桌区域 -->
@@ -133,17 +133,33 @@
     </view>
 
     <!-- 底部候桌栏 -->
-    <view class="waiting-bar">
+    <!-- <view class="waiting-bar">
       <view class="avatar-list">
         <block wx:for="{{waitingList}}" wx:key="*this">
           <image class="waiting-avatar" src="{{item}}" />
         </block>
       </view>
       <view class="wait-btn">候桌</view>
-    </view>
+    </view> -->
   </view>
 
   <!-- 底部导航栏 -->
   <tab-bar selected="1"></tab-bar>
+
+  <!-- 4. 预约规则弹窗 -->
+  <view class="modal-mask" wx:if="{{showRulesPopup}}" bindtap="hideRules">
+    <view class="modal-content" catchtap="true"> <!-- catchtap 阻止冒泡 -->
+      <view class="rules-title">预约规则与牌桌礼仪</view>
+      <view class="rules-list">
+        <view class="rule-item">1. 下午场开局时间15:00，预约位置并在16:30前低消赠送2000积分（晚上低消不再赠送）；</view>
+        <view class="rule-item">2. 每天开局时间20:00，预约位置保留到20:30，预约玩家（或候桌玩家）20:30前低消赠送1000积分，20:30后仅预约玩家低消赠送500积分至账户，上桌积分不可以超过3千积分；</view>
+        <view class="rule-item">3. 桌面满员 或 过了预约时间，可进行候桌，届时通过候桌时间来安排上桌游戏次序；</view>
+        <view class="rule-item">4. 禁止上桌后分码，如发现任何分码行为，将把分出的码作为当局收池奖励；</view>
+        <view class="rule-item">5. 禁止收回讨论fold牌，影响其他玩家继续；</view>
+        <view class="rule-item">6. 禁止大声分析玩家行为影响其他玩家；</view>
+        <view class="rule-item">7. 禁止说教、指责、干扰其他玩家玩法；</view>
+      </view>
+    </view>
+  </view>
 
 </view>

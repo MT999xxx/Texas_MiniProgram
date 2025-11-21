@@ -47,22 +47,43 @@ Page({
         // 候补列表头像 (模拟)
         waitingList: [
             '/images/会员图标.png',
+            '/images/会员图标.png',
             '/images/会员图标.png'
-        ]
+        ],
+        showRulesPopup: false // 控制规则弹窗显示
     },
 
     onLoad: function (options) {
         // 页面加载逻辑
     },
 
+    /**
+     * 显示规则弹窗
+     */
+    showRules: function () {
+        this.setData({
+            showRulesPopup: true
+        });
+    },
+
+    /**
+     * 隐藏规则弹窗
+     */
+    hideRules: function () {
+        this.setData({
+            showRulesPopup: false
+        });
+    },
+
     // 底部导航栏点击处理
     switchTab: function (e) {
+        // 确保 index 是数字
         const index = parseInt(e.currentTarget.dataset.index);
         const urls = [
             '/pages/home/index',      // 0: 首页
             '/pages/table/index',     // 1: 桌面
-            '/pages/ranking/ranking', // 2: 排行榜
-            '/pages/member/member'    // 3: 会员
+            '/pages/ranking/index',   // 2: 排行榜
+            '/pages/member/index'     // 3: 会员
         ];
 
         if (index !== 1) {

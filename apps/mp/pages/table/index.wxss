@@ -141,8 +141,8 @@ page {
 /* --- 3. 牌桌区域 (核心) --- */
 .poker-table-container {
   position: relative;
-  width: 100%;
-  height: 720rpx; /* 显著增加高度，放大显示区域 */
+  width: auto;
+  height: 920rpx; /* 显著增加高度，放大显示区域 */
   margin-bottom: 30rpx;
   background: radial-gradient(circle at center, #2a2a2a 0%, #030304 70%);
   border-radius: 40rpx;
@@ -163,7 +163,7 @@ page {
 /* 座位通用样式 - 放大 50% */
 .seat {
   position: absolute;
-  width: 135rpx; /* 90 * 1.5 */
+  width: 100rpx; /* 90 * 1.5 */
   height: 180rpx; /* 120 * 1.5 */
   border-radius: 16rpx;
   display: flex;
@@ -325,4 +325,48 @@ page {
   font-size: 26rpx;
   font-weight: bold;
   box-shadow: 0 4rpx 10rpx rgba(255, 215, 0, 0.3);
+}
+
+/* --- 5. 弹窗样式 --- */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  width: 80%;
+  background-color: #000;
+  border-radius: 20rpx;
+  padding: 40rpx;
+  border: 1rpx solid #333;
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.5);
+}
+
+.rules-title {
+  color: #FFD700;
+  font-size: 36rpx;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+
+.rules-list {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.rule-item {
+  color: #FFD700; /* 默认金色，部分文字可能需要白色，这里整体用金色或浅黄 */
+  font-size: 26rpx;
+  margin-bottom: 20rpx;
+  line-height: 1.5;
+  text-align: justify;
 }

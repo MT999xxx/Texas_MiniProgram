@@ -24,17 +24,89 @@ Page({
       { icon: '/images/首页图标.png', text: '邀请有礼', url: '' }, // 暂时使用通用图标
       { icon: '/images/桌面图标.png', text: '存积分', url: '' },
       { icon: '/images/排行榜图标.png', text: '订单列表', url: '' },
-    ]
+    ],
+    showRechargePopup: false,
+    rechargeOptions: [
+      { amount: 500, bonus: 7500, desc: '赠送7500积分' },
+      { amount: 1000, bonus: 20000, desc: '赠送20000积分' },
+      { amount: 3000, bonus: 72000, desc: '赠送72000积分+5张酒券' },
+      { amount: 5000, bonus: 120000, desc: '赠送120000积分+10张酒券' }
+    ],
+    selectedAmount: 500,
+    inputAmount: ''
   },
 
   /**
    * 充值按钮点击
    */
   onRecharge() {
-    wx.showToast({
-      title: '充值功能开发中',
-      icon: 'none'
+    this.setData({
+      showRechargePopup: true
     });
+  },
+
+  /**
+   * 隐藏充值弹窗
+   */
+  hideRecharge() {
+    this.setData({
+      showRechargePopup: false
+    });
+  },
+
+  /**
+   * 选择充值金额
+   */
+  selectAmount(e) {
+    const amount = e.currentTarget.dataset.amount;
+    this.setData({
+      selectedAmount: amount,
+      inputAmount: '' // 选择预设时清空输入框
+    });
+  },
+
+  /**
+   * 输入自定义金额
+   */
+  onInputAmount(e) {
+    const value = e.detail.value;
+    this.setData({
+      inputAmount: value,
+      selectedAmount: 0 // 输入时取消预设选中
+    });
+  },
+
+  /**
+   * 清除输入
+   */
+  clearInput() {
+    this.setData({
+      inputAmount: '',
+      selectedAmount: 500 // 清除后默认选中第一个
+    });
+  },
+
+  /**
+   * 提交充值
+   */
+  submitRecharge() {
+    const amount = this.data.inputAmount || this.data.selectedAmount;
+    if (!amount) {
+      wx.showToast({
+        title: '请选择或输入金额',
+        icon: 'none'
+      });
+      return;
+    }
+    wx.showLoading({ title: '充值中...' });
+    setTimeout(() => {
+      wx.hideLoading();
+      wx.showToast({
+        title: '充值成功',
+        icon: 'success'
+      });
+      this.hideRecharge();
+    }, 1500);
   },
 
   /**

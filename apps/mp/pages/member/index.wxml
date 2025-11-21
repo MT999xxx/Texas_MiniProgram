@@ -61,4 +61,45 @@
   <!-- 底部导航栏 -->
   <tab-bar selected="3"></tab-bar>
 
+  <!-- 4. 充值弹窗 -->
+  <view class="modal-mask" wx:if="{{showRechargePopup}}" bindtap="hideRecharge">
+    <view class="modal-content" catchtap="true">
+      <view class="modal-title">充值金币</view>
+      
+      <!-- 金额选项网格 -->
+      <view class="amount-grid">
+        <block wx:for="{{rechargeOptions}}" wx:key="amount">
+          <view class="amount-item {{selectedAmount === item.amount ? 'active' : ''}}" 
+                bindtap="selectAmount" 
+                data-amount="{{item.amount}}">
+            <text class="amount-value">¥{{item.amount}}</text>
+            <text class="amount-desc">{{item.desc}}</text>
+          </view>
+        </block>
+      </view>
+
+      <!-- 自定义输入框 -->
+      <view class="input-container">
+        <input class="custom-input" 
+               type="number" 
+               placeholder="请输入金额" 
+               placeholder-class="input-placeholder"
+               value="{{inputAmount}}" 
+               bindinput="onInputAmount" />
+        <view class="clear-btn" bindtap="clearInput" wx:if="{{inputAmount}}">X</view>
+      </view>
+
+      <!-- 赠送提示 (简单逻辑：显示选中项的赠送，如果是自定义输入则暂不显示或显示默认) -->
+      <view class="bonus-tip">
+        {{selectedAmount ? '赠送' + (selectedAmount * 15) + '积分' : (inputAmount ? '赠送' + (inputAmount * 15) + '积分' : '请选择充值金额')}}
+      </view>
+
+      <!-- 底部按钮 -->
+      <view class="modal-footer">
+        <view class="cancel-btn" bindtap="hideRecharge">取消</view>
+        <view class="submit-btn" bindtap="submitRecharge">提交</view>
+      </view>
+    </view>
+  </view>
+
 </view>

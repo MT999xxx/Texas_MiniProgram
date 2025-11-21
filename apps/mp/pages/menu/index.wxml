@@ -1,185 +1,39 @@
-<view class="menu-container">
-  <!-- 头部 -->
-  <view class="header">
-    <view class="store-info">
-      <text class="store-name">重庆店-尖子tusk</text>
-      <text class="status">营业中 08:00-02:00</text>
-    </view>
+<view class="container">
+  
+  <!-- 头部区域 -->
+  <view class="header-bar">
+    <text class="store-name">重庆店-尖牙tusk ></text>
   </view>
 
-  <!-- 分类和菜单 -->
-  <view class="content">
-    <!-- 左侧分类 -->
-    <scroll-view class="category-list" scroll-y>
-      <view
-        wx:for="{{categories}}"
-        wx:key="id"
-        class="category-item {{currentCategory === item.id ? 'active' : ''}}"
-        bindtap="selectCategory"
-        data-id="{{item.id}}"
-      >
-        <text>{{item.name}}</text>
-      </view>
+  <!-- 内容区域 -->
+  <view class="content-container">
+    
+    <!-- 左侧分类侧边栏 -->
+    <scroll-view scroll-y class="sidebar">
+      <block wx:for="{{categories}}" wx:key="id">
+        <view class="category-item {{currentCategory === index ? 'active' : ''}}" bindtap="switchCategory" data-index="{{index}}">
+          {{item.name}}
+        </view>
+      </block>
     </scroll-view>
 
-    <!-- 右侧菜品 -->
-    <scroll-view class="menu-list" scroll-y scroll-into-view="{{scrollIntoView}}">
-      <view wx:for="{{menuItems}}" wx:key="id" class="menu-section" id="cat-{{item.categoryId}}">
-        <view class="section-title">{{item.categoryName}}</view>
-        <view class="items">
-          <view wx:for="{{item.items}}" wx:key="id" wx:for-item="dish" class="menu-item">
-            <view class="item-info">
-              <view class="item-header">
-                <text class="item-name">{{dish.name}}</text>
-                <view wx:if="{{dish.status === 'SOLD_OUT'}}" class="sold-out-tag">已售罄</view>
-              </view>
-              <text class="item-desc">{{dish.description || ''}}</text>
-              <view class="item-footer">
-                <text class="price">¥ {{dish.price}}</text>
-                <view class="stock-info" wx:if="{{dish.stock < 10 && dish.stock > 0}}">
-                  <text>仅剩{{dish.stock}}份</text>
-                </view>
-              </view>
-            </view>
-            <view class="item-action">
-              <view wx:if="{{dish.status !== 'SOLD_OUT'}}" class="counter">
-                <view
-                  wx:if="{{cart[dish.id] > 0}}"
-                  class="btn-minus"
-                  bindtap="decreaseItem"
-                  data-id="{{dish.id}}"
-                >-</view>
-                <text wx:if="{{cart[dish.id] > 0}}" class="count">{{cart[dish.id]}}</text>
-                <view
-                  class="btn-plus"
-                  bindtap="increaseItem"
-                  data-id="{{dish.id}}"
-                  data-price="{{dish.price}}"
-                  data-name="{{dish.name}}"
-                >+</view>
-              </view>
+    <!-- 右侧商品列表 -->
+    <scroll-view scroll-y class="goods-list">
+      <block wx:for="{{goodsList}}" wx:key="id">
+        <view class="goods-item">
+          <image class="goods-image" src="{{item.image}}" mode="aspectFill" />
+          <view class="goods-info">
+            <text class="goods-name">{{item.name}}</text>
+            <text class="goods-desc">{{item.desc}}</text>
+            <view class="price-row">
+              <text class="goods-price">¥ {{item.price}}</text>
+              <view class="add-btn" bindtap="addToCart" data-id="{{item.id}}">+</view>
             </view>
           </view>
         </view>
-      </view>
+      </block>
     </scroll-view>
+
   </view>
 
-  <!-- 购物车栏 -->
-  <view class="cart-bar" bindtap="showCart" wx:if="{{totalCount > 0}}">
-    <view class="cart-info">
-      <view class="cart-icon-wrapper">
-        <view class="cart-badge">{{totalCount}}</view>
-        <text class="cart-icon">🛒</text>
-      </view>
-      <view class="cart-price">
-        <text class="total">¥{{totalPrice}}</text>
-        <text class="delivery-tip">已选{{totalCount}}件</text>
-      </view>
-    </view>
-    <view class="checkout-btn" bindtap="checkout" catchtap="checkout">
-      去结算
-    </view>
-  </view>
-
-  <!-- 购物车弹窗 -->
-  <view class="cart-modal {{showCartModal ? 'show' : ''}}" catchtap="hideCart">
-    <view class="cart-content" catchtap="stopPropagation">
-      <view class="cart-header">
-        <text>已选商品</text>
-        <text class="clear-btn" bindtap="clearCart">清空</text>
-      </view>
-      <scroll-view class="cart-items" scroll-y>
-        <view wx:for="{{cartItems}}" wx:key="id" class="cart-item">
-          <view class="item-left">
-            <text class="item-name">{{item.name}}</text>
-            <text class="item-price">¥{{item.price}}</text>
-          </view>
-          <view class="item-right">
-            <view class="counter">
-              <view class="btn-minus" bindtap="decreaseItem" data-id="{{item.id}}">-</view>
-              <text class="count">{{item.count}}</text>
-              <view class="btn-plus" bindtap="increaseItem" data-id="{{item.id}}" data-price="{{item.price}}" data-name="{{item.name}}">+</view>
-            </view>
-          </view>
-        </view>
-      </scroll-view>
-
-      <!-- 优惠券选择区域 -->
-      <view class="coupon-section" wx:if="{{isLoggedIn}}">
-        <view class="coupon-header">
-          <text>优惠券</text>
-          <view class="coupon-action" bindtap="showCouponModal" wx:if="{{!selectedCoupon && availableCoupons.length > 0}}">
-            <text class="select-coupon-text">选择优惠券</text>
-            <text class="arrow">></text>
-          </view>
-          <view class="coupon-action" bindtap="showCouponModal" wx:elif="{{!selectedCoupon}}">
-            <text class="no-coupon-text">暂无可用优惠券</text>
-          </view>
-        </view>
-
-        <!-- 已选择的优惠券 -->
-        <view class="selected-coupon" wx:if="{{selectedCoupon}}">
-          <view class="coupon-info">
-            <text class="coupon-name">{{selectedCoupon.coupon.name}}</text>
-            <text class="coupon-desc">
-              {{selectedCoupon.coupon.type === 'AMOUNT' ? '减' + selectedCoupon.coupon.value + '元' : ''}}
-              {{selectedCoupon.coupon.type === 'DISCOUNT' ? selectedCoupon.coupon.value + '折' : ''}}
-              {{selectedCoupon.coupon.type === 'PERCENTAGE' ? selectedCoupon.coupon.value + '%折扣' : ''}}
-            </text>
-          </view>
-          <view class="coupon-remove" bindtap="unselectCoupon">取消</view>
-        </view>
-      </view>
-
-      <!-- 价格汇总 -->
-      <view class="price-summary">
-        <view class="price-row">
-          <text class="label">商品总计</text>
-          <text class="value">¥{{originalPrice}}</text>
-        </view>
-        <view class="price-row" wx:if="{{selectedCoupon && discountAmount > 0}}">
-          <text class="label">优惠券折扣</text>
-          <text class="discount">-¥{{discountAmount}}</text>
-        </view>
-        <view class="price-row final-price">
-          <text class="label">实付金额</text>
-          <text class="value">¥{{totalPrice}}</text>
-        </view>
-      </view>
-    </view>
-  </view>
-
-  <!-- 优惠券选择弹窗 -->
-  <view class="coupon-modal {{showCouponModal ? 'show' : ''}}" catchtap="hideCouponModal">
-    <view class="coupon-modal-content" catchtap="stopPropagation">
-      <view class="modal-header">
-        <text>选择优惠券</text>
-        <view class="close-btn" bindtap="hideCouponModal">×</view>
-      </view>
-      <scroll-view class="coupon-list" scroll-y>
-        <view wx:for="{{availableCoupons}}" wx:key="id" class="coupon-option" bindtap="selectCoupon" data-id="{{item.id}}">
-          <view class="coupon-left">
-            <view class="coupon-amount">
-              <text class="amount">{{item.coupon.value}}</text>
-              <text class="unit">
-                {{item.coupon.type === 'AMOUNT' ? '元' : ''}}
-                {{item.coupon.type === 'DISCOUNT' ? '折' : ''}}
-                {{item.coupon.type === 'PERCENTAGE' ? '%' : ''}}
-              </text>
-            </view>
-          </view>
-          <view class="coupon-right">
-            <text class="coupon-name">{{item.coupon.name}}</text>
-            <text class="coupon-condition" wx:if="{{item.coupon.minAmount > 0}}">满{{item.coupon.minAmount}}元可用</text>
-            <text class="coupon-condition" wx:else>无门槛</text>
-            <text class="coupon-validity">{{item.validityText || '有效期至：' + item.endTime}}</text>
-          </view>
-        </view>
-        <view class="no-coupons" wx:if="{{availableCoupons.length === 0}}">
-          <text>暂无可用优惠券</text>
-        </view>
-      </scroll-view>
-    </view>
-  </view>
 </view>
