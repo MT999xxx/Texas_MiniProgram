@@ -1,16 +1,11 @@
 import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PaymentEntity, PaymentType, PaymentStatus } from './payment.entity';
-import { RechargeRecordEntity, RechargeStatus } from './recharge-record.entity';
-import { RechargePackageEntity } from './recharge-package.entity';
+import { PaymentEntity, PaymentType, PaymentStatus, PaymentMethod, RechargeRecordEntity, RechargePackageEntity } from './payment.entity';
 import { WechatPayService } from './wechat-pay.service';
 import { MemberEntity } from '../membership/member.entity';
-import { OrderEntity } from '../orders/order.entity';
-import { CreatePaymentDto, CreateRechargeDto, PaymentCallbackDto } from './dto/payment.dto';
-import { LoyaltyService } from '../loyalty/loyalty.service';
-import { OrdersService } from '../orders/orders.service';
-import { NotificationService } from './notification.service';
+import { OrderEntity, OrderStatus } from '../orders/order.entity';
+import { ReservationEntity } from '../reservation/reservation.entity';
 
 @Injectable()
 export class PaymentService {
@@ -27,14 +22,15 @@ export class PaymentService {
     private memberRepo: Repository<MemberEntity>,
     @InjectRepository(OrderEntity)
     private orderRepo: Repository<OrderEntity>,
+    @InjectRepository(ReservationEntity)
+    private reservationRepo: Repository<ReservationEntity>,
     private wechatPayService: WechatPayService,
-    private loyaltyService: LoyaltyService,
-    private ordersService: OrdersService,
-    private notificationService: NotificationService,
-  ) {}
+  ) { }
+
+  // ========== 创建支付 ==========
 
   // 创建订单支付
-  async createOrderPayment(orderId: string, dto: CreatePaymentDto) {
+  async createOrderPayment(orderId: string, memberId: string, openid?: string) {
     const order = await this.orderRepo.findOne({
       where: { id: orderId },
       relations: ['member'],
@@ -44,70 +40,130 @@ export class PaymentService {
       throw new NotFoundException('订单不存在');
     }
 
-    if (order.status !== 'PENDING') {
+    if (order.status !== OrderStatus.PENDING) {
       throw new BadRequestException('订单状态不允许支付');
     }
 
-    const member = order.member;
+    // 创建支付记录
+    const member = await this.memberRepo.findOne({ where: { id: memberId } });
     if (!member) {
-      throw new BadRequestException('用户信息不存在');
+      throw new NotFoundException('用户不存在');
+    }
+
+    const payment = this.paymentRepo.create({
+      type: PaymentType.ORDER_PAYMENT,
+      method: PaymentMethod.WECHAT_PAY,
+      status: PaymentStatus.PENDING,
+      amount: Math.round(Number(order.totalAmount) * 100), // 转换为分
+      description: `订单支付 - ${order.orderNumber}`,
+      paymentOrderNo: this.generateTradeNo('ORDER'),
+      member,
+      order,
+    });
+
+    const saved = await this.paymentRepo.save(payment);
+
+    // 调用微信支付
+    const wechatPayResult = await this.wechatPayService.createJsapiOrder({
+      outTradeNo: saved.paymentOrderNo,
+      description: saved.description || '订单支付',
+      amount: Number(saved.amount),
+      openid: openid || '',
+    });
+
+    if (wechatPayResult) {
+      // 更新支付状态为PROCESSING
+      payment.status = PaymentStatus.PROCESSING;
+      payment.thirdPartyOrderNo = wechatPayResult.prepayId;
+      await this.paymentRepo.save(payment);
+
+      return {
+        paymentId: saved.id,
+        paymentOrderNo: saved.paymentOrderNo,
+        amount: saved.amount,
+        // 微信支付参数
+        ...wechatPayResult,
+      };
+    }
+
+    // 微信支付创建失败，标记为FAILED
+    payment.status = PaymentStatus.FAILED;
+    await this.paymentRepo.save(payment);
+
+    throw new BadRequestException('创建微信支付订单失败');
+  }
+
+  // 创建预约订金支付
+  async createReservationPayment(reservationId: string, depositAmount: number, memberId: string, openid?: string) {
+    const reservation = await this.reservationRepo.findOne({
+      where: { id: reservationId },
+      relations: ['table', 'member'],
+    });
+
+    if (!reservation) {
+      throw new NotFoundException('预约不存在');
+    }
+
+    if (reservation.depositPaid) {
+      throw new BadRequestException('订金已支付');
     }
 
     // 创建支付记录
-    const payment = this.paymentRepo.create({
-      orderId,
-      memberId: member.id,
-      type: PaymentType.ORDER,
-      amount: order.totalAmount,
-      status: PaymentStatus.PENDING,
-      description: `订单支付 - ${order.orderNumber}`,
-      paymentMethod: dto.paymentMethod || 'WECHAT_PAY',
-      outTradeNo: this.generateTradeNo('ORDER'),
-    });
-
-    await this.paymentRepo.save(payment);
-
-    // 调用微信支付
-    if (payment.paymentMethod === 'WECHAT_PAY') {
-      const wechatPayResult = await this.wechatPayService.createJsapiOrder({
-        outTradeNo: payment.outTradeNo,
-        description: payment.description,
-        amount: Math.round(payment.amount * 100), // 转换为分
-        openid: dto.openid,
-        notifyUrl: `${process.env.API_BASE_URL}/payment/wechat-callback`,
-      });
-
-      if (wechatPayResult) {
-        payment.thirdPartyTransactionId = wechatPayResult.prepayId;
-        payment.status = PaymentStatus.PROCESSING;
-        await this.paymentRepo.save(payment);
-
-        return {
-          paymentId: payment.id,
-          ...wechatPayResult,
-        };
-      } else {
-        payment.status = PaymentStatus.FAILED;
-        await this.paymentRepo.save(payment);
-        throw new BadRequestException('创建微信支付订单失败');
-      }
+    const member = await this.memberRepo.findOne({ where: { id: memberId } });
+    if (!member) {
+      throw new NotFoundException('用户不存在');
     }
 
-    return payment;
+    const payment = this.paymentRepo.create({
+      type: PaymentType.RESERVATION_DEPOSIT,
+      method: PaymentMethod.WECHAT_PAY,
+      status: PaymentStatus.PENDING,
+      amount: Math.round(depositAmount * 100), // 转换为分
+      description: `预约订金 - ${reservation.table.name}`,
+      paymentOrderNo: this.generateTradeNo('RESERVATION'),
+      member,
+      reservationId,
+    });
+
+    const saved = await this.paymentRepo.save(payment);
+
+    // 调用微信支付
+    const wechatPayResult = await this.wechatPayService.createJsapiOrder({
+      outTradeNo: saved.paymentOrderNo,
+      description: saved.description || '预约订金',
+      amount: Number(saved.amount),
+      openid: openid || '',
+    });
+
+    if (wechatPayResult) {
+      payment.status = PaymentStatus.PROCESSING;
+      payment.thirdPartyOrderNo = wechatPayResult.prepayId;
+      await this.paymentRepo.save(payment);
+
+      return {
+        paymentId: saved.id,
+        paymentOrderNo: saved.paymentOrderNo,
+        amount: saved.amount,
+        reservationId,
+        // 微信支付参数
+        ...wechatPayResult,
+      };
+    }
+
+    payment.status = PaymentStatus.FAILED;
+    await this.paymentRepo.save(payment);
+    throw new BadRequestException('创建预约支付订单失败');
   }
 
   // 创建充值支付
-  async createRechargePayment(dto: CreateRechargeDto) {
-    const member = await this.memberRepo.findOne({
-      where: { id: dto.memberId },
-    });
-
+  async createRechargePayment(packageId: string, memberId: string, openid?: string) {
+    const member = await this.memberRepo.findOne({ where: { id: memberId } });
     if (!member) {
       throw new NotFoundException('用户不存在');
     }
 
     const rechargePackage = await this.packageRepo.findOne({
-      where: { id: dto.packageId, isActive: true },
+      where: { id: packageId, isEnabled: true },
     });
 
     if (!rechargePackage) {
@@ -116,97 +172,71 @@ export class PaymentService {
 
     // 创建充值记录
     const rechargeRecord = this.rechargeRepo.create({
-      memberId: member.id,
-      packageId: rechargePackage.id,
-      amount: rechargePackage.price,
-      points: rechargePackage.points,
+      member,
+      amount: rechargePackage.amount,
+      pointsEarned: rechargePackage.points,
       bonusPoints: rechargePackage.bonusPoints,
-      status: RechargeStatus.PENDING,
-      outTradeNo: this.generateTradeNo('RECHARGE'),
+      packageId: rechargePackage.id,
     });
 
     await this.rechargeRepo.save(rechargeRecord);
 
     // 创建支付记录
     const payment = this.paymentRepo.create({
-      rechargeId: rechargeRecord.id,
-      memberId: member.id,
       type: PaymentType.RECHARGE,
-      amount: rechargePackage.price,
+      method: PaymentMethod.WECHAT_PAY,
       status: PaymentStatus.PENDING,
+      amount: rechargePackage.amount,
       description: `积分充值 - ${rechargePackage.name}`,
-      paymentMethod: dto.paymentMethod || 'WECHAT_PAY',
-      outTradeNo: rechargeRecord.outTradeNo,
+      paymentOrderNo: this.generateTradeNo('RECHARGE'),
+      member,
     });
 
-    await this.paymentRepo.save(payment);
+    // 关联充值记录
+    rechargeRecord.payment = payment;
+    await this.rechargeRepo.save(rechargeRecord);
+
+    const saved = await this.paymentRepo.save(payment);
 
     // 调用微信支付
-    if (payment.paymentMethod === 'WECHAT_PAY') {
-      const wechatPayResult = await this.wechatPayService.createJsapiOrder({
-        outTradeNo: payment.outTradeNo,
-        description: payment.description,
-        amount: Math.round(payment.amount * 100), // 转换为分
-        openid: dto.openid,
-        notifyUrl: `${process.env.API_BASE_URL}/payment/wechat-callback`,
-      });
+    const wechatPayResult = await this.wechatPayService.createJsapiOrder({
+      outTradeNo: saved.paymentOrderNo,
+      description: saved.description || '积分充值',
+      amount: Number(saved.amount),
+      openid: openid || '',
+    });
 
-      if (wechatPayResult) {
-        payment.thirdPartyTransactionId = wechatPayResult.prepayId;
-        payment.status = PaymentStatus.PROCESSING;
-        await this.paymentRepo.save(payment);
+    if (wechatPayResult) {
+      payment.status = PaymentStatus.PROCESSING;
+      payment.thirdPartyOrderNo = wechatPayResult.prepayId;
+      await this.paymentRepo.save(payment);
 
-        return {
-          paymentId: payment.id,
-          rechargeId: rechargeRecord.id,
-          ...wechatPayResult,
-        };
-      } else {
-        payment.status = PaymentStatus.FAILED;
-        rechargeRecord.status = RechargeStatus.FAILED;
-        await this.paymentRepo.save(payment);
-        await this.rechargeRepo.save(rechargeRecord);
-        throw new BadRequestException('创建微信支付订单失败');
-      }
+      return {
+        paymentId: saved.id,
+        paymentOrderNo: saved.paymentOrderNo,
+        amount: saved.amount,
+        // 微信支付参数
+        ...wechatPayResult,
+      };
     }
 
-    return { paymentId: payment.id, rechargeId: rechargeRecord.id };
+    payment.status = PaymentStatus.FAILED;
+    await this.paymentRepo.save(payment);
+    throw new BadRequestException('创建充值支付订单失败');
   }
 
-  // 处理微信支付回调
-  async handleWechatPayCallback(callbackData: PaymentCallbackDto) {
-    this.logger.log('收到微信支付回调:', callbackData);
+  // ========== 支付回调处理 ==========
 
-    // 验证签名
-    const isValidSignature = this.wechatPayService.verifyCallback(
-      callbackData.signature,
-      callbackData.timestamp,
-      callbackData.nonce,
-      callbackData.body,
-    );
-
-    if (!isValidSignature) {
-      this.logger.error('微信支付回调签名验证失败');
-      throw new BadRequestException('签名验证失败');
-    }
-
-    // 解密回调数据
-    const decryptedData = this.wechatPayService.decryptCallback(callbackData.resource);
-    if (!decryptedData) {
-      this.logger.error('微信支付回调数据解密失败');
-      throw new BadRequestException('数据解密失败');
-    }
-
-    const { out_trade_no, trade_state, transaction_id, amount } = decryptedData;
-
+  // 处理微信支付回调（简化版）
+  async handleWechatPayCallback(paymentOrderNo: string, transactionId: string) {
     // 查找支付记录
     const payment = await this.paymentRepo.findOne({
-      where: { outTradeNo: out_trade_no },
-      relations: ['recharge', 'order'],
+      where: { paymentOrderNo },
+      relations: ['member', 'order'],
     });
 
     if (!payment) {
-      this.logger.error(`找不到支付记录: ${out_trade_no}`);
+      this.logger.error(`找不到支付记录: ${paymentOrderNo}`);
       throw new NotFoundException('支付记录不存在');
     }
 
@@ -217,121 +247,94 @@ export class PaymentService {
     }
 
     // 更新支付记录
-    payment.thirdPartyTransactionId = transaction_id;
+    payment.thirdPartyOrderNo = transactionId;
     payment.paidAt = new Date();
+    payment.status = PaymentStatus.SUCCESS;
+    await this.paymentRepo.save(payment);
 
-    if (trade_state === 'SUCCESS') {
-      payment.status = PaymentStatus.SUCCESS;
-      await this.paymentRepo.save(payment);
-
-      // 处理支付成功逻辑
-      await this.handlePaymentSuccess(payment);
-    } else if (trade_state === 'PAYERROR') {
-      payment.status = PaymentStatus.FAILED;
-      await this.paymentRepo.save(payment);
-
-      // 处理支付失败逻辑
-      await this.handlePaymentFailure(payment);
-    }
+    // 处理支付成功逻辑
+    await this.handlePaymentSuccess(payment);
 
     return { code: 'SUCCESS', message: 'OK' };
   }
 
   // 处理支付成功
   private async handlePaymentSuccess(payment: PaymentEntity) {
-    if (payment.type === PaymentType.ORDER && payment.orderId) {
-      // 处理订单支付成功
-      await this.handleOrderPaymentSuccess(payment.orderId);
-    } else if (payment.type === PaymentType.RECHARGE && payment.rechargeId) {
-      // 处理充值支付成功
-      await this.handleRechargePaymentSuccess(payment.rechargeId);
-    }
-  }
-
-  // 处理支付失败
-  private async handlePaymentFailure(payment: PaymentEntity) {
-    if (payment.type === PaymentType.ORDER && payment.orderId) {
-      // 标记订单为支付失败
-      await this.orderRepo.update(payment.orderId, { status: 'PAYMENT_FAILED' });
-    } else if (payment.type === PaymentType.RECHARGE && payment.rechargeId) {
-      // 标记充值为失败
-      await this.rechargeRepo.update(payment.rechargeId, { status: RechargeStatus.FAILED });
+    switch (payment.type) {
+      case PaymentType.ORDER_PAYMENT:
+        await this.handleOrderPaymentSuccess(payment);
+        break;
+      case PaymentType.RESERVATION_DEPOSIT:
+        await this.handleReservationPaymentSuccess(payment);
+        break;
+      case PaymentType.RECHARGE:
+        await this.handleRechargePaymentSuccess(payment);
+        break;
     }
   }
 
   // 处理订单支付成功
-  private async handleOrderPaymentSuccess(orderId: string) {
-    const order = await this.ordersService.markAsPaid(orderId);
-
-    // 发送订单支付成功通知
-    if (order.member) {
-      await this.notificationService.sendOrderPaidNotification(
-        order.member.id,
-        order.orderNumber,
-        order.totalAmount
-      );
+  private async handleOrderPaymentSuccess(payment: PaymentEntity) {
+    if (!payment.order) {
+      this.logger.error(`订单支付记录缺少订单关联: ${payment.id}`);
+      return;
     }
 
-    this.logger.log(`订单支付成功: ${orderId}`);
+    // 更新订单状态
+    payment.order.status = OrderStatus.PAID;
+    payment.order.paidAt = new Date();
+    await this.orderRepo.save(payment.order);
+
+    this.logger.log(`订单支付成功: ${payment.order.id}`);
+  }
+
+  // 处理预约订金支付成功
+  private async handleReservationPaymentSuccess(payment: PaymentEntity) {
+    if (!payment.reservationId) {
+      this.logger.error(`预约支付记录缺少预约ID: ${payment.id}`);
+      return;
+    }
+
+    const reservation = await this.reservationRepo.findOne({
+      where: { id: payment.reservationId },
+    });
+
+    if (reservation) {
+      reservation.depositPaid = true;
+      reservation.paymentId = payment.id;
+      await this.reservationRepo.save(reservation);
+      this.logger.log(`预约订金支付成功: ${reservation.id}`);
+    }
   }
 
   // 处理充值支付成功
-  private async handleRechargePaymentSuccess(rechargeId: string) {
+  private async handleRechargePaymentSuccess(payment: PaymentEntity) {
     const rechargeRecord = await this.rechargeRepo.findOne({
-      where: { id: rechargeId },
-      relations: ['member', 'package'],
+      where: { payment: { id: payment.id } },
+      relations: ['member'],
     });
 
-    if (!rechargeRecord) return;
+    if (!rechargeRecord) {
+      this.logger.error(`找不到充值记录: payment ${payment.id}`);
+      return;
+    }
 
-    // 更新充值状态
-    rechargeRecord.status = RechargeStatus.SUCCESS;
-    rechargeRecord.completedAt = new Date();
-    await this.rechargeRepo.save(rechargeRecord);
-
-    // 给用户增加积分
-    const totalPoints = rechargeRecord.points + rechargeRecord.bonusPoints;
-    await this.loyaltyService.addPoints(
-      rechargeRecord.memberId,
-      totalPoints,
-      'RECHARGE',
-      `充值获得积分 - ${rechargeRecord.package.name}`,
-    );
-
-    // 发送充值成功通知
-    await this.notificationService.sendRechargeSuccessNotification(
-      rechargeRecord.memberId,
-      rechargeRecord.package.name,
-      rechargeRecord.points,
-      rechargeRecord.bonusPoints
-    );
-
-    this.logger.log(`充值成功: 用户${rechargeRecord.memberId} 获得${totalPoints}积分`);
+    // TODO: 给用户增加积分（需要LoyaltyService）
+    const totalPoints = rechargeRecord.pointsEarned + rechargeRecord.bonusPoints;
+    this.logger.log(`充值成功: 用户${rechargeRecord.member.id} 应获得${totalPoints}积分`);
   }
+
+  // ========== 查询接口 ==========
 
   // 查询支付状态
   async getPaymentStatus(paymentId: string) {
     const payment = await this.paymentRepo.findOne({
       where: { id: paymentId },
-      relations: ['recharge', 'order'],
+      relations: ['member', 'order'],
     });
 
     if (!payment) {
       throw new NotFoundException('支付记录不存在');
-    }
-
-    // 如果是进行中状态，主动查询微信支付状态
-    if (payment.status === PaymentStatus.PROCESSING && payment.paymentMethod === 'WECHAT_PAY') {
-      const wechatStatus = await this.wechatPayService.queryOrder(payment.outTradeNo);
-      if (wechatStatus && wechatStatus.trade_state === 'SUCCESS') {
-        payment.status = PaymentStatus.SUCCESS;
-        payment.thirdPartyTransactionId = wechatStatus.transaction_id;
-        payment.paidAt = new Date();
-        await this.paymentRepo.save(payment);
-
-        // 处理支付成功逻辑
-        await this.handlePaymentSuccess(payment);
-      }
     }
 
     return payment;
@@ -340,16 +343,16 @@ export class PaymentService {
   // 获取充值套餐列表
   async getRechargePackages() {
     return this.packageRepo.find({
-      where: { isActive: true },
-      order: { sortOrder: 'ASC', price: 'ASC' },
+      where: { isEnabled: true },
+      order: { sortOrder: 'ASC', amount: 'ASC' },
     });
   }
 
   // 获取用户支付记录
   async getPaymentHistory(memberId: string, page: number = 1, limit: number = 20) {
     const [payments, total] = await this.paymentRepo.findAndCount({
-      where: { memberId },
-      relations: ['recharge', 'order'],
+      where: { member: { id: memberId } },
+      relations: ['order'],
       order: { createdAt: 'DESC' },
       skip: (page - 1) * limit,
       take: limit,
@@ -363,23 +366,7 @@ export class PaymentService {
     };
   }
 
-  // 获取用户充值记录
-  async getRechargeHistory(memberId: string, page: number = 1, limit: number = 20) {
-    const [recharges, total] = await this.rechargeRepo.findAndCount({
-      where: { memberId },
-      relations: ['package', 'payment'],
-      order: { createdAt: 'DESC' },
-      skip: (page - 1) * limit,
-      take: limit,
-    });
-
-    return {
-      data: recharges,
-      total,
-      page,
-      totalPages: Math.ceil(total / limit),
-    };
-  }
+  // ========== 工具方法 ==========
 
   // 生成交易号
   private generateTradeNo(prefix: string): string {
@@ -400,11 +387,6 @@ export class PaymentService {
 
     if (payment.status !== PaymentStatus.PENDING && payment.status !== PaymentStatus.PROCESSING) {
       throw new BadRequestException('当前状态不允许取消支付');
-    }
-
-    // 如果是微信支付，尝试关闭订单
-    if (payment.paymentMethod === 'WECHAT_PAY' && payment.status === PaymentStatus.PROCESSING) {
-      await this.wechatPayService.closeOrder(payment.outTradeNo);
     }
 
     payment.status = PaymentStatus.CANCELLED;

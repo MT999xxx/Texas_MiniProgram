@@ -121,9 +121,14 @@ export class EventRegistrationEntity {
   @ManyToOne(() => EventEntity, (event) => event.registrations)
   event!: EventEntity;
 
-  @ApiProperty({ type: () => MemberEntity })
-  @ManyToOne(() => MemberEntity, (member) => member.eventRegistrations)
-  member!: MemberEntity;
+  @ApiProperty({ description: '是否已签到' })
+  @Column({ default: false })
+  checkedIn!: boolean;
+
+  // TODO: Member关系待完善
+  // @ApiProperty({ type: () => MemberEntity })
+  // @ManyToOne(() => MemberEntity, (member) => member.eventRegistrations)
+  // member!: MemberEntity;
 
   @ApiProperty({ enum: RegistrationStatus, description: '报名状态' })
   @Column({ type: 'enum', enum: RegistrationStatus, default: RegistrationStatus.REGISTERED })

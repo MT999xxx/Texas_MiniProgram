@@ -1,17 +1,14 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PaymentService } from './payment.service';
 import { PaymentController } from './payment.controller';
+import { PaymentService } from './payment.service';
+import { PaymentEntity, RechargeRecordEntity, RechargePackageEntity } from './payment.entity';
 import { WechatPayService } from './wechat-pay.service';
 import { WechatPayConfigService } from './wechat-pay.config';
-import { NotificationService } from './notification.service';
-import { PaymentEntity } from './payment.entity';
-import { RechargeRecordEntity } from './recharge-record.entity';
-import { RechargePackageEntity } from './recharge-package.entity';
 import { MemberEntity } from '../membership/member.entity';
 import { OrderEntity } from '../orders/order.entity';
-import { LoyaltyModule } from '../loyalty/loyalty.module';
-import { OrdersModule } from '../orders/orders.module';
+import { ReservationEntity } from '../reservation/reservation.entity';
+import { NotificationService } from './notification.service';
 
 @Module({
   imports: [
@@ -21,9 +18,8 @@ import { OrdersModule } from '../orders/orders.module';
       RechargePackageEntity,
       MemberEntity,
       OrderEntity,
+      ReservationEntity,
     ]),
-    LoyaltyModule,
-    OrdersModule,
   ],
   controllers: [PaymentController],
   providers: [
@@ -32,6 +28,6 @@ import { OrdersModule } from '../orders/orders.module';
     WechatPayConfigService,
     NotificationService,
   ],
-  exports: [PaymentService, WechatPayService],
+  exports: [PaymentService],
 })
-export class PaymentModule {}
+export class PaymentModule { }

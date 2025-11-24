@@ -60,6 +60,18 @@ export class ReservationEntity {
   @Column({ name: 'member_id', nullable: true })
   memberId?: string;
 
+  @ApiPropertyOptional({ description: '订金金额' })
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  depositAmount!: number;
+
+  @ApiPropertyOptional({ description: '是否已支付订金' })
+  @Column({ type: 'boolean', default: false })
+  depositPaid!: boolean;
+
+  @ApiPropertyOptional({ description: '支付ID' })
+  @Column({ name: 'payment_id', nullable: true })
+  paymentId?: string;
+
   @ApiPropertyOptional({ type: () => [OrderEntity] })
   @OneToMany(() => OrderEntity, (order) => order.reservation)
   orders!: OrderEntity[];

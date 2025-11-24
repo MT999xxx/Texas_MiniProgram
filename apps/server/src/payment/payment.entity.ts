@@ -14,6 +14,7 @@ export enum PaymentType {
   ORDER_PAYMENT = 'ORDER_PAYMENT',    // 订单支付
   RECHARGE = 'RECHARGE',              // 充值
   REFUND = 'REFUND',                  // 退款
+  RESERVATION_DEPOSIT = 'RESERVATION_DEPOSIT', // 预约订金
 }
 
 export enum PaymentStatus {
@@ -81,6 +82,10 @@ export class PaymentEntity {
   @ApiPropertyOptional({ type: () => OrderEntity })
   @ManyToOne(() => OrderEntity, { nullable: true })
   order?: OrderEntity;
+
+  @ApiPropertyOptional({ description: '预约ID（用于预约订金）' })
+  @Column({ name: 'reservation_id', nullable: true })
+  reservationId?: string;
 
   @ApiPropertyOptional({ description: '支付时间' })
   @Column({ type: 'timestamp', nullable: true })

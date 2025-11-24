@@ -12,7 +12,7 @@ import { MemberEntity } from '../membership/member.entity';
 import { ReservationEntity } from '../reservation/reservation.entity';
 import { TableEntity } from '../tables/table.entity';
 import { OrderItemEntity } from './order-item.entity';
-import { UserCouponEntity } from '../coupons/user-coupon.entity';
+// import { UserCouponEntity } from '../coupons/user-coupon.entity';
 
 export enum OrderStatus {
   PENDING = 'PENDING',
@@ -45,9 +45,10 @@ export class OrderEntity {
   @ManyToOne(() => TableEntity, { nullable: true, eager: true })
   table?: TableEntity;
 
-  @ApiPropertyOptional({ type: () => UserCouponEntity })
-  @ManyToOne(() => UserCouponEntity, { nullable: true })
-  userCoupon?: UserCouponEntity;
+  // TODO: 优惠券功能待实现
+  // @ApiPropertyOptional({ type: () => UserCouponEntity })
+  // @ManyToOne(() => UserCouponEntity, { nullable: true })
+  // userCoupon?: UserCouponEntity;
 
   @ApiProperty({ description: '商品原价总额' })
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })

@@ -122,36 +122,32 @@ Page({
       return;
     }
 
-    const { customerName, phone, partySize, tableId, reservedDate, reservedTime, note } = this.data.form;
+    const { form } = this.data;
 
-    // 验证表单
-    if (!customerName || !phone) {
-      wx.showToast({ title: '请填写联系信息', icon: 'none' });
+    // 表单验证
+    if (!form.customerName) {
+      wx.showToast({ title: '请填写姓名', icon: 'none' });
       return;
     }
-
-    if (!tableId) {
-      wx.showToast({ title: '请选择桌台', icon: 'none' });
+    if (!form.phone) {
+      wx.showToast({ title: '请填写电话', icon: 'none' });
       return;
     }
-
-    if (!reservedDate || !reservedTime) {
+    if (!/^1[3-9]\d{9}$/.test(form.phone)) {
+      wx.showToast({ title: '请填写正确的手机号', icon: 'none' });
+      return;
+    }
+    if (!form.tableId) {
+      wx.showToast({ title: '请选择桌位', icon: 'none' });
+      return;
+    }
+    if (!form.reservedDate || !form.reservedTime) {
       wx.showToast({ title: '请选择预约时间', icon: 'none' });
       return;
     }
 
-    // 验证手机号
-    const phoneReg = /^1[3-9]\d{9}$/;
-    if (!phoneReg.test(phone)) {
-      wx.showToast({ title: '请输入正确的手机号', icon: 'none' });
-      return;
-    }
-
-    // 组合日期时间
-    const reservedAt = `${reservedDate} ${reservedTime}:00`;
-    const reservedDateTime = new Date(reservedAt);
-
     // 验证预约时间不能早于当前时间
+    const reservedDateTime = new Date(`${form.reservedDate} ${form.reservedTime}:00`);
     if (reservedDateTime < new Date()) {
       wx.showToast({ title: '预约时间不能早于当前时间', icon: 'none' });
       return;
@@ -160,38 +156,100 @@ Page({
     this.setData({ loading: true });
 
     try {
+      const { request } = require('../../utils/request');
+      const PaymentUtils = require('../../utils/payment');
+
+      // 组装预约时间
+      const reservedAt = `${form.reservedDate} ${form.reservedTime}:00`;
+
       const data = {
-        customerName,
-        phone,
-        partySize,
-        tableId,
-        reservedAt: reservedDateTime.toISOString(),
-        note,
+        customerName: form.customerName,
+        phone: form.phone,
+        partySize: form.partySize,
+        tableId: form.tableId,
+        reservedAt,
+        note: form.note,
+        memberId: this.data.userInfo?.id || null,
+        // 订金金额（可以从服务器获取或固定）
+        depositAmount: 100, // 100元订金
       };
 
-      // 如果已登录，添加会员ID
-      if (this.data.userInfo && this.data.userInfo.id) {
-        data.memberId = this.data.userInfo.id;
-      }
-
-      await request({
-        url: '/reservations',
+      // 调用带订金的预约接口
+      const result = await request({
+        url: '/reservations/with-deposit',
         method: 'POST',
         data,
       });
 
-      wx.showToast({ title: '预约成功', icon: 'success' });
+      console.log('预约创建成功:', result);
 
-      // 延迟跳转到预约记录页面
-      setTimeout(() => {
-        wx.navigateTo({
-          url: '/pages/reservation-list/index',
-          fail: () => {
-            // 如果页面不存在，返回首页
-            wx.switchTab({ url: '/pages/home/index' });
-          }
+      // 如果需要支付订金
+      if (result.needPayment && result.reservation) {
+        const reservationId = result.reservation.id;
+
+        // 显示支付确认
+        const confirmResult = await new Promise((resolve) => {
+          wx.showModal({
+            title: '支付订金',
+            content: `预约成功！需要支付￥${data.depositAmount}订金`,
+            confirmText: '立即支付',
+            cancelText: '稍后支付',
+            success: (res) => resolve(res.confirm)
+          });
         });
-      }, 1500);
+
+        if (confirmResult) {
+          // 创建并执行支付
+          const paymentResult = await PaymentUtils.createReservationPayment(
+            reservationId,
+            data.depositAmount,
+            {
+              successCallback: () => {
+                wx.showToast({ title: '支付成功', icon: 'success' });
+                setTimeout(() => {
+                  wx.navigateTo({
+                    url: '/pages/reservation-list/index',
+                    fail: () => wx.switchTab({ url: '/pages/home/index' })
+                  });
+                }, 1500);
+              },
+              failCallback: () => {
+                wx.showModal({
+                  title: '支付失败',
+                  content: '您可以稍后在"我的预约"中继续支付',
+                  showCancel: false,
+                  success: () => {
+                    wx.navigateTo({
+                      url: '/pages/reservation-list/index',
+                      fail: () => wx.switchTab({ url: '/pages/home/index' })
+                    });
+                  }
+                });
+              }
+            }
+          );
+
+          console.log('支付结果:', paymentResult);
+        } else {
+          // 用户选择稍后支付
+          wx.showToast({ title: '预约成功，请稍后支付', icon: 'none', duration: 2000 });
+          setTimeout(() => {
+            wx.navigateTo({
+              url: '/pages/reservation-list/index',
+              fail: () => wx.switchTab({ url: '/pages/home/index' })
+            });
+          }, 2000);
+        }
+      } else {
+        // 不需要支付
+        wx.showToast({ title: '预约成功', icon: 'success' });
+        setTimeout(() => {
+          wx.navigateTo({
+            url: '/pages/reservation-list/index',
+            fail: () => wx.switchTab({ url: '/pages/home/index' })
+          });
+        }, 1500);
+      }
 
       // 清空表单
       this.setData({

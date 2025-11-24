@@ -1,13 +1,13 @@
 import { Controller, Post, Get, Body, Param, Query, Headers, UseGuards, Req } from '@nestjs/common';
 import { PaymentService } from './payment.service';
-import { CreatePaymentDto, CreateRechargeDto, PaymentCallbackDto } from './dto/payment.dto';
+import { PaymentCallbackDto } from './dto/payment.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiHeader, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('payment')
 @Controller('payment')
 export class PaymentController {
-  constructor(private readonly paymentService: PaymentService) {}
+  constructor(private readonly paymentService: PaymentService) { }
 
   @Post('order/:orderId')
   @UseGuards(JwtAuthGuard)
@@ -16,18 +16,44 @@ export class PaymentController {
   @ApiResponse({ status: 201, description: '支付创建成功' })
   async createOrderPayment(
     @Param('orderId') orderId: string,
-    @Body() dto: CreatePaymentDto,
+    @Body() body: { openid?: string },
+    @Req() req: any,
   ) {
-    return this.paymentService.createOrderPayment(orderId, dto);
+    const memberId = req.user.id;
+    return this.paymentService.createOrderPayment(orderId, memberId, body.openid);
   }
 
-  @Post('recharge')
+  @Post('reservation/:reservationId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '创建预约订金支付' })
+  @ApiResponse({ status: 201, description: '预约支付创建成功' })
+  async createReservationPayment(
+    @Param('reservationId') reservationId: string,
+    @Body() body: { depositAmount: number; openid?: string },
+    @Req() req: any,
+  ) {
+    const memberId = req.user.id;
+    return this.paymentService.createReservationPayment(
+      reservationId,
+      body.depositAmount,
+      memberId,
+      body.openid,
+    );
+  }
+
+  @Post('recharge/:packageId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: '创建充值支付' })
   @ApiResponse({ status: 201, description: '充值支付创建成功' })
-  async createRechargePayment(@Body() dto: CreateRechargeDto) {
-    return this.paymentService.createRechargePayment(dto);
+  async createRechargePayment(
+    @Param('packageId') packageId: string,
+    @Body() body: { openid?: string },
+    @Req() req: any,
+  ) {
+    const memberId = req.user.id;
+    return this.paymentService.createRechargePayment(packageId, memberId, body.openid);
   }
 
   @Post('wechat-callback')
@@ -35,34 +61,20 @@ export class PaymentController {
   @ApiHeader({ name: 'Wechatpay-Signature', description: '微信支付签名' })
   @ApiHeader({ name: 'Wechatpay-Timestamp', description: '微信支付时间戳' })
   @ApiHeader({ name: 'Wechatpay-Nonce', description: '微信支付随机串' })
-  async handleWechatPayCallback(
-    @Headers('Wechatpay-Signature') signature: string,
-    @Headers('Wechatpay-Timestamp') timestamp: string,
-    @Headers('Wechatpay-Nonce') nonce: string,
-    @Body() body: any,
-    @Req() req: any,
-  ) {
+  async handleWechatPayCallback(@Body() body: any) {
     try {
-      const callbackData: PaymentCallbackDto = {
-        signature,
-        timestamp,
-        nonce,
-        body: JSON.stringify(body),
-        resource: body.resource,
-      };
+      // 简化版回调处理
+      const paymentOrderNo = body.out_trade_no;
+      const transactionId = body.transaction_id;
 
-      const result = await this.paymentService.handleWechatPayCallback(callbackData);
+      await this.paymentService.handleWechatPayCallback(paymentOrderNo, transactionId);
 
-      // 微信支付要求返回特定格式的响应
       return {
         code: 'SUCCESS',
         message: '成功'
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('微信支付回调处理失败:', error);
-
-      // 即使处理失败，也要返回成功，避免微信重复回调
-      // 具体的错误处理在service层进行
       return {
         code: 'FAIL',
         message: error.message || '处理失败'
@@ -98,24 +110,6 @@ export class PaymentController {
   ) {
     const memberId = req.user.id;
     return this.paymentService.getPaymentHistory(
-      memberId,
-      parseInt(page),
-      parseInt(limit),
-    );
-  }
-
-  @Get('recharge-history')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: '获取充值记录' })
-  @ApiResponse({ status: 200, description: '充值记录列表' })
-  async getRechargeHistory(
-    @Req() req: any,
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '20',
-  ) {
-    const memberId = req.user.id;
-    return this.paymentService.getRechargeHistory(
       memberId,
       parseInt(page),
       parseInt(limit),

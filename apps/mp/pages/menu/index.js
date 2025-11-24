@@ -1,28 +1,78 @@
 // pages/menu/index.js
+const { request } = require('../../utils/request');
+const PaymentUtils = require('../../utils/payment');
+
 Page({
+  data: {
+    categories: [],
+    currentCategory: 0,
+    goodsList: [],
+    cart: {}, // 购物车 { itemId: quantity }
+    cartCount: 0, // 购物车总数量
+    cartAmount: 0, // 购物车总金额
+    showCart: false, // 是否显示购物车详情
+    loading: false,
+  },
 
   /**
-   * 页面的初始数据
+   * 页面加载
    */
-  data: {
-    categories: [
-      { id: 1, name: '经典' },
-      { id: 2, name: '德州主题' },
-      { id: 3, name: '无酒精' },
-      { id: 4, name: '啤酒' },
-      { id: 5, name: '小吃' },
-      { id: 6, name: '酒券套餐' },
-      { id: 7, name: '积分商城' }
-    ],
-    currentCategory: 0, // 当前选中的分类索引
-    goodsList: [
-      { id: 1, name: '古典', desc: '威士忌|苦精|糖|橙子', price: 68, image: '/images/桌面图标.png' }, // 暂用占位图
-      { id: 2, name: '金汤力', desc: '杜松子|青柠|奎宁', price: 68, image: '/images/桌面图标.png' },
-      { id: 3, name: '自由古巴', desc: '朗姆|青柠|可乐', price: 68, image: '/images/桌面图标.png' },
-      { id: 4, name: '曼哈顿', desc: '黑麦威士忌|苦精|葡萄酒|樱桃', price: 68, image: '/images/桌面图标.png' },
-      { id: 5, name: '长岛冰茶', desc: '<伏特加|君度|黑朗姆|金酒|龙舌兰|可乐|柠檬汁> 20%vol', price: 68, image: '/images/桌面图标.png' },
-      { id: 6, name: '威士忌酸', desc: '19世纪美国淘金热中，矿工用威士忌、柠檬和糖调出威士忌酸', price: 68, image: '/images/桌面图标.png' }
-    ]
+  onLoad(options) {
+    this.loadCategories();
+    this.loadCartFromStorage();
+  },
+
+  /**
+   * 页面显示
+   */
+  onShow() {
+    // 从缓存恢复购物车
+    this.loadCartFromStorage();
+  },
+
+  /**
+   * 加载分类列表
+   */
+  async loadCategories() {
+    try {
+      const categories = await request({
+        url: '/menu/categories',
+        method: 'GET',
+      });
+
+      if (categories && categories.length > 0) {
+        this.setData({ categories });
+        // 加载第一个分类的商品
+        this.loadMenuItems(categories[0].id);
+      }
+    } catch (error) {
+      console.error('加载分类失败:', error);
+      wx.showToast({ title: '加载分类失败', icon: 'none' });
+    }
+  },
+
+  /**
+   * 加载菜单商品
+   */
+  async loadMenuItems(categoryId) {
+    this.setData({ loading: true });
+
+    try {
+      const items = await request({
+        url: '/menu/items',
+        method: 'GET',
+        data: { categoryId },
+      });
+
+      this.setData({
+        goodsList: items || [],
+        loading: false,
+      });
+    } catch (error) {
+      console.error('加载商品失败:', error);
+      this.setData({ loading: false });
+      wx.showToast({ title: '加载商品失败', icon: 'none' });
+    }
   },
 
   /**
@@ -30,76 +80,284 @@ Page({
    */
   switchCategory(e) {
     const index = e.currentTarget.dataset.index;
-    this.setData({
-      currentCategory: index
-    });
-    // 这里可以添加根据分类加载不同商品数据的逻辑
+    const categoryId = this.data.categories[index]?.id;
+
+    this.setData({ currentCategory: index });
+
+    if (categoryId) {
+      this.loadMenuItems(categoryId);
+    }
   },
 
   /**
-   * 加购
+   * 加入购物车
    */
   addToCart(e) {
-    const id = e.currentTarget.dataset.id;
+    const { id, name, price } = e.currentTarget.dataset;
+    const cart = { ...this.data.cart };
+
+    // 增加数量
+    if (cart[id]) {
+      cart[id].quantity += 1;
+    } else {
+      cart[id] = {
+        id,
+        name,
+        price,
+        quantity: 1,
+      };
+    }
+
+    this.updateCart(cart);
+
     wx.showToast({
       title: '已加入购物车',
-      icon: 'success'
+      icon: 'success',
+      duration: 1000,
     });
   },
 
   /**
-   * 生命周期函数--监听页面加载
+   * 减少购物车商品数量
    */
-  onLoad(options) {
+  reduceCartItem(e) {
+    const { id } = e.currentTarget.dataset;
+    const cart = { ...this.data.cart };
 
+    if (cart[id]) {
+      cart[id].quantity -= 1;
+
+      if (cart[id].quantity <= 0) {
+        delete cart[id];
+      }
+    }
+
+    this.updateCart(cart);
   },
 
   /**
-   * 生命周期函数--监听页面初次渲染完成
+   * 增加购物车商品数量
    */
-  onReady() {
+  increaseCartItem(e) {
+    const { id } = e.currentTarget.dataset;
+    const cart = { ...this.data.cart };
 
+    if (cart[id]) {
+      cart[id].quantity += 1;
+    }
+
+    this.updateCart(cart);
   },
 
   /**
-   * 生命周期函数--监听页面显示
+   * 删除购物车商品
    */
-  onShow() {
+  removeCartItem(e) {
+    const { id } = e.currentTarget.dataset;
+    const cart = { ...this.data.cart };
 
+    delete cart[id];
+    this.updateCart(cart);
   },
 
   /**
-   * 生命周期函数--监听页面隐藏
+   * 更新购物车
    */
-  onHide() {
+  updateCart(cart) {
+    let count = 0;
+    let amount = 0;
 
+    Object.values(cart).forEach(item => {
+      count += item.quantity;
+      amount += item.price * item.quantity;
+    });
+
+    this.setData({
+      cart,
+      cartCount: count,
+      cartAmount: amount,
+    });
+
+    // 保存到缓存
+    wx.setStorageSync('menu_cart', cart);
   },
 
   /**
-   * 生命周期函数--监听页面卸载
+   * 从缓存加载购物车
    */
-  onUnload() {
-
+  loadCartFromStorage() {
+    try {
+      const cart = wx.getStorageSync('menu_cart') || {};
+      this.updateCart(cart);
+    } catch (error) {
+      console.error('加载购物车失败:', error);
+    }
   },
 
   /**
-   * 页面相关事件处理函数--监听用户下拉动作
+   * 清空购物车
+   */
+  clearCart() {
+    wx.showModal({
+      title: '确认清空',
+      content: '确定要清空购物车吗？',
+      success: (res) => {
+        if (res.confirm) {
+          this.updateCart({});
+          wx.showToast({ title: '已清空', icon: 'success' });
+        }
+      },
+    });
+  },
+
+  /**
+   * 显示/隐藏购物车详情
+   */
+  toggleCart() {
+    if (this.data.cartCount > 0) {
+      this.setData({ showCart: !this.data.showCart });
+    }
+  },
+
+  /**
+   * 关闭购物车详情
+   */
+  closeCart() {
+    this.setData({ showCart: false });
+  },
+
+  /**
+   * 提交订单
+   */
+  async submitOrder() {
+    if (this.data.cartCount === 0) {
+      wx.showToast({ title: '购物车为空', icon: 'none' });
+      return;
+    }
+
+    // 检查登录状态
+    const token = wx.getStorageSync('token');
+    if (!token) {
+      wx.showModal({
+        title: '需要登录',
+        content: '下单需要先登录',
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            wx.switchTab({ url: '/pages/user/index' });
+          }
+        },
+      });
+      return;
+    }
+
+    this.setData({ loading: true });
+
+    try {
+      // 组装订单商品
+      const items = Object.values(this.data.cart).map(item => ({
+        menuItemId: item.id,
+        quantity: item.quantity,
+        price: item.price,
+      }));
+
+      // 创建订单
+      const order = await request({
+        url: '/orders',
+        method: 'POST',
+        data: {
+          items,
+          totalAmount: this.data.cartAmount,
+          note: '',
+        },
+      });
+
+      this.setData({ loading: false });
+
+      // 询问是否立即支付
+      wx.showModal({
+        title: '下单成功',
+        content: `订单金额：￥${this.data.cartAmount.toFixed(2)}\n是否立即支付？`,
+        confirmText: '立即支付',
+        cancelText: '稍后支付',
+        success: async (res) => {
+          if (res.confirm) {
+            // 立即支付
+            await this.payOrder(order.id);
+          } else {
+            // 稍后支付，跳转到订单列表
+            this.clearCartAndNavigate();
+          }
+        },
+      });
+    } catch (error) {
+      this.setData({ loading: false });
+      console.error('下单失败:', error);
+      wx.showToast({ title: error.message || '下单失败', icon: 'none' });
+    }
+  },
+
+  /**
+   * 支付订单
+   */
+  async payOrder(orderId) {
+    try {
+      const result = await PaymentUtils.createOrderPayment(orderId, {
+        successCallback: () => {
+          this.clearCartAndNavigate();
+          wx.showToast({ title: '支付成功', icon: 'success' });
+        },
+        failCallback: (error) => {
+          if (!error.cancelled) {
+            wx.showModal({
+              title: '支付失败',
+              content: '您可以在"我的订单"中继续支付',
+              showCancel: false,
+              success: () => {
+                this.clearCartAndNavigate();
+              },
+            });
+          } else {
+            // 用户取消支付
+            this.clearCartAndNavigate();
+          }
+        },
+      });
+
+      console.log('支付结果:', result);
+    } catch (error) {
+      console.error('支付失败:', error);
+      wx.showToast({ title: '支付失败', icon: 'none' });
+    }
+  },
+
+  /**
+   * 清空购物车并跳转
+   */
+  clearCartAndNavigate() {
+    // 清空购物车
+    this.updateCart({});
+
+    // 跳转到订单列表
+    wx.navigateTo({
+      url: '/pages/order-list/index',
+      fail: () => {
+        wx.switchTab({ url: '/pages/user/index' });
+      },
+    });
+  },
+
+  /**
+   * 下拉刷新
    */
   onPullDownRefresh() {
-
+    const categoryId = this.data.categories[this.data.currentCategory]?.id;
+    if (categoryId) {
+      this.loadMenuItems(categoryId).then(() => {
+        wx.stopPullDownRefresh();
+      });
+    } else {
+      wx.stopPullDownRefresh();
+    }
   },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom() {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage() {
-
-  }
-})
+});

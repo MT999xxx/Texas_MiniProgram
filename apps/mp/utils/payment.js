@@ -245,6 +245,87 @@ class PaymentUtils {
       return result;
     }
   }
+
+  // ========== 新增：业务支付方法 ==========
+
+  /**
+   * 创建订单支付
+   * @param {string} orderId - 订单ID
+   * @param {object} options - 回调选项
+   * @returns {Promise}
+   */
+  static async createOrderPayment(orderId, options = {}) {
+    const { request } = require('./request');
+
+    return this.createAndPay(
+      async () => {
+        const openid = wx.getStorageSync('openid');
+        const result = await request({
+          url: `/payment/order/${orderId}`,
+          method: 'POST',
+          data: { openid },
+        });
+        return result;
+      },
+      {
+        ...options,
+        loadingText: '创建订单支付...',
+      }
+    );
+  }
+
+  /**
+   * 创建预约订金支付
+   * @param {string} reservationId - 预约ID
+   * @param {number} depositAmount - 订金金额（元）
+   * @param {object} options - 回调选项
+   * @returns {Promise}
+   */
+  static async createReservationPayment(reservationId, depositAmount, options = {}) {
+    const { request } = require('./request');
+
+    return this.createAndPay(
+      async () => {
+        const openid = wx.getStorageSync('openid');
+        const result = await request({
+          url: `/payment/reservation/${reservationId}`,
+          method: 'POST',
+          data: { depositAmount, openid },
+        });
+        return result;
+      },
+      {
+        ...options,
+        loadingText: '创建预约支付...',
+      }
+    );
+  }
+
+  /**
+   * 创建充值支付
+   * @param {string} packageId - 充值套餐ID
+   * @param {object} options - 回调选项
+   * @returns {Promise}
+   */
+  static async createRechargePayment(packageId, options = {}) {
+    const { request } = require('./request');
+
+    return this.createAndPay(
+      async () => {
+        const openid = wx.getStorageSync('openid');
+        const result = await request({
+          url: `/payment/recharge/${packageId}`,
+          method: 'POST',
+          data: { openid },
+        });
+        return result;
+      },
+      {
+        ...options,
+        loadingText: '创建充值支付...',
+      }
+    );
+  }
 }
 
 module.exports = PaymentUtils;

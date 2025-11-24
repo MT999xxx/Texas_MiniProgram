@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import { IsDateString, IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 import { ReservationStatus } from '../reservation.entity';
+import { PaymentMethod } from '../../payment/payment.entity';
 
 export class CreateReservationDto {
   @ApiProperty({ description: '顾客姓名', maxLength: 64 })
@@ -39,6 +40,23 @@ export class CreateReservationDto {
   @IsOptional()
   @MaxLength(200)
   note?: string;
+}
+
+export class CreateReservationWithDepositDto extends CreateReservationDto {
+  @ApiProperty({ description: '订金金额（元）' })
+  @IsNumber()
+  @Min(0)
+  depositAmount!: number;
+
+  @ApiProperty({ enum: PaymentMethod, description: '支付方式', default: PaymentMethod.WECHAT_PAY })
+  @IsEnum(PaymentMethod)
+  @IsOptional()
+  paymentMethod?: PaymentMethod;
+
+  @ApiPropertyOptional({ description: '用户openid（微信支付需要）' })
+  @IsString()
+  @IsOptional()
+  openid?: string;
 }
 
 export class UpdateReservationStatusDto {

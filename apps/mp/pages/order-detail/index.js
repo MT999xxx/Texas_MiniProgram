@@ -199,31 +199,26 @@ Page({
 
   // 支付订单
   async payOrder() {
-    wx.showToast({
-      title: '支付功能开发中',
-      icon: 'none'
-    });
+    const PaymentUtils = require('../../utils/payment');
 
-    // TODO: 集成微信支付
-    // 模拟支付成功
-    setTimeout(async () => {
-      try {
-        await request({
-          url: `/orders/${this.data.orderId}/status`,
-          method: 'PATCH',
-          data: {
-            status: 'PAID'
+    try {
+      const result = await PaymentUtils.createOrderPayment(this.data.orderId, {
+        successCallback: () => {
+          wx.showToast({ title: '支付成功', icon: 'success' });
+          setTimeout(() => this.loadOrderDetail(), 1500);
+        },
+        failCallback: (error) => {
+          if (!error.cancelled) {
+            wx.showToast({ title: '支付失败', icon: 'none' });
           }
-        });
-        wx.showToast({
-          title: '支付成功',
-          icon: 'success'
-        });
-        this.loadOrderDetail();
-      } catch (error) {
-        console.error('更新订单状态失败:', error);
-      }
-    }, 2000);
+        },
+      });
+
+      console.log('支付结果:', result);
+    } catch (error) {
+      console.error('支付失败:', error);
+      wx.showToast({ title: '支付失败', icon: 'none' });
+    }
   },
 
   // 联系客服
