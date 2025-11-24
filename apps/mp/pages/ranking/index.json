@@ -2,6 +2,9 @@
   "navigationBarTitleText": "排行榜",
   "navigationBarBackgroundColor": "#1c1c1e",
   "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#1c1c1e",
+  "backgroundTextStyle": "light",
   "usingComponents": {
     "tab-bar": "/components/tab-bar/index"
   }

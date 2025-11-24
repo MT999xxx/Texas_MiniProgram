@@ -66,10 +66,23 @@ const request = (options = {}) => {
 
 // 便捷方法
 const api = {
-  get: (url, options = {}) => request({ ...options, url, method: 'GET' }),
+  get: (url, params = {}) => {
+    const queryString = Object.keys(params).length > 0
+      ? '?' + Object.entries(params).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&')
+      : '';
+    return request({ url: url + queryString, method: 'GET' });
+  },
   post: (url, data, options = {}) => request({ ...options, url, method: 'POST', data }),
   put: (url, data, options = {}) => request({ ...options, url, method: 'PUT', data }),
   delete: (url, options = {}) => request({ ...options, url, method: 'DELETE' }),
 };
 
-module.exports = { request, api };
+// 向后兼容：支持 request.get() 和 api.get() 两种用法
+request.get = api.get;
+request.post = api.post;
+request.put = api.put;
+request.delete = api.delete;
+
+module.exports = request;
+module.exports.api = api;
+module.exports.default = request;

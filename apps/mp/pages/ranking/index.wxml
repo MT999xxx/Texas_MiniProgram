@@ -4,7 +4,7 @@
   <view class="header-section">
     <view class="store-label">重庆店 ></view>
     <view class="page-title">排行榜</view>
-    <view class="date-range">20251108至20251122</view>
+    <view class="date-range">{{dateRange}}</view>
 
     <!-- Tab 栏 -->
     <view class="tab-header">
@@ -25,21 +25,55 @@
 
   <!-- 2. 排行榜列表区域 -->
   <view class="ranking-list-container">
-    <block wx:for="{{rankingList}}" wx:key="rank">
-      <view class="ranking-item">
-        <!-- 排名 -->
-        <view class="rank-num">{{item.rank}}</view>
-        
-        <!-- 头像 -->
-        <image class="rank-avatar" src="{{item.avatar}}" />
-        
-        <!-- 信息 -->
-        <view class="rank-info">
-          <text class="rank-name">{{item.name}}</text>
-          <text class="rank-score">{{item.score}}积分</text>
+    <!-- Loading状态 -->
+    <view class="loading-container" wx:if="{{loading}}">
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <!-- 空数据提示 -->
+    <view class="empty-container" wx:elif="{{isEmpty}}">
+      <text class="empty-icon">📊</text>
+      <text class="empty-text">暂无排行榜数据</text>
+      <text class="empty-hint">快去赢取积分，登上榜首吧！</text>
+    </view>
+
+    <!-- 排行榜列表 -->
+    <block wx:else>
+      <block wx:for="{{rankingList}}" wx:key="rank">
+        <view class="ranking-item">
+          <!-- 排名 -->
+          <view class="rank-num rank-{{item.rank <= 3 ? item.rank : 'normal'}}">
+            {{item.rank}}
+          </view>
+          
+          <!-- 头像 -->
+          <image class="rank-avatar" src="{{item.avatar}}" />
+          
+          <!-- 信息 -->
+          <view class="rank-info">
+            <text class="rank-name">{{item.name}}</text>
+            <text class="rank-score">{{item.score}}积分</text>
+          </view>
+        </view>
+      </block>
+    </block>
+  </view>
+
+  <!-- 3. 当前用户排名卡片 (底部固定) -->
+  <view class="user-rank-card" wx:if="{{currentUserRank}}">
+    <view class="user-rank-content">
+      <view class="user-rank-label">我的排名</view>
+      <view class="user-rank-info">
+        <image class="user-avatar" src="{{currentUserRank.avatar}}" />
+        <view class="user-details">
+          <text class="user-name">{{currentUserRank.name}}</text>
+          <text class="user-score">{{currentUserRank.score}}积分</text>
+        </view>
+        <view class="user-rank-badge">
+          <text class="rank-text">{{currentUserRank.rank}}</text>
         </view>
       </view>
-    </block>
+    </view>
   </view>
 
   <!-- 底部导航栏 -->
