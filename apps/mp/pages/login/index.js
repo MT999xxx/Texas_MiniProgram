@@ -7,6 +7,7 @@ Page({
   },
 
   async onLoad(options) {
+    console.log('登录页面加载');
     // 检查是否已登录
     const isLoggedIn = await authManager.checkLogin();
     if (isLoggedIn) {
@@ -16,8 +17,64 @@ Page({
     }
   },
 
-  // 获取用户信息并登录
+  // 点击登录按钮
+  onLoginClick() {
+    console.log('点击了登录按钮');
+
+    // 显示加载状态
+    this.setData({ loading: true });
+
+    // 调用微信授权
+    wx.getUserProfile({
+      desc: '登录获取您的昵称、头像',
+      success: (res) => {
+        console.log('获取用户信息成功:', res.userInfo);
+        this.handleLogin(res.userInfo);
+      },
+      fail: (err) => {
+        console.error('获取用户信息失败:', err);
+        this.setData({ loading: false });
+        wx.showToast({
+          title: '授权失败',
+          icon: 'none'
+        });
+      }
+    });
+  },
+
+  // 处理登录
+  async handleLogin(userInfo) {
+    try {
+      console.log('开始处理登录...');
+      const user = await authManager.wxLogin(userInfo);
+
+      console.log('登录成功:', user);
+
+      wx.showToast({
+        title: '登录成功',
+        icon: 'success',
+        duration: 1500
+      });
+
+      // 延迟跳转
+      setTimeout(() => {
+        this.navigateBack();
+      }, 1500);
+
+    } catch (error) {
+      console.error('登录失败:', error);
+      wx.showToast({
+        title: error.message || '登录失败',
+        icon: 'none',
+        duration: 2000
+      });
+      this.setData({ loading: false });
+    }
+  },
+
+  // 获取用户信息并登录 (保留兼容)
   async onGetUserProfile(e) {
+    console.log('onGetUserProfile triggered', e);
     this.setData({ loading: true });
 
     try {

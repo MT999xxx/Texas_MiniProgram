@@ -45,7 +45,10 @@
       
       <!-- 9个座位 -->
       <block wx:for="{{seats}}" wx:key="id">
-        <view class="seat seat-{{item.seatNum}} {{item.status}}">
+        <view class="seat seat-{{item.seatNum}} {{item.status}}" 
+              bindtap="handleSeatClick" 
+              data-seatindex="{{index}}" 
+              data-tabletype="main">
           
           <!-- 座位号标记 -->
           <view class="seat-number">{{item.seatNum}}</view>
@@ -108,7 +111,10 @@
       
       <!-- 9个座位 (副桌) -->
       <block wx:for="{{subSeats}}" wx:key="id">
-        <view class="seat seat-{{item.seatNum}} {{item.status}}">
+        <view class="seat seat-{{item.seatNum}} {{item.status}}"
+              bindtap="handleSeatClick" 
+              data-seatindex="{{index}}" 
+              data-tabletype="sub">
           
           <!-- 座位号标记 -->
           <view class="seat-number">{{item.seatNum}}</view>
