@@ -1,0 +1,76 @@
+.tables-page {
+    padding: 0;
+}
+
+.toolbar {
+    margin-bottom: 20px;
+}
+
+.table-card {
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.table-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.table-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.table-info {
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: #666;
+}
+
+.table-info>div {
+    margin-bottom: 6px;
+}
+
+.description {
+    color: #999;
+    font-size: 12px;
+}
+
+.table-actions {
+    border-top: 1px solid #f0f0f0;
+    padding-top: 12px;
+}
+
+.status-available {
+    border-left: 4px solid #52c41a;
+}
+
+.status-reserved {
+    border-left: 4px solid #faad14;
+}
+
+.status-in_use {
+    border-left: 4px solid #1890ff;
+}
+
+.status-maintenance {
+    border-left: 4px solid #ff4d4f;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.empty-state p {
+    font-size: 16px;
+}
