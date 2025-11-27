@@ -17,7 +17,7 @@ export interface MenuItem {
     stock: number;
     category: MenuCategory;
     imageUrl?: string;
-    isAvailable: boolean;
+    status: 'ON_SALE' | 'OFF_SHELF' | 'SOLD_OUT';
     createdAt: string;
     updatedAt: string;
 }

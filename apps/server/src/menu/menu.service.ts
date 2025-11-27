@@ -14,7 +14,7 @@ export class MenuService {
     private readonly categoryRepo: Repository<MenuCategoryEntity>,
     @InjectRepository(MenuItemEntity)
     private readonly itemRepo: Repository<MenuItemEntity>,
-  ) {}
+  ) { }
 
   createCategory(dto: CreateCategoryDto) {
     const category = this.categoryRepo.create({ name: dto.name, sort: dto.sort ?? 1 });
@@ -44,6 +44,7 @@ export class MenuService {
   listMenuItems(categoryId?: string) {
     return this.itemRepo.find({
       where: categoryId ? { category: { id: categoryId } } : {},
+      relations: ['category'],
       order: { createdAt: 'DESC' },
     });
   }

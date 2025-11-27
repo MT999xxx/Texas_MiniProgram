@@ -33,9 +33,12 @@ export default function Menu() {
         setLoading(true);
         try {
             const data = await menuApi.listItems(categoryFilter);
+            console.log('菜品数据:', data);
+            console.log('第一项:', data[0]);
             setItems(data);
         } catch (error) {
             message.error('加载菜品失败');
+            console.error('加载错误:', error);
         } finally {
             setLoading(false);
         }
@@ -72,39 +75,50 @@ export default function Menu() {
     const columns: ColumnsType<MenuItem> = [
         {
             title: '菜品名称',
-            dataIndex: 'name',
             key: 'name',
+            render: (record: MenuItem) => record?.name || '-',
         },
         {
             title: '分类',
             key: 'category',
-            render: (record: MenuItem) => record.category?.name || '-',
+            render: (_: any, record: MenuItem) => record?.category?.name || '-',
         },
         {
             title: '价格',
             dataIndex: 'price',
             key: 'price',
-            render: (price: number) => `¥${price.toFixed(2)}`,
+            render: (price: number | string) => `¥${Number(price).toFixed(2)}`,
         },
         {
             title: '库存',
             dataIndex: 'stock',
             key: 'stock',
-            render: (stock: number) => (
-                <Tag color={stock > 10 ? 'green' : stock > 0 ? 'orange' : 'red'}>
-                    {stock}
-                </Tag>
-            ),
+            render: (stock: number | string) => {
+                const stockNum = Number(stock);
+                return (
+                    <Tag color={stockNum > 10 ? 'green' : stockNum > 0 ? 'orange' : 'red'}>
+                        {stockNum}
+                    </Tag>
+                );
+            },
         },
         {
             title: '状态',
-            dataIndex: 'isAvailable',
-            key: 'isAvailable',
-            render: (isAvailable: boolean) => (
-                <Tag color={isAvailable ? 'green' : 'red'}>
-                    {isAvailable ? '可用' : '停售'}
-                </Tag>
-            ),
+            dataIndex: 'status',
+            key: 'status',
+            render: (status: string) => {
+                const map: Record<string, { color: string; text: string }> = {
+                    'ON_SALE': { color: 'green', text: '在售' },
+                    'OFF_SHELF': { color: 'red', text: '下架' },
+                    'SOLD_OUT': { color: 'orange', text: '售罄' },
+                };
+                const config = map[status] || { color: 'default', text: status };
+                return (
+                    <Tag color={config.color}>
+                        {config.text}
+                    </Tag>
+                );
+            },
         },
         {
             title: '操作',
@@ -131,10 +145,12 @@ export default function Menu() {
                             value={categoryFilter}
                             onChange={setCategoryFilter}
                         >
-                            {categories.map(cat => (
-                                <Select.Option key={cat.id} value={cat.id}>
-                                    {cat.name}
-                                </Select.Option>
+                            {categories?.map(cat => (
+                                cat ? (
+                                    <Select.Option key={cat.id} value={cat.id}>
+                                        {cat.name}
+                                    </Select.Option>
+                                ) : null
                             ))}
                         </Select>
                         <Button icon={<ReloadOutlined />} onClick={loadItems}>
@@ -145,7 +161,7 @@ export default function Menu() {
 
                 <Table
                     loading={loading}
-                    dataSource={items}
+                    dataSource={items?.filter(item => item)}
                     columns={columns}
                     rowKey="id"
                     pagination={{ pageSize: 10, showTotal: (total) => `共 ${total} 条` }}
