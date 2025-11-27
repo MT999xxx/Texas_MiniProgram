@@ -1,14 +1,17 @@
 // pages/member/index.js
+const authManager = require('../../utils/auth');
+
 Page({
 
   /**
    * 页面的初始数据
    */
   data: {
+    isLogin: false, // 添加登录状态
     userInfo: {
       avatar: '/images/会员图标.png', // 暂时使用通用图标
-      nickname: '德州爱好者6228',
-      id: '重庆-6228'
+      nickname: '点击登录',
+      id: ''
     },
     memberInfo: {
       level: 'V1',
@@ -34,6 +37,18 @@ Page({
     ],
     selectedAmount: 500,
     inputAmount: ''
+  },
+
+  /**
+   * 点击头像/用户信息
+   */
+  onUserInfoClick() {
+    if (!this.data.isLogin) {
+      // 未登录，跳转登录页
+      wx.navigateTo({
+        url: '/pages/login/index'
+      });
+    }
   },
 
   /**
@@ -144,8 +159,29 @@ Page({
   /**
    * 生命周期函数--监听页面显示
    */
-  onShow() {
-
+  async onShow() {
+    // 检查登录状态
+    const isLoggedIn = await authManager.checkLogin();
+    if (isLoggedIn) {
+      const userInfo = authManager.getUserInfo();
+      this.setData({
+        isLogin: true,
+        userInfo: {
+          avatar: userInfo.avatar || '/images/会员图标.png',
+          nickname: userInfo.nickname || '德州爱好者',
+          id: userInfo.id || ''
+        }
+      });
+    } else {
+      this.setData({
+        isLogin: false,
+        userInfo: {
+          avatar: '/images/会员图标.png',
+          nickname: '点击登录',
+          id: ''
+        }
+      });
+    }
   },
 
   /**

@@ -36,4 +36,46 @@
 
   </view>
 
+  <!-- 购物车底部栏 -->
+  <view class="cart-bar">
+    <view class="cart-info" bindtap="toggleCart">
+      <view class="cart-icon-wrapper">
+        <image class="cart-icon" src="/images/购物车.png" />
+        <view class="cart-badge" wx:if="{{cartCount > 0}}">{{cartCount}}</view>
+      </view>
+      <view class="cart-price">
+        <text class="price-symbol">¥</text>
+        <text class="price-value">{{cartAmount}}</text>
+      </view>
+    </view>
+    <view class="checkout-btn {{cartCount > 0 ? 'active' : ''}}" bindtap="checkout">
+      去结算
+    </view>
+  </view>
+
+  <!-- 购物车详情弹窗 -->
+  <view class="cart-detail {{showCart ? 'show' : ''}}" catchtap="hideCart">
+    <view class="cart-content" catchtap="stopPropagation">
+      <view class="cart-header">
+        <text>购物车</text>
+        <text class="clear-cart" bindtap="clearCart">清空</text>
+      </view>
+      <scroll-view scroll-y class="cart-list">
+        <block wx:for="{{cartItems}}" wx:key="id">
+          <view class="cart-item">
+            <view class="item-info">
+              <text class="item-name">{{item.name}}</text>
+              <text class="item-price">¥{{item.price}}</text>
+            </view>
+            <view class="item-controls">
+              <view class="control-btn" bindtap="decreaseCart" data-id="{{item.id}}">-</view>
+              <text class="item-count">{{item.count}}</text>
+              <view class="control-btn" bindtap="increaseCart" data-id="{{item.id}}">+</view>
+            </view>
+          </view>
+        </block>
+      </scroll-view>
+    </view>
+  </view>
+
 </view>

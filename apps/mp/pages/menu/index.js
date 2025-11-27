@@ -1,5 +1,5 @@
 // pages/menu/index.js
-const { request } = require('../../utils/request');
+const request = require('../../utils/request');
 const PaymentUtils = require('../../utils/payment');
 
 Page({
@@ -8,6 +8,7 @@ Page({
     currentCategory: 0,
     goodsList: [],
     cart: {}, // 购物车 { itemId: quantity }
+    cartItems: [], // 购物车商品列表（用于显示）
     cartCount: 0, // 购物车总数量
     cartAmount: 0, // 购物车总金额
     showCart: false, // 是否显示购物车详情
@@ -166,16 +167,25 @@ Page({
   updateCart(cart) {
     let count = 0;
     let amount = 0;
+    const cartItems = [];
 
-    Object.values(cart).forEach(item => {
+    Object.keys(cart).forEach(id => {
+      const item = cart[id];
       count += item.quantity;
       amount += item.price * item.quantity;
+      cartItems.push({
+        id,
+        name: item.name,
+        price: item.price,
+        count: item.quantity
+      });
     });
 
     this.setData({
       cart,
+      cartItems,
       cartCount: count,
-      cartAmount: amount,
+      cartAmount: amount.toFixed(2),
     });
 
     // 保存到缓存
@@ -220,10 +230,65 @@ Page({
   },
 
   /**
-   * 关闭购物车详情
+   * 隐藏购物车详情
    */
-  closeCart() {
+  hideCart() {
     this.setData({ showCart: false });
+  },
+
+  /**
+   * 阻止事件冒泡
+   */
+  stopPropagation() {
+    // 阻止事件冒泡到父元素
+  },
+
+  /**
+   * 减少购物车商品（购物车详情中）
+   */
+  decreaseCart(e) {
+    const { id } = e.currentTarget.dataset;
+    const cart = { ...this.data.cart };
+
+    if (cart[id]) {
+      cart[id].quantity -= 1;
+
+      if (cart[id].quantity <= 0) {
+        delete cart[id];
+      }
+    }
+
+    this.updateCart(cart);
+  },
+
+  /**
+   * 增加购物车商品（购物车详情中）
+   */
+  increaseCart(e) {
+    const { id } = e.currentTarget.dataset;
+    const cart = { ...this.data.cart };
+
+    if (cart[id]) {
+      cart[id].quantity += 1;
+    }
+
+    this.updateCart(cart);
+  },
+
+  /**
+   * 去结算
+   */
+  async checkout() {
+    if (this.data.cartCount === 0) {
+      wx.showToast({ title: '购物车为空', icon: 'none' });
+      return;
+    }
+
+    // 隐藏购物车详情
+    this.setData({ showCart: false });
+
+    // 调用提交订单
+    await this.submitOrder();
   },
 
   /**

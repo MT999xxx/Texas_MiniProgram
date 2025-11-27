@@ -9,7 +9,7 @@ export class TableService {
   constructor(
     @InjectRepository(TableEntity)
     private readonly repo: Repository<TableEntity>,
-  ) {}
+  ) { }
 
   async create(dto: CreateTableDto): Promise<TableEntity> {
     const table = this.repo.create({
@@ -40,5 +40,26 @@ export class TableService {
     }
     table.status = status;
     return this.repo.save(table);
+  }
+
+  async update(id: string, dto: Partial<TableEntity>): Promise<TableEntity> {
+    const table = await this.repo.findOne({ where: { id } });
+    if (!table) {
+      throw new NotFoundException('Table not found');
+    }
+
+    if (dto.name !== undefined) table.name = dto.name;
+    if (dto.category !== undefined) table.category = dto.category;
+    if (dto.capacity !== undefined) table.capacity = dto.capacity;
+
+    return this.repo.save(table);
+  }
+
+  async delete(id: string): Promise<void> {
+    const table = await this.repo.findOne({ where: { id } });
+    if (!table) {
+      throw new NotFoundException('Table not found');
+    }
+    await this.repo.remove(table);
   }
 }

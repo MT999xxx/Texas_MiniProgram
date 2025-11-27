@@ -1,7 +1,7 @@
 <view class="container">
   
   <!-- 1. 用户信息区域 -->
-  <view class="user-info-section">
+  <view class="user-info-section" bindtap="onUserInfoClick">
     <image class="user-avatar" src="{{userInfo.avatar}}" />
     <view class="user-details">
       <text class="user-nickname">{{userInfo.nickname}}</text>
