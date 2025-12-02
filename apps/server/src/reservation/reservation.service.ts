@@ -84,6 +84,38 @@ export class ReservationService {
     return reservation;
   }
 
+  // 更新预约
+  async update(id: string, dto: Partial<CreateReservationDto>): Promise<ReservationEntity> {
+    const reservation = await this.repo.findOne({ where: { id } });
+    if (!reservation) {
+      throw new NotFoundException('Reservation not found');
+    }
+
+    if (dto.customerName !== undefined) reservation.customerName = dto.customerName;
+    if (dto.phone !== undefined) reservation.phone = dto.phone;
+    if (dto.partySize !== undefined) reservation.partySize = dto.partySize;
+    if (dto.reservedAt !== undefined) reservation.reservedAt = new Date(dto.reservedAt);
+    if (dto.note !== undefined) reservation.note = dto.note;
+
+    return this.repo.save(reservation);
+  }
+
+  // 删除预约
+  async delete(id: string): Promise<void> {
+    const reservation = await this.repo.findOne({ where: { id }, relations: ['table'] });
+    if (!reservation) {
+      throw new NotFoundException('Reservation not found');
+    }
+
+    // 释放桌位
+    if (reservation.table) {
+      await this.tableService.updateStatus(reservation.table.id, TableStatus.AVAILABLE);
+      await this.redisService.getClient().set(`table:${reservation.table.id}:status`, TableStatus.AVAILABLE);
+    }
+
+    await this.repo.remove(reservation);
+  }
+
   // 创建预约（带订金）- 返回预约ID，前端需要再调用支付接口
   async createWithDeposit(dto: CreateReservationWithDepositDto): Promise<{ reservation: ReservationEntity; needPayment: boolean }> {
     const table = await this.tableService.findById(dto.tableId);

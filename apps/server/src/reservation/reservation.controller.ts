@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, Delete, UseGuards, Req } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Put, Query, Delete, UseGuards, Req } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiOkResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ReservationService } from './reservation.service';
 import { CreateReservationDto, CreateReservationWithDepositDto, UpdateReservationStatusDto } from './dto/create-reservation.dto';
@@ -49,6 +49,14 @@ export class ReservationController {
     return this.reservationService.findById(id);
   }
 
+  @Put(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: '更新预约成功' })
+  @ApiBadRequestResponse({ description: '预约不存在' })
+  update(@Param('id') id: string, @Body() dto: Partial<CreateReservationDto>) {
+    return this.reservationService.update(id, dto);
+  }
+
   @Patch(':id/status')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: '更新预约状态成功' })
@@ -70,5 +78,13 @@ export class ReservationController {
   @ApiBadRequestResponse({ description: '预约不存在或无法取消' })
   cancel(@Param('id') id: string, @Body() body?: { reason?: string }) {
     return this.reservationService.cancelReservation(id, body?.reason);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOkResponse({ description: '删除预约成功' })
+  @ApiBadRequestResponse({ description: '预约不存在' })
+  async delete(@Param('id') id: string): Promise<void> {
+    await this.reservationService.delete(id);
   }
 }

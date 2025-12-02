@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Put, Query } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { MenuService } from './menu.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -8,7 +8,7 @@ import { UpdateStockDto } from './dto/update-stock.dto';
 @ApiTags('Menu')
 @Controller('menu')
 export class MenuController {
-  constructor(private readonly menuService: MenuService) {}
+  constructor(private readonly menuService: MenuService) { }
 
   @Post('categories')
   @ApiCreatedResponse({ description: '创建分类成功' })
@@ -23,6 +23,22 @@ export class MenuController {
     return this.menuService.listCategories();
   }
 
+  @Put('categories/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: '更新分类成功' })
+  @ApiBadRequestResponse({ description: '分类不存在' })
+  updateCategory(@Param('id') id: string, @Body() dto: Partial<CreateCategoryDto>) {
+    return this.menuService.updateCategory(id, dto);
+  }
+
+  @Delete('categories/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOkResponse({ description: '删除分类成功' })
+  @ApiBadRequestResponse({ description: '分类不存在或有关联菜品' })
+  async deleteCategory(@Param('id') id: string) {
+    await this.menuService.deleteCategory(id);
+  }
+
   @Post('items')
   @ApiCreatedResponse({ description: '创建菜品成功' })
   @ApiBadRequestResponse({ description: '分类不存在或参数错误' })
@@ -34,6 +50,22 @@ export class MenuController {
   @ApiOkResponse({ description: '菜品列表' })
   listItems(@Query('categoryId') categoryId?: string) {
     return this.menuService.listMenuItems(categoryId);
+  }
+
+  @Put('items/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: '更新菜品成功' })
+  @ApiBadRequestResponse({ description: '菜品不存在' })
+  updateItem(@Param('id') id: string, @Body() dto: Partial<CreateMenuItemDto>) {
+    return this.menuService.updateMenuItem(id, dto);
+  }
+
+  @Delete('items/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOkResponse({ description: '删除菜品成功' })
+  @ApiBadRequestResponse({ description: '菜品不存在' })
+  async deleteItem(@Param('id') id: string) {
+    await this.menuService.deleteMenuItem(id);
   }
 
   @Patch('items/:id/stock')

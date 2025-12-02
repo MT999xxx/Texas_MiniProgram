@@ -1,186 +1,249 @@
 import { useState, useEffect } from 'react';
-import { Table, Card, Space, Button, Tag, message, Modal, Select, Input } from 'antd';
-import { CheckOutlined, CloseOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
+import { Table, Card, Button, Space, Tag, message, Modal, Form, Input, InputNumber, Select, DatePicker } from 'antd';
+import { PlusOutlined, ReloadOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import { reservationApi, Reservation } from '../../api/reservations';
+import { reservationApi, Reservation, ReservationStatus, CreateReservationDto } from '../../api/reservations';
+import { tableApi } from '../../api/tables';
+import dayjs from 'dayjs';
 import './Reservations.css';
-
-const { Search } = Input;
 
 export default function Reservations() {
     const [loading, setLoading] = useState(false);
     const [reservations, setReservations] = useState<Reservation[]>([]);
-    const [statusFilter, setStatusFilter] = useState<string | undefined>();
-    const [searchText, setSearchText] = useState('');
+    const [tables, setTables] = useState<any[]>([]);
+    const [statusFilter, setStatusFilter] = useState<ReservationStatus>();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
+    const [form] = Form.useForm();
 
-    // 加载预约列表
-    const loadReservations = async () => {
-        setLoading(true);
-        try {
-            const data = await reservationApi.list({ status: statusFilter });
-            setReservations(data);
-        } catch (error) {
-            console.error('加载预约列表失败:', error);
-            message.error('加载预约列表失败');
-        } finally {
-            setLoading(false);
-        }
-    };
+    useEffect(() => {
+        loadReservations();
+        loadTables();
+    }, []);
 
     useEffect(() => {
         loadReservations();
     }, [statusFilter]);
 
-    //确认预约
-    const handleConfirm = async (id: string) => {
+    const loadTables = async () => {
         try {
-            await reservationApi.updateStatus(id, 'CONFIRMED');
-            message.success('已确认预约');
+            const data = await tableApi.list();
+            setTables(data);
+        } catch (error) {
+            console.error('加载桌位失败:', error);
+        }
+    };
+
+    const loadReservations = async () => {
+        setLoading(true);
+        try {
+            const data = await reservationApi.list({
+                status: statusFilter,
+            });
+            setReservations(data);
+        } catch (error) {
+            message.error('加载预约列表失败');
+            console.error('加载错误:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 打开新增/编辑弹窗
+    const openModal = (reservation?: Reservation) => {
+        setEditingReservation(reservation || null);
+        if (reservation) {
+            form.setFieldsValue({
+                customerName: reservation.customerName,
+                phone: reservation.phone,
+                partySize: reservation.partySize,
+                tableId: reservation.table.id,
+                reservedAt: dayjs(reservation.reservedAt),
+                note: reservation.note,
+            });
+        } else {
+            form.resetFields();
+        }
+        setIsModalOpen(true);
+    };
+
+    // 关闭弹窗
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setEditingReservation(null);
+        form.resetFields();
+    };
+
+    // 提交表单
+    const handleSubmit = async () => {
+        try {
+            const values = await form.validateFields();
+            const data = {
+                ...values,
+                reservedAt: values.reservedAt.toISOString(),
+            };
+
+            if (editingReservation) {
+                await reservationApi.update(editingReservation.id, data);
+                message.success('预约更新成功');
+            } else {
+                await reservationApi.create(data as CreateReservationDto);
+                message.success('预约创建成功');
+            }
+            closeModal();
             loadReservations();
         } catch (error) {
             message.error('操作失败');
         }
     };
 
-    // 取消预约
-    const handleCancel = async (id: string) => {
+    // 删除预约
+    const handleDelete = (reservation: Reservation) => {
         Modal.confirm({
-            title: '确认取消预约',
-            content: '是否确认取消此预约？',
+            title: '确认删除',
+            content: `确定要删除「${reservation.customerName}」的预约吗？`,
+            okText: '确认',
+            okType: 'danger',
+            cancelText: '取消',
             onOk: async () => {
                 try {
-                    await reservationApi.cancel(id);
-                    message.success('已取消预约');
+                    await reservationApi.delete(reservation.id);
+                    message.success('删除成功');
                     loadReservations();
                 } catch (error) {
-                    message.error('操作失败');
+                    message.error('删除失败');
                 }
             },
         });
     };
 
-    // 状态标签
-
-    const getStatusTag = (status: string) => {
-        const statusConfig: Record<string, { color: string; text: string }> = {
-            PENDING: { color: 'orange', text: '待确认' },
-            CONFIRMED: { color: 'green', text: '已确认' },
-            CANCELLED: { color: 'red', text: '已取消' },
-            COMPLETED: { color: 'default', text: '已完成' },
-        };
-        const config = statusConfig[status] || { color: 'default', text: status };
-        return <Tag color={config.color}>{config.text}</Tag>;
+    // 更新预约状态
+    const handleUpdateStatus = async (id: string, status: ReservationStatus) => {
+        try {
+            await reservationApi.updateStatus(id, status);
+            message.success('状态更新成功');
+            loadReservations();
+        } catch (error) {
+            message.error('操作失败');
+        }
     };
 
-    // 表格列定义
+    const getStatusText = (status: string) => {
+        const map: Record<string, string> = {
+            PENDING: '待确认',
+            CONFIRMED: '已确认',
+            CHECKED_IN: '已入座',
+            COMPLETED: '已完成',
+            CANCELLED: '已取消',
+        };
+        return map[status] || status;
+    };
+
+    const getStatusColor = (status: string) => {
+        const map: Record<string, string> = {
+            PENDING: 'orange',
+            CONFIRMED: 'blue',
+            CHECKED_IN: 'green',
+            COMPLETED: 'default',
+            CANCELLED: 'red',
+        };
+        return map[status] || 'default';
+    };
+
     const columns: ColumnsType<Reservation> = [
         {
-            title: '预约时间',
-            dataIndex: 'reservedAt',
-            key: 'reservedAt',
-            render: (date: string) => new Date(date).toLocaleString('zh-CN'),
+            title: '客户姓名',
+            dataIndex: 'customerName',
+            key: 'customerName',
         },
         {
-            title: '客户信息',
-            key: 'member',
-            render: (record: Reservation) => (
-                <div>
-                    <div>{record.member?.nickname || '-'}</div>
-                    <div style={{ fontSize: 12, color: '#999' }}>{record.member?.phone || '-'}</div>
-                </div>
-            ),
+            title: '手机号',
+            dataIndex: 'phone',
+            key: 'phone',
+        },
+        {
+            title: '人数',
+            dataIndex: 'partySize',
+            key: 'partySize',
         },
         {
             title: '桌位',
             key: 'table',
-            render: (record: Reservation) => (
-                <div>
-                    <div>{record.table?.name || '-'}</div>
-                    <div style={{ fontSize: 12, color: '#999' }}>{record.table?.category || '-'}</div>
-                </div>
-            ),
+            render: (_, record) => record.table?.name || '-',
         },
         {
-            title: '订金',
-            key: 'deposit',
-            render: (record: Reservation) => {
-                if (!record.depositAmount) return '-';
-                return (
-                    <div>
-                        <div>¥{record.depositAmount}</div>
-                        <div style={{ fontSize: 12 }}>
-                            {record.depositPaid ? (
-                                <Tag color="green">已支付</Tag>
-                            ) : (
-                                <Tag color="orange">未支付</Tag>
-                            )}
-                        </div>
-                    </div>
-                );
-            },
+            title: '预约时间',
+            dataIndex: 'reservedAt',
+            key: 'reservedAt',
+            render: (text) => dayjs(text).format('YYYY-MM-DD HH:mm'),
         },
         {
             title: '状态',
             dataIndex: 'status',
             key: 'status',
-            render: getStatusTag,
+            render: (status) => (
+                <Tag color={getStatusColor(status)}>
+                    {getStatusText(status)}
+                </Tag>
+            ),
+        },
+        {
+            title: '备注',
+            dataIndex: 'note',
+            key: 'note',
+            ellipsis: true,
         },
         {
             title: '操作',
-            key: 'action',
-            render: (record: Reservation) => (
-                <Space>
+            key: 'actions',
+            render: (_, record) => (
+                <Space size="small">
                     {record.status === 'PENDING' && (
-                        <>
-                            <Button
-                                type="primary"
-                                size="small"
-                                icon={<CheckOutlined />}
-                                onClick={() => handleConfirm(record.id)}
-                            >
-                                确认
-                            </Button>
-                            <Button
-                                danger
-                                size="small"
-                                icon={<CloseOutlined />}
-                                onClick={() => handleCancel(record.id)}
-                            >
-                                取消
-                            </Button>
-                        </>
+                        <Button
+                            size="small"
+                            type="primary"
+                            onClick={() => handleUpdateStatus(record.id, ReservationStatus.CONFIRMED)}
+                        >
+                            确认
+                        </Button>
                     )}
                     {record.status === 'CONFIRMED' && (
                         <Button
-                            danger
                             size="small"
-                            icon={<CloseOutlined />}
-                            onClick={() => handleCancel(record.id)}
+                            onClick={() => handleUpdateStatus(record.id, ReservationStatus.CHECKED_IN)}
                         >
-                            取消
+                            入座
                         </Button>
                     )}
+                    <Button
+                        size="small"
+                        icon={<EditOutlined />}
+                        onClick={() => openModal(record)}
+                    >
+                        编辑
+                    </Button>
+                    <Button
+                        size="small"
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={() => handleDelete(record)}
+                    >
+                        删除
+                    </Button>
                 </Space>
             ),
         },
     ];
-
-    // 筛选后的数据
-    const filteredData = reservations.filter((item) => {
-        if (!searchText) return true;
-        const text = searchText.toLowerCase();
-        return (
-            item.member?.nickname?.toLowerCase().includes(text) ||
-            item.member?.phone?.includes(text) ||
-            item.table?.name?.toLowerCase().includes(text)
-        );
-    });
 
     return (
         <div className="reservations-page">
             <Card>
                 <div className="toolbar">
                     <Space size="middle">
+                        <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal()}>
+                            新增预约
+                        </Button>
+
                         <Select
                             placeholder="状态筛选"
                             style={{ width: 150 }}
@@ -188,41 +251,105 @@ export default function Reservations() {
                             value={statusFilter}
                             onChange={setStatusFilter}
                         >
-                            <Select.Option value="PENDING">待确认</Select.Option>
-                            <Select.Option value="CONFIRMED">已确认</Select.Option>
-                            <Select.Option value="CANCELLED">已取消</Select.Option>
-                            <Select.Option value="COMPLETED">已完成</Select.Option>
+                            <Select.Option value={ReservationStatus.PENDING}>待确认</Select.Option>
+                            <Select.Option value={ReservationStatus.CONFIRMED}>已确认</Select.Option>
+                            <Select.Option value={ReservationStatus.CHECKED_IN}>已入座</Select.Option>
+                            <Select.Option value={ReservationStatus.COMPLETED}>已完成</Select.Option>
+                            <Select.Option value={ReservationStatus.CANCELLED}>已取消</Select.Option>
                         </Select>
 
-                        <Search
-                            placeholder="搜索客户/手机号/桌位"
-                            allowClear
-                            style={{ width: 300 }}
-                            onSearch={setSearchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                        />
-
-                        <Button
-                            icon={<ReloadOutlined />}
-                            onClick={loadReservations}
-                        >
+                        <Button icon={<ReloadOutlined />} onClick={loadReservations}>
                             刷新
                         </Button>
                     </Space>
                 </div>
 
                 <Table
-                    loading={loading}
-                    dataSource={filteredData}
                     columns={columns}
+                    dataSource={reservations}
                     rowKey="id"
-                    pagination={{
-                        pageSize: 10,
-                        showSizeChanger: true,
-                        showTotal: (total) => `共 ${total} 条`,
-                    }}
+                    loading={loading}
+                    pagination={{ pageSize: 10 }}
                 />
             </Card>
+
+            {/* 新增/编辑预约弹窗 */}
+            <Modal
+                title={editingReservation ? '编辑预约' : '新增预约'}
+                open={isModalOpen}
+                onOk={handleSubmit}
+                onCancel={closeModal}
+                okText="确定"
+                cancelText="取消"
+                width={600}
+            >
+                <Form
+                    form={form}
+                    layout="vertical"
+                    autoComplete="off"
+                >
+                    <Form.Item
+                        label="客户姓名"
+                        name="customerName"
+                        rules={[{ required: true, message: '请输入客户姓名' }]}
+                    >
+                        <Input placeholder="请输入客户姓名" />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="手机号"
+                        name="phone"
+                        rules={[
+                            { required: true, message: '请输入手机号' },
+                            { pattern: /^1\d{10}$/, message: '请输入有效的手机号' },
+                        ]}
+                    >
+                        <Input placeholder="请输入手机号" />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="人数"
+                        name="partySize"
+                        rules={[{ required: true, message: '请输入人数' }]}
+                    >
+                        <InputNumber min={1} max={20} style={{ width: '100%' }} placeholder="请输入人数" />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="桌位"
+                        name="tableId"
+                        rules={[{ required: true, message: '请选择桌位' }]}
+                    >
+                        <Select placeholder="请选择桌位">
+                            {tables.map(table => (
+                                <Select.Option key={table.id} value={table.id}>
+                                    {table.name} ({table.capacity}人)
+                                </Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+
+                    <Form.Item
+                        label="预约时间"
+                        name="reservedAt"
+                        rules={[{ required: true, message: '请选择预约时间' }]}
+                    >
+                        <DatePicker
+                            showTime
+                            format="YYYY-MM-DD HH:mm"
+                            style={{ width: '100%' }}
+                            placeholder="请选择预约时间"
+                        />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="备注"
+                        name="note"
+                    >
+                        <Input.TextArea rows={3} placeholder="备注信息（可选）" maxLength={200} />
+                    </Form.Item>
+                </Form>
+            </Modal>
         </div>
     );
 }

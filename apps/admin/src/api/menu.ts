@@ -3,8 +3,7 @@ import client from './client';
 export interface MenuCategory {
     id: string;
     name: string;
-    description?: string;
-    sortOrder: number;
+    sort: number;
     createdAt: string;
     updatedAt: string;
 }
@@ -12,43 +11,70 @@ export interface MenuCategory {
 export interface MenuItem {
     id: string;
     name: string;
-    description?: string;
     price: number;
     stock: number;
+    status: string;
+    description?: string;
     category: MenuCategory;
-    imageUrl?: string;
-    status: 'ON_SALE' | 'OFF_SHELF' | 'SOLD_OUT';
     createdAt: string;
     updatedAt: string;
 }
 
+export interface CreateCategoryDto {
+    name: string;
+    sort?: number;
+}
+
+export interface CreateMenuItemDto {
+    name: string;
+    categoryId: string;
+    price: number;
+    stock: number;
+    desc?: string;
+    status?: string;
+}
+
 export const menuApi = {
-    // 分类
+    // ===== 分类管理 =====
     async listCategories() {
-        const response = await client.get('/menu/categories');
+        const response = await client.get<MenuCategory[]>('/menu/categories');
         return response.data;
     },
 
-    async createCategory(data: { name: string; description?: string; sortOrder: number }) {
-        const response = await client.post('/menu/categories', data);
+    async createCategory(data: CreateCategoryDto) {
+        const response = await client.post<MenuCategory>('/menu/categories', data);
         return response.data;
     },
 
-    // 菜品
-    async listItems(categoryId?: string) {
-        const response = await client.get('/menu/items', { params: { categoryId } });
+    async updateCategory(id: string, data: Partial<CreateCategoryDto>) {
+        const response = await client.put<MenuCategory>(`/menu/categories/${id}`, data);
         return response.data;
     },
 
-    async createItem(data: {
-        categoryId: string;
-        name: string;
-        description?: string;
-        price: number;
-        stock: number;
-    }) {
-        const response = await client.post('/menu/items', data);
+    async deleteCategory(id: string) {
+        await client.delete(`/menu/categories/${id}`);
+    },
+
+    // ===== 菜品管理 =====
+    async listMenuItems(categoryId?: string) {
+        const response = await client.get<MenuItem[]>('/menu/items', {
+            params: categoryId ? { categoryId } : {},
+        });
         return response.data;
+    },
+
+    async createMenuItem(data: CreateMenuItemDto) {
+        const response = await client.post<MenuItem>('/menu/items', data);
+        return response.data;
+    },
+
+    async updateMenuItem(id: string, data: Partial<CreateMenuItemDto>) {
+        const response = await client.put<MenuItem>(`/menu/items/${id}`, data);
+        return response.data;
+    },
+
+    async deleteMenuItem(id: string) {
+        await client.delete(`/menu/items/${id}`);
     },
 
     async updateStock(id: string, stock: number) {

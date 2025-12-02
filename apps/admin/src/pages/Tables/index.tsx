@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
-import { Card, Row, Col, Tag, Button, Select, message, Space, Modal } from 'antd';
-import { ReloadOutlined } from '@ant-design/icons';
-import { tableApi, Table } from '../../api/tables';
+import { Card, Row, Col, Tag, Button, Select, message, Space, Modal, Form, Input, InputNumber } from 'antd';
+import { PlusOutlined, ReloadOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { tableApi, Table, TableCategory, TableStatus, CreateTableDto, UpdateTableDto } from '../../api/tables';
 import './Tables.css';
 
 export default function Tables() {
     const [loading, setLoading] = useState(false);
     const [tables, setTables] = useState<Table[]>([]);
-    const [categoryFilter, setCategoryFilter] = useState<string | undefined>();
-    const [statusFilter, setStatusFilter] = useState<string | undefined>();
+    const [categoryFilter, setCategoryFilter] = useState<TableCategory | undefined>();
+    const [statusFilter, setStatusFilter] = useState<TableStatus | undefined>();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingTable, setEditingTable] = useState<Table | null>(null);
+    const [form] = Form.useForm();
 
     // 加载桌位列表
     const loadTables = async () => {
@@ -31,8 +34,70 @@ export default function Tables() {
         loadTables();
     }, [categoryFilter, statusFilter]);
 
+    // 打开新增/编辑弹窗
+    const openModal = (table?: Table) => {
+        setEditingTable(table || null);
+        if (table) {
+            form.setFieldsValue({
+                name: table.name,
+                category: table.category,
+                capacity: table.capacity,
+            });
+        } else {
+            form.resetFields();
+        }
+        setIsModalOpen(true);
+    };
+
+    // 关闭弹窗
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setEditingTable(null);
+        form.resetFields();
+    };
+
+    // 提交表单
+    const handleSubmit = async () => {
+        try {
+            const values = await form.validateFields();
+            if (editingTable) {
+                // 编辑桌位
+                await tableApi.update(editingTable.id, values as UpdateTableDto);
+                message.success('桌位更新成功');
+            } else {
+                // 新增桌位
+                await tableApi.create(values as CreateTableDto);
+                message.success('桌位创建成功');
+            }
+            closeModal();
+            loadTables();
+        } catch (error) {
+            message.error('操作失败');
+        }
+    };
+
+    // 删除桌位
+    const handleDelete = (table: Table) => {
+        Modal.confirm({
+            title: '确认删除',
+            content: `确定要删除桌位「${table.name}」吗？`,
+            okText: '确认',
+            okType: 'danger',
+            cancelText: '取消',
+            onOk: async () => {
+                try {
+                    await tableApi.delete(table.id);
+                    message.success('删除成功');
+                    loadTables();
+                } catch (error) {
+                    message.error('删除失败');
+                }
+            },
+        });
+    };
+
     // 更新桌位状态
-    const handleUpdateStatus = async (id: string, status: string) => {
+    const handleUpdateStatus = async (id: string, status: TableStatus) => {
         Modal.confirm({
             title: '确认更新状态',
             content: `是否将桌位状态更新为：${getStatusText(status)}？`,
@@ -130,6 +195,10 @@ export default function Tables() {
             <Card>
                 <div className="toolbar">
                     <Space size="middle">
+                        <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal()}>
+                            新增桌位
+                        </Button>
+
                         <Select
                             placeholder="类别筛选"
                             style={{ width: 150 }}
@@ -179,14 +248,26 @@ export default function Tables() {
                                 <div className="table-info">
                                     <div>类别：{getCategoryText(table.category)}</div>
                                     <div>容量：{table.capacity}人</div>
-                                    {table.description && (
-                                        <div className="description">{table.description}</div>
-                                    )}
                                 </div>
 
                                 <div className="table-actions">
                                     <Space size="small" wrap>
                                         {getStatusActions(table)}
+                                        <Button
+                                            size="small"
+                                            icon={<EditOutlined />}
+                                            onClick={() => openModal(table)}
+                                        >
+                                            编辑
+                                        </Button>
+                                        <Button
+                                            size="small"
+                                            danger
+                                            icon={<DeleteOutlined />}
+                                            onClick={() => handleDelete(table)}
+                                        >
+                                            删除
+                                        </Button>
                                     </Space>
                                 </div>
                             </Card>
@@ -200,6 +281,56 @@ export default function Tables() {
                     </div>
                 )}
             </Card>
+
+            {/* 新增/编辑桌位弹窗 */}
+            <Modal
+                title={editingTable ? '编辑桌位' : '新增桌位'}
+                open={isModalOpen}
+                onOk={handleSubmit}
+                onCancel={closeModal}
+                okText="确定"
+                cancelText="取消"
+            >
+                <Form
+                    form={form}
+                    layout="vertical"
+                    autoComplete="off"
+                >
+                    <Form.Item
+                        label="桌位名称"
+                        name="name"
+                        rules={[
+                            { required: true, message: '请输入桌位名称' },
+                            { max: 50, message: '名称不能超过50个字符' },
+                        ]}
+                    >
+                        <Input placeholder="例如：主桌A1" />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="桌位类别"
+                        name="category"
+                        rules={[{ required: true, message: '请选择桌位类别' }]}
+                    >
+                        <Select placeholder="请选择">
+                            <Select.Option value={TableCategory.MAIN}>主赛桌</Select.Option>
+                            <Select.Option value={TableCategory.SIDE}>副赛桌</Select.Option>
+                            <Select.Option value={TableCategory.DINING}>餐饮区</Select.Option>
+                        </Select>
+                    </Form.Item>
+
+                    <Form.Item
+                        label="容量（人数）"
+                        name="capacity"
+                        rules={[
+                            { required: true, message: '请输入容量' },
+                            { type: 'number', min: 1, max: 20, message: '容量需在1-20之间' },
+                        ]}
+                    >
+                        <InputNumber min={1} max={20} style={{ width: '100%' }} placeholder="请输入" />
+                    </Form.Item>
+                </Form>
+            </Modal>
         </div>
     );
 }

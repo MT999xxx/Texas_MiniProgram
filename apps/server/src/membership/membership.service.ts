@@ -13,7 +13,7 @@ export class MembershipService {
     private readonly levelRepo: Repository<MembershipLevelEntity>,
     @InjectRepository(MemberEntity)
     private readonly memberRepo: Repository<MemberEntity>,
-  ) {}
+  ) { }
 
   createLevel(dto: CreateLevelDto) {
     const level = this.levelRepo.create({
@@ -33,7 +33,7 @@ export class MembershipService {
   async createMember(dto: CreateMemberDto) {
     let level: MembershipLevelEntity | undefined;
     if (dto.levelCode) {
-      level = await this.levelRepo.findOne({ where: { code: dto.levelCode } });
+      level = await this.levelRepo.findOne({ where: { code: dto.levelCode } }) || undefined;
       if (!level) {
         throw new NotFoundException('Level not found');
       }
@@ -55,6 +55,24 @@ export class MembershipService {
       relations: ['level'],
       order: { createdAt: 'DESC' },
     });
+  }
+
+  getMemberById(id: string) {
+    return this.memberRepo.findOne({ where: { id }, relations: ['level'] });
+  }
+
+  // 更新会员
+  async updateMember(id: string, dto: Partial<MemberEntity>): Promise<MemberEntity> {
+    const member = await this.memberRepo.findOne({ where: { id } });
+    if (!member) {
+      throw new NotFoundException('Member not found');
+    }
+
+    if (dto.nickname !== undefined) member.nickname = dto.nickname;
+    if (dto.phone !== undefined) member.phone = dto.phone;
+    if (dto.avatar !== undefined) member.avatar = dto.avatar;
+
+    return this.memberRepo.save(member);
   }
 
   async adjustPoints(memberId: string, delta: number) {
