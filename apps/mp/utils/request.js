@@ -1,7 +1,7 @@
 const request = (options = {}) => {
   return new Promise((resolve, reject) => {
     const app = getApp();
-    const apiBase = (app?.globalData?.apiBase || 'http://localhost:3000').replace(/\/$/, '');
+    const apiBase = (app?.globalData?.apiBase || 'http://47.109.44.38:3000').replace(/\/$/, '');
 
     // 获取token
     const token = wx.getStorageSync('token');

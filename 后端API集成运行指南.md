@@ -18,7 +18,7 @@
 docker run --name texas-mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=texas_poker -p 3306:3306 -d mysql:8
 
 # 启动 Redis
-docker run --name texas-redis -p 6379:6379 -d redis:alpine
+docker run --name texas-redis -p 6379:6379 -d redis:alpined
 ```
 
 ### 2. 配置环境变量
