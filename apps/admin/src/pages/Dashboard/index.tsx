@@ -35,7 +35,7 @@ export default function Dashboard() {
         <div className="dashboard-page">
             <header className="hero-panel">
                 <div className="hero-left">
-                    <span className="hero-badge">重庆店 · 尖牙 tusk</span>
+                    <span className="hero-badge">重庆店 · 尖牙 TUSK</span>
                     <h1>德州扑克主题酒吧控制台</h1>
                     <p>预约赛桌 · 奢享酒食 · 决战巅峰</p>
                     <div className="hero-actions">
@@ -90,7 +90,7 @@ export default function Dashboard() {
                                 <strong>{item.value}</strong>
                             </div>
                             <p>{item.desc}</p>
-                            <button className="btn ghost">调度</button>
+                            <button className="btn ghost" style={{ width: '100%', marginTop: '10px' }}>调度</button>
                         </div>
                     ))}
                 </div>

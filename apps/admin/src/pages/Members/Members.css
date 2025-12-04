@@ -1,7 +1,107 @@
+/* Members.css */
 .members-page {
-    padding: 0;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.members-page .ant-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
 }
 
 .toolbar {
-    margin-bottom: 16px;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Member Level Tags */
+.ant-tag-blue {
+    background: rgba(24, 144, 255, 0.15) !important;
+    color: #1890ff !important;
+    border: none !important;
+}
+
+.ant-tag-gold {
+    background: rgba(212, 175, 55, 0.15) !important;
+    color: var(--color-gold-primary) !important;
+    border: none !important;
+}
+
+/* Points styling */
+.points-value {
+    font-family: 'DIN Alternate', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--color-gold-primary);
+}
+
+/* Spent amount */
+.spent-value {
+    font-family: 'DIN Alternate', sans-serif;
+    color: var(--text-secondary);
+}
+
+/* Member avatar */
+.member-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--color-gold-primary);
+    object-fit: cover;
+}
+
+/* Table enhancements */
+.ant-table {
+    background: transparent;
+}
+
+.ant-table-thead>tr>th {
+    background: rgba(255, 255, 255, 0.03) !important;
+    color: var(--text-muted) !important;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color) !important;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+
+.ant-table-tbody>tr>td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    color: var(--text-primary);
+}
+
+.ant-table-tbody>tr:hover>td {
+    background: rgba(212, 175, 55, 0.05) !important;
+}
+
+/* VIP badge styling */
+.vip-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    background: linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-dark));
+    color: #000;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.vip-badge::before {
+    content: '👑';
+    margin-right: 4px;
 }

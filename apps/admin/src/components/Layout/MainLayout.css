@@ -1,35 +1,54 @@
+/* MainLayout.css */
 .main-layout {
     min-height: 100vh;
 }
 
-.logo {
+/* Sidebar Styling */
+.site-sider {
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.5);
+    z-index: 100;
+}
+
+.logo-container {
     height: 64px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
-    margin: 0;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .logo-text {
-    color: #fff;
+    color: var(--color-gold-primary);
     font-size: 20px;
-    font-weight: bold;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px var(--color-gold-glow);
+    font-family: 'Times New Roman', serif;
 }
 
+.site-menu {
+    border-right: none !important;
+    padding-top: 16px;
+}
+
+/* Header Styling */
 .site-header {
-    background: #fff;
     padding: 0 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 99;
 }
 
 .header-left h2 {
     margin: 0;
     font-size: 18px;
-    color: #333;
+    color: var(--text-primary);
+    font-weight: 500;
 }
 
 .header-right {
@@ -37,28 +56,44 @@
     align-items: center;
 }
 
-.user-info {
+.user-info-trigger {
     display: flex;
     align-items: center;
     cursor: pointer;
-    padding: 8px 12px;
-    border-radius: 4px;
-    transition: background 0.3s;
+    padding: 4px 12px;
+    border-radius: 20px;
+    transition: all 0.3s;
 }
 
-.user-info:hover {
-    background: #f5f5f5;
+.user-info-trigger:hover {
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .user-name {
     margin-left: 8px;
-    color: #333;
+    font-size: 14px;
+    color: var(--text-primary);
+    font-weight: 500;
 }
 
-.site-content {
-    margin: 24px;
+/* Content Area */
+.site-layout {
+    background: var(--bg-primary);
+}
+
+.site-content-wrapper {
+    margin: 24px 16px;
     padding: 24px;
-    background: #f0f2f5;
     min-height: 280px;
-    overflow: auto;
+    background: transparent;
+    /* Let individual pages handle their background */
+    overflow: initial;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .site-content-wrapper {
+        margin: 16px 8px;
+        padding: 16px;
+    }
 }

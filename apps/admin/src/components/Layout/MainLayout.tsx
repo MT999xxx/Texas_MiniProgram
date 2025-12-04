@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Layout, Menu, Avatar, Dropdown, message } from 'antd';
+import { Layout, Menu, Avatar, Dropdown, message, ConfigProvider, theme } from 'antd';
 import type { MenuProps } from 'antd';
 import {
     DashboardOutlined,
@@ -93,11 +93,13 @@ export default function MainLayout() {
                 collapsible
                 collapsed={collapsed}
                 onCollapse={setCollapsed}
-                theme="dark"
-                width={220}
+                width={240}
+                className="site-sider"
             >
-                <div className="logo">
-                    <span className="logo-text">{collapsed ? 'T' : 'Texas Bar'}</span>
+                <div className="logo-container">
+                    <div className="logo-text">
+                        {collapsed ? 'T' : 'TUSK ADMIN'}
+                    </div>
                 </div>
                 <Menu
                     theme="dark"
@@ -105,28 +107,33 @@ export default function MainLayout() {
                     selectedKeys={[location.pathname]}
                     items={menuItems}
                     onClick={handleMenuClick}
+                    className="site-menu"
                 />
             </Sider>
 
-            <Layout>
+            <Layout className="site-layout">
                 <Header className="site-header">
                     <div className="header-left">
-                        <h2>德州扑克酒吧后台管理系统</h2>
+                        {/* 可以放置面包屑或其他导航元素 */}
                     </div>
                     <div className="header-right">
                         <Dropdown
                             menu={{ items: userMenuItems, onClick: handleUserMenuClick }}
                             placement="bottomRight"
+                            trigger={['click']}
                         >
-                            <div className="user-info">
-                                <Avatar icon={<UserOutlined />} />
+                            <div className="user-info-trigger">
+                                <Avatar
+                                    icon={<UserOutlined />}
+                                    style={{ backgroundColor: 'var(--color-gold-primary)', color: '#000' }}
+                                />
                                 <span className="user-name">{user.name}</span>
                             </div>
                         </Dropdown>
                     </div>
                 </Header>
 
-                <Content className="site-content">
+                <Content className="site-content-wrapper">
                     <Outlet />
                 </Content>
             </Layout>

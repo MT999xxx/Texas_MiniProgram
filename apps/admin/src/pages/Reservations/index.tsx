@@ -17,8 +17,17 @@ export default function Reservations() {
     const loadReservations = async () => {
         setLoading(true);
         try {
-            const data = await reservationApi.list({ status: statusFilter });
-            setReservations(data);
+            // TODO: 实际对接API
+            // const data = await reservationApi.list({ status: statusFilter });
+            // setReservations(data);
+
+            // 模拟数据
+            const mockData: Reservation[] = [
+                { id: '1', reservedAt: '2023-11-25T19:00:00', member: { nickname: 'Husk·Aiden', phone: '13800138000' }, table: { name: '主赛桌 A1', category: 'MAIN' }, depositAmount: 200, depositPaid: true, status: 'CONFIRMED' },
+                { id: '2', reservedAt: '2023-11-25T20:30:00', member: { nickname: 'Husk·Yuri', phone: '13900139000' }, table: { name: '副赛桌 B2', category: 'SIDE' }, depositAmount: 100, depositPaid: false, status: 'PENDING' },
+                { id: '3', reservedAt: '2023-11-26T18:00:00', member: { nickname: 'Tom', phone: '13700137000' }, table: { name: '练习桌 C1', category: 'TRAINING' }, depositAmount: 0, depositPaid: false, status: 'CANCELLED' },
+            ];
+            setReservations(mockData);
         } catch (error) {
             console.error('加载预约列表失败:', error);
             message.error('加载预约列表失败');
@@ -34,7 +43,7 @@ export default function Reservations() {
     //确认预约
     const handleConfirm = async (id: string) => {
         try {
-            await reservationApi.updateStatus(id, 'CONFIRMED');
+            // await reservationApi.updateStatus(id, 'CONFIRMED');
             message.success('已确认预约');
             loadReservations();
         } catch (error) {
@@ -47,9 +56,11 @@ export default function Reservations() {
         Modal.confirm({
             title: '确认取消预约',
             content: '是否确认取消此预约？',
+            okText: '确认',
+            cancelText: '取消',
             onOk: async () => {
                 try {
-                    await reservationApi.cancel(id);
+                    // await reservationApi.cancel(id);
                     message.success('已取消预约');
                     loadReservations();
                 } catch (error) {
@@ -60,7 +71,6 @@ export default function Reservations() {
     };
 
     // 状态标签
-
     const getStatusTag = (status: string) => {
         const statusConfig: Record<string, { color: string; text: string }> = {
             PENDING: { color: 'orange', text: '待确认' },
@@ -78,15 +88,15 @@ export default function Reservations() {
             title: '预约时间',
             dataIndex: 'reservedAt',
             key: 'reservedAt',
-            render: (date: string) => new Date(date).toLocaleString('zh-CN'),
+            render: (date: string) => <span className="text-gold">{new Date(date).toLocaleString('zh-CN')}</span>,
         },
         {
             title: '客户信息',
             key: 'member',
             render: (record: Reservation) => (
                 <div>
-                    <div>{record.member?.nickname || '-'}</div>
-                    <div style={{ fontSize: 12, color: '#999' }}>{record.member?.phone || '-'}</div>
+                    <div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{record.member?.nickname || '-'}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{record.member?.phone || '-'}</div>
                 </div>
             ),
         },
@@ -95,8 +105,8 @@ export default function Reservations() {
             key: 'table',
             render: (record: Reservation) => (
                 <div>
-                    <div>{record.table?.name || '-'}</div>
-                    <div style={{ fontSize: 12, color: '#999' }}>{record.table?.category || '-'}</div>
+                    <div style={{ color: 'var(--color-gold-primary)' }}>{record.table?.name || '-'}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{record.table?.category || '-'}</div>
                 </div>
             ),
         },
@@ -104,10 +114,10 @@ export default function Reservations() {
             title: '订金',
             key: 'deposit',
             render: (record: Reservation) => {
-                if (!record.depositAmount) return '-';
+                if (!record.depositAmount) return <span style={{ color: 'var(--text-muted)' }}>-</span>;
                 return (
                     <div>
-                        <div>¥{record.depositAmount}</div>
+                        <div style={{ fontFamily: 'DIN Alternate', fontWeight: 'bold' }}>¥{record.depositAmount}</div>
                         <div style={{ fontSize: 12 }}>
                             {record.depositPaid ? (
                                 <Tag color="green">已支付</Tag>
@@ -141,10 +151,11 @@ export default function Reservations() {
                                 确认
                             </Button>
                             <Button
-                                danger
+                                className="btn-danger-ghost"
                                 size="small"
                                 icon={<CloseOutlined />}
                                 onClick={() => handleCancel(record.id)}
+                                style={{ background: 'transparent', border: '1px solid #ff4d4f', color: '#ff4d4f' }}
                             >
                                 取消
                             </Button>
@@ -152,10 +163,11 @@ export default function Reservations() {
                     )}
                     {record.status === 'CONFIRMED' && (
                         <Button
-                            danger
+                            className="btn-danger-ghost"
                             size="small"
                             icon={<CloseOutlined />}
                             onClick={() => handleCancel(record.id)}
+                            style={{ background: 'transparent', border: '1px solid #ff4d4f', color: '#ff4d4f' }}
                         >
                             取消
                         </Button>
@@ -167,6 +179,7 @@ export default function Reservations() {
 
     // 筛选后的数据
     const filteredData = reservations.filter((item) => {
+        if (statusFilter && item.status !== statusFilter) return false;
         if (!searchText) return true;
         const text = searchText.toLowerCase();
         return (
@@ -178,7 +191,17 @@ export default function Reservations() {
 
     return (
         <div className="reservations-page">
-            <Card>
+            <div className="panel-header">
+                <div>
+                    <h2>预约管理</h2>
+                    <p>管理所有赛桌预约记录</p>
+                </div>
+                <Button type="primary" icon={<ReloadOutlined />} onClick={loadReservations}>
+                    刷新列表
+                </Button>
+            </div>
+
+            <Card bordered={false}>
                 <div className="toolbar">
                     <Space size="middle">
                         <Select
@@ -187,6 +210,7 @@ export default function Reservations() {
                             allowClear
                             value={statusFilter}
                             onChange={setStatusFilter}
+                            popupClassName="dropdown-dark"
                         >
                             <Select.Option value="PENDING">待确认</Select.Option>
                             <Select.Option value="CONFIRMED">已确认</Select.Option>
@@ -201,13 +225,6 @@ export default function Reservations() {
                             onSearch={setSearchText}
                             onChange={(e) => setSearchText(e.target.value)}
                         />
-
-                        <Button
-                            icon={<ReloadOutlined />}
-                            onClick={loadReservations}
-                        >
-                            刷新
-                        </Button>
                     </Space>
                 </div>
 

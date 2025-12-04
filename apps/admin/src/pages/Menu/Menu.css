@@ -1,7 +1,90 @@
+/* Menu.css */
 .menu-page {
-    padding: 0;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.menu-page .ant-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
 }
 
 .toolbar {
-    margin-bottom: 16px;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Price styling */
+.price-cell {
+    font-family: 'DIN Alternate', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--color-gold-primary);
+}
+
+/* Stock tags */
+.stock-high {
+    background: rgba(82, 196, 26, 0.15);
+    color: #52c41a;
+    border: none;
+}
+
+.stock-low {
+    background: rgba(250, 173, 20, 0.15);
+    color: #faad14;
+    border: none;
+}
+
+.stock-out {
+    background: rgba(255, 77, 79, 0.15);
+    color: #ff4d4f;
+    border: none;
+}
+
+/* Image preview */
+.menu-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Table enhancements */
+.ant-table {
+    background: transparent;
+}
+
+.ant-table-thead>tr>th {
+    background: rgba(255, 255, 255, 0.03) !important;
+    color: var(--text-muted) !important;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color) !important;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+
+.ant-table-tbody>tr>td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    color: var(--text-primary);
+}
+
+.ant-table-tbody>tr:hover>td {
+    background: rgba(212, 175, 55, 0.05) !important;
 }

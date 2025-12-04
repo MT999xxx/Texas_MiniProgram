@@ -17,10 +17,8 @@ export default function Login() {
     const handleLogin = async (values: LoginForm) => {
         setLoading(true);
         try {
-            // TODO: 对接真实登录API
-            // const response = await axios.post('/auth/admin-login', values);
-
             // 模拟登录（开发环境）
+            // 实际项目中应调用真实API
             if (values.username === 'admin' && values.password === 'admin123') {
                 const mockToken = 'mock_admin_token_' + Date.now();
                 const mockUser = {
@@ -48,10 +46,10 @@ export default function Login() {
 
     return (
         <div className="login-container">
-            <Card className="login-card">
+            <Card className="login-card" bordered={false}>
                 <div className="login-header">
-                    <h1>德州扑克酒吧</h1>
-                    <h2>后台管理系统</h2>
+                    <h1>TUSK ADMIN</h1>
+                    <h2>德州扑克后台管理系统</h2>
                 </div>
 
                 <Form
@@ -60,6 +58,7 @@ export default function Login() {
                     onFinish={handleLogin}
                     size="large"
                     autoComplete="off"
+                    layout="vertical"
                 >
                     <Form.Item
                         name="username"
@@ -68,6 +67,7 @@ export default function Login() {
                         <Input
                             prefix={<UserOutlined />}
                             placeholder="用户名"
+                            autoComplete="off"
                         />
                     </Form.Item>
 
@@ -78,6 +78,7 @@ export default function Login() {
                         <Input.Password
                             prefix={<LockOutlined />}
                             placeholder="密码"
+                            autoComplete="off"
                         />
                     </Form.Item>
 
@@ -88,7 +89,7 @@ export default function Login() {
                             loading={loading}
                             block
                         >
-                            登录
+                            登 录
                         </Button>
                     </Form.Item>
                 </Form>
