@@ -1,0 +1,71 @@
+/* PageSkeleton.css */
+.skeleton-dashboard,
+.skeleton-card {
+    animation: fadeIn 0.5s ease;
+}
+
+.skeleton-hero {
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 24px !important;
+    margin-bottom: 24px;
+    padding: 24px;
+}
+
+.skeleton-card {
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 20px !important;
+}
+
+/* Override Ant Skeleton colors for dark theme */
+.ant-skeleton-content .ant-skeleton-title,
+.ant-skeleton-content .ant-skeleton-paragraph>li {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.06) 25%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.06) 75%);
+    background-size: 400% 100%;
+    animation: skeleton-loading 1.4s ease infinite;
+}
+
+.ant-skeleton-button,
+.ant-skeleton-input,
+.ant-skeleton-avatar,
+.ant-skeleton-image {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.06) 25%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.06) 75%) !important;
+    background-size: 400% 100% !important;
+    animation: skeleton-loading 1.4s ease infinite !important;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0 50%;
+    }
+}
+
+.skeleton-toolbar {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    margin-bottom: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+}
+
+.skeleton-table-header {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.skeleton-table-row {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}

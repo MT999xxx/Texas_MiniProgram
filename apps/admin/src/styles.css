@@ -149,3 +149,95 @@ body {
   opacity: 0.9;
   box-shadow: 0 0 10px var(--color-gold-glow);
 }
+/* Animation Utilities */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Page Transition */
+.page-enter {
+  animation: fadeInUp 0.4s ease forwards;
+}
+
+/* Card Hover Effects */
+.card-hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Button Ripple Effect */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.4s ease, height 0.4s ease;
+}
+
+.btn-ripple:active::after {
+  width: 200px;
+  height: 200px;
+}
+
+/* Glow Effect */
+.glow-gold {
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+.glow-gold:hover {
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+}
+
+/* Number Animation */
+.count-up {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+/* Staggered Animation */
+.stagger-item {
+  opacity: 0;
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+.stagger-item:nth-child(1) { animation-delay: 0.1s; }
+.stagger-item:nth-child(2) { animation-delay: 0.2s; }
+.stagger-item:nth-child(3) { animation-delay: 0.3s; }
+.stagger-item:nth-child(4) { animation-delay: 0.4s; }
+.stagger-item:nth-child(5) { animation-delay: 0.5s; }

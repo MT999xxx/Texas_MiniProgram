@@ -1,4 +1,30 @@
+import { Line, Pie, Bar } from '@ant-design/charts';
 import './Dashboard.css';
+
+// 模拟数据
+const revenueData = [
+    { date: '11/28', revenue: 12800 },
+    { date: '11/29', revenue: 15600 },
+    { date: '11/30', revenue: 18200 },
+    { date: '12/01', revenue: 21500 },
+    { date: '12/02', revenue: 19800 },
+    { date: '12/03', revenue: 24300 },
+    { date: '12/04', revenue: 22100 },
+];
+
+const reservationData = [
+    { type: '主赛桌', value: 45 },
+    { type: '副赛桌', value: 32 },
+    { type: '练习桌', value: 23 },
+];
+
+const hotMenuData = [
+    { name: '火焰威士忌塔', sales: 128 },
+    { name: '冠军定制套餐', sales: 96 },
+    { name: '午夜能量Shot', sales: 85 },
+    { name: '皇家精酿', sales: 72 },
+    { name: '特调鸡尾酒', sales: 68 },
+];
 
 const leaderboard = [
     { name: 'Husk·Aiden', score: 12890, tag: '周榜冠军', avatar: '🦊' },
@@ -12,16 +38,10 @@ const reservationStatus = [
     { title: '练习桌', value: '05 / 08', desc: '快速上手体验', accent: 'TRAINING' },
 ];
 
-const menuHighlights = [
-    { name: '火焰威士忌塔', desc: '会员 9 折 / 赠 200 积分', price: '¥188' },
-    { name: '冠军定制套餐', desc: '主厨冷盘 + 精酿 + 甜品', price: '¥268' },
-    { name: '午夜能量shot', desc: '德州扑克限定，唤醒战意', price: '¥58' },
-];
-
 const events = [
     { tag: '赛事', title: '德州大师赛 · 火热报名中', time: '周六 19:00', badge: 'TOP1 入场券' },
     { tag: '福利', title: '新会员注册即送 200 积分', time: '长期有效', badge: '积分加速' },
-    { tag: '公告', title: '周五店内升级，暂停营业一天', time: '11/22(周五)', badge: '营运提示' },
+    { tag: '公告', title: '周五店内升级，暂停营业一天', time: '12/06(周五)', badge: '营运提示' },
 ];
 
 const memberPerks = [
@@ -31,6 +51,93 @@ const memberPerks = [
 ];
 
 export default function Dashboard() {
+    // 营收趋势图配置
+    const revenueConfig = {
+        data: revenueData,
+        xField: 'date',
+        yField: 'revenue',
+        smooth: true,
+        color: '#D4AF37',
+        areaStyle: {
+            fill: 'l(270) 0:#D4AF3700 1:#D4AF3740',
+        },
+        point: {
+            size: 4,
+            shape: 'circle',
+            style: {
+                fill: '#D4AF37',
+                stroke: '#000',
+                lineWidth: 2,
+            },
+        },
+        xAxis: {
+            label: { style: { fill: '#666' } },
+            line: { style: { stroke: '#333' } },
+        },
+        yAxis: {
+            label: {
+                style: { fill: '#666' },
+                formatter: (v: string) => `¥${Number(v) / 1000}k`,
+            },
+            grid: { line: { style: { stroke: '#222' } } },
+        },
+        tooltip: {
+            formatter: (datum: { revenue: number }) => ({
+                name: '营收',
+                value: `¥${datum.revenue.toLocaleString()}`,
+            }),
+        },
+    };
+
+    // 预约统计饼图配置
+    const reservationPieConfig = {
+        data: reservationData,
+        angleField: 'value',
+        colorField: 'type',
+        radius: 0.8,
+        innerRadius: 0.6,
+        color: ['#D4AF37', '#AA8A2E', '#F4D03F'],
+        label: {
+            type: 'outer',
+            content: '{name} {percentage}',
+            style: { fill: '#999', fontSize: 12 },
+        },
+        legend: {
+            position: 'bottom' as const,
+            itemName: { style: { fill: '#999' } },
+        },
+        statistic: {
+            title: {
+                content: '总预约',
+                style: { color: '#999', fontSize: '14px' },
+            },
+            content: {
+                content: '100',
+                style: { color: '#D4AF37', fontSize: '24px', fontWeight: 'bold' },
+            },
+        },
+    };
+
+    // 热门菜品排行配置
+    const hotMenuConfig = {
+        data: hotMenuData,
+        xField: 'sales',
+        yField: 'name',
+        color: '#D4AF37',
+        barBackground: { style: { fill: 'rgba(255,255,255,0.05)' } },
+        xAxis: {
+            label: { style: { fill: '#666' } },
+            grid: { line: { style: { stroke: '#222' } } },
+        },
+        yAxis: {
+            label: { style: { fill: '#999' } },
+        },
+        label: {
+            position: 'right' as const,
+            style: { fill: '#D4AF37' },
+        },
+    };
+
     return (
         <div className="dashboard-page">
             <header className="hero-panel">
@@ -73,6 +180,35 @@ export default function Dashboard() {
                     </div>
                 </div>
             </header>
+
+            {/* 数据可视化区域 */}
+            <section className="charts-section">
+                <div className="chart-card large">
+                    <div className="chart-header">
+                        <h3>📈 营收趋势 (近7天)</h3>
+                        <span className="chart-badge">+18.5%</span>
+                    </div>
+                    <div className="chart-body">
+                        <Line {...revenueConfig} />
+                    </div>
+                </div>
+                <div className="chart-card">
+                    <div className="chart-header">
+                        <h3>📊 预约分布</h3>
+                    </div>
+                    <div className="chart-body">
+                        <Pie {...reservationPieConfig} />
+                    </div>
+                </div>
+                <div className="chart-card">
+                    <div className="chart-header">
+                        <h3>🔥 热门菜品 TOP5</h3>
+                    </div>
+                    <div className="chart-body">
+                        <Bar {...hotMenuConfig} />
+                    </div>
+                </div>
+            </section>
 
             <section className="panel reservation-panel">
                 <div className="panel-header">
@@ -149,27 +285,6 @@ export default function Dashboard() {
                             </div>
                         ))}
                     </div>
-                </div>
-            </section>
-
-            <section className="panel menu-panel">
-                <div className="panel-header">
-                    <div>
-                        <h2>酒水 · 菜单曝光</h2>
-                        <p>打造高端氛围 · 让顾客提前种草</p>
-                    </div>
-                    <button className="btn link">管理菜品</button>
-                </div>
-                <div className="menu-grid">
-                    {menuHighlights.map((item) => (
-                        <div className="menu-card" key={item.name}>
-                            <div>
-                                <strong>{item.name}</strong>
-                                <p>{item.desc}</p>
-                            </div>
-                            <span className="price">{item.price}</span>
-                        </div>
-                    ))}
                 </div>
             </section>
 

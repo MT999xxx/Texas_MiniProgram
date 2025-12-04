@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Layout, Menu, Avatar, Dropdown, message, ConfigProvider, theme } from 'antd';
+import { Layout, Menu, Avatar, Dropdown, message } from 'antd';
 import type { MenuProps } from 'antd';
 import {
     DashboardOutlined,
@@ -13,6 +13,7 @@ import {
     LogoutOutlined,
     UserOutlined,
 } from '@ant-design/icons';
+import NotificationCenter from '../NotificationCenter';
 import './MainLayout.css';
 
 const { Header, Sider, Content } = Layout;
@@ -114,9 +115,10 @@ export default function MainLayout() {
             <Layout className="site-layout">
                 <Header className="site-header">
                     <div className="header-left">
-                        {/* 可以放置面包屑或其他导航元素 */}
+                        {/* 面包屑或其他导航元素 */}
                     </div>
                     <div className="header-right">
+                        <NotificationCenter />
                         <Dropdown
                             menu={{ items: userMenuItems, onClick: handleUserMenuClick }}
                             placement="bottomRight"
