@@ -37,7 +37,7 @@ export class OrdersService {
     private readonly membershipService: MembershipService,
     private readonly loyaltyService: LoyaltyService,
     private readonly couponsService: CouponsService,
-  ) {}
+  ) { }
 
   async create(dto: CreateOrderDto) {
     const menuIds = dto.items.map((item) => item.menuItemId);
@@ -65,10 +65,11 @@ export class OrdersService {
       }
     }
 
-    let member = undefined;
-    if (dto.memberId) {
-      member = await this.membershipService.findMemberById(dto.memberId);
-      if (!member) throw new NotFoundException('Member not found');
+    const member = dto.memberId
+      ? await this.membershipService.findMemberById(dto.memberId)
+      : undefined;
+    if (dto.memberId && !member) {
+      throw new NotFoundException('Member not found');
     }
 
     // 验证并处理优惠券
@@ -137,7 +138,7 @@ export class OrdersService {
       await this.userCouponRepo.save(userCoupon);
     }
 
-    const order = this.orderRepo.create({
+    const order: OrderEntity = this.orderRepo.create({
       orderNumber: this.generateOrderNumber(),
       member,
       reservation,
@@ -150,7 +151,7 @@ export class OrdersService {
       items,
     });
 
-    const saved = await this.orderRepo.save(order);
+    const saved: OrderEntity = await this.orderRepo.save(order);
     await this.redisService.getClient().set(`order:${saved.id}:status`, saved.status);
     if (table) {
       await this.redisService.getClient().set(`table:${table.id}:lastOrder`, saved.id);

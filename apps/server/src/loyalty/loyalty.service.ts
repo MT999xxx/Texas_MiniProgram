@@ -14,7 +14,7 @@ export class LoyaltyService {
     @InjectRepository(MemberEntity)
     private readonly memberRepo: Repository<MemberEntity>,
     private readonly membershipService: MembershipService,
-  ) {}
+  ) { }
 
   async awardPointsForOrder(order: OrderEntity) {
     if (!order.member) {
@@ -86,11 +86,11 @@ export class LoyaltyService {
         avatar: member.avatar,
         points,
         levelName: member.level?.name || 'V1 普通会员',
-        levelNumber: member.level?.level || 1
+        levelNumber: member.level?.threshold || 0
       };
     })
-    .filter(member => member.points > 0) // 过滤掉0积分的用户
-    .sort((a, b) => b.points - a.points); // 重新按积分排序
+      .filter(member => member.points > 0) // 过滤掉0积分的用户
+      .sort((a, b) => b.points - a.points); // 重新按积分排序
 
     return rankings;
   }
@@ -115,7 +115,7 @@ export class LoyaltyService {
           avatar: member.avatar,
           points: 0,
           levelName: member.level?.name || 'V1 普通会员',
-          levelNumber: member.level?.level || 1
+          levelNumber: member.level?.threshold || 0
         };
       }
     }

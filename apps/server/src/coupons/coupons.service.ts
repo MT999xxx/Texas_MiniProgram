@@ -14,7 +14,7 @@ export class CouponsService {
     @InjectRepository(UserCouponEntity)
     private readonly userCouponRepo: Repository<UserCouponEntity>,
     private readonly membershipService: MembershipService,
-  ) {}
+  ) { }
 
   // 创建优惠券
   async create(dto: CreateCouponDto): Promise<CouponEntity> {
@@ -46,7 +46,7 @@ export class CouponsService {
     // 会员等级筛选
     if (member) {
       queryBuilder.andWhere('(coupon.minMemberLevel IS NULL OR coupon.minMemberLevel <= :memberLevel)', {
-        memberLevel: member.level?.level || 1
+        memberLevel: member.level?.threshold || 0
       });
     } else {
       queryBuilder.andWhere('coupon.minMemberLevel IS NULL OR coupon.minMemberLevel <= 1');
@@ -80,8 +80,8 @@ export class CouponsService {
     }
 
     // 检查会员等级要求
-    if (coupon.minMemberLevel && (!member.level || member.level.level < coupon.minMemberLevel)) {
-      throw new BadRequestException(`需要达到V${coupon.minMemberLevel}会员等级才能领取`);
+    if (coupon.minMemberLevel && (!member.level || member.level.threshold < coupon.minMemberLevel)) {
+      throw new BadRequestException(`需要达到会员等级${member.level.threshold}才能领取`);
     }
 
     // 检查个人领取限制

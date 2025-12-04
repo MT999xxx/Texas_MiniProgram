@@ -23,7 +23,7 @@ export class AuthService {
     private readonly memberRepo: Repository<MemberEntity>,
     @InjectRepository(MembershipLevelEntity)
     private readonly levelRepo: Repository<MembershipLevelEntity>,
-  ) {}
+  ) { }
 
   async wxLogin(dto: WxLoginDto) {
     // 1. 调用微信API获取openid
@@ -40,10 +40,9 @@ export class AuthService {
     });
 
     if (!member) {
-      // 获取默认会员等级
+      // 获取默认会员等级（threshold 最小的等级）
       const defaultLevel = await this.levelRepo.findOne({
-        where: { level: 1 },
-        order: { level: 'ASC' },
+        order: { threshold: 'ASC' },
       });
 
       // 创建新用户
