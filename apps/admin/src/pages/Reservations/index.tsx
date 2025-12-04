@@ -1,12 +1,30 @@
 import { useState, useEffect } from 'react';
-import { Table, Card, Space, Button, Tag, message, Modal, Select, Input, Checkbox } from 'antd';
-import { CheckOutlined, CloseOutlined, ReloadOutlined, DownloadOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { Table, Card, Space, Button, Tag, message, Modal, Select, Input, Form, DatePicker, InputNumber } from 'antd';
+import { CheckOutlined, CloseOutlined, ReloadOutlined, DownloadOutlined, PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import { reservationApi, Reservation } from '../../api/reservations';
+import dayjs from 'dayjs';
+import { reservationApi, Reservation, CreateReservationDto } from '../../api/reservations';
 import './Reservations.css';
 
 const { Search } = Input;
 const { confirm } = Modal;
+
+// 模拟会员数据
+const mockMembers = [
+    { id: '1', nickname: 'Husk·Aiden', phone: '13800138000' },
+    { id: '2', nickname: 'Husk·Yuri', phone: '13900139000' },
+    { id: '3', nickname: 'Tom', phone: '13700137000' },
+    { id: '4', nickname: 'Jerry', phone: '13600136000' },
+];
+
+// 模拟桌位数据
+const mockTables = [
+    { id: '1', name: '主赛桌 A1', category: 'MAIN' },
+    { id: '2', name: '主赛桌 A2', category: 'MAIN' },
+    { id: '3', name: '副赛桌 B1', category: 'SIDE' },
+    { id: '4', name: '副赛桌 B2', category: 'SIDE' },
+    { id: '5', name: '练习桌 C1', category: 'TRAINING' },
+];
 
 export default function Reservations() {
     const [loading, setLoading] = useState(false);
@@ -15,21 +33,23 @@ export default function Reservations() {
     const [searchText, setSearchText] = useState('');
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
+    // 创建预约弹窗
+    const [createModalVisible, setCreateModalVisible] = useState(false);
+    const [createForm] = Form.useForm();
+
     // 加载预约列表
     const loadReservations = async () => {
         setLoading(true);
         try {
-            // 模拟数据
             const mockData: Reservation[] = [
-                { id: '1', reservedAt: '2023-12-04T19:00:00', member: { nickname: 'Husk·Aiden', phone: '13800138000' }, table: { name: '主赛桌 A1', category: 'MAIN' }, depositAmount: 200, depositPaid: true, status: 'CONFIRMED' },
-                { id: '2', reservedAt: '2023-12-04T20:30:00', member: { nickname: 'Husk·Yuri', phone: '13900139000' }, table: { name: '副赛桌 B2', category: 'SIDE' }, depositAmount: 100, depositPaid: false, status: 'PENDING' },
-                { id: '3', reservedAt: '2023-12-05T18:00:00', member: { nickname: 'Tom', phone: '13700137000' }, table: { name: '练习桌 C1', category: 'TRAINING' }, depositAmount: 0, depositPaid: false, status: 'PENDING' },
-                { id: '4', reservedAt: '2023-12-05T19:30:00', member: { nickname: 'Jerry', phone: '13600136000' }, table: { name: '主赛桌 A2', category: 'MAIN' }, depositAmount: 200, depositPaid: true, status: 'PENDING' },
-                { id: '5', reservedAt: '2023-12-06T20:00:00', member: { nickname: 'Mike', phone: '13500135000' }, table: { name: '副赛桌 B1', category: 'SIDE' }, depositAmount: 100, depositPaid: false, status: 'CANCELLED' },
+                { id: '1', reservedAt: '2023-12-04T19:00:00', member: { id: '1', nickname: 'Husk·Aiden', phone: '13800138000' }, table: { id: '1', name: '主赛桌 A1', category: 'MAIN' }, depositAmount: 200, depositPaid: true, status: 'CONFIRMED', createdAt: '', updatedAt: '' },
+                { id: '2', reservedAt: '2023-12-04T20:30:00', member: { id: '2', nickname: 'Husk·Yuri', phone: '13900139000' }, table: { id: '3', name: '副赛桌 B2', category: 'SIDE' }, depositAmount: 100, depositPaid: false, status: 'PENDING', createdAt: '', updatedAt: '' },
+                { id: '3', reservedAt: '2023-12-05T18:00:00', member: { id: '3', nickname: 'Tom', phone: '13700137000' }, table: { id: '5', name: '练习桌 C1', category: 'TRAINING' }, depositAmount: 0, depositPaid: false, status: 'PENDING', createdAt: '', updatedAt: '' },
+                { id: '4', reservedAt: '2023-12-05T19:30:00', member: { id: '4', nickname: 'Jerry', phone: '13600136000' }, table: { id: '2', name: '主赛桌 A2', category: 'MAIN' }, depositAmount: 200, depositPaid: true, status: 'PENDING', createdAt: '', updatedAt: '' },
+                { id: '5', reservedAt: '2023-12-06T20:00:00', member: { id: '2', nickname: 'Husk·Yuri', phone: '13900139000' }, table: { id: '4', name: '副赛桌 B1', category: 'SIDE' }, depositAmount: 100, depositPaid: false, status: 'CANCELLED', createdAt: '', updatedAt: '' },
             ];
             setReservations(mockData);
         } catch (error) {
-            console.error('加载预约列表失败:', error);
             message.error('加载预约列表失败');
         } finally {
             setLoading(false);
@@ -39,6 +59,32 @@ export default function Reservations() {
     useEffect(() => {
         loadReservations();
     }, [statusFilter]);
+
+    // 打开创建预约弹窗
+    const handleOpenCreate = () => {
+        createForm.resetFields();
+        setCreateModalVisible(true);
+    };
+
+    // 创建预约
+    const handleCreateSubmit = async () => {
+        try {
+            const values = await createForm.validateFields();
+            const data: CreateReservationDto = {
+                memberId: values.memberId,
+                tableId: values.tableId,
+                reservedAt: values.reservedAt.toISOString(),
+                depositAmount: values.depositAmount,
+                remark: values.remark,
+            };
+            // await reservationApi.create(data);
+            message.success('预约创建成功');
+            setCreateModalVisible(false);
+            loadReservations();
+        } catch (error) {
+            console.error('创建失败:', error);
+        }
+    };
 
     // 批量确认
     const handleBatchConfirm = () => {
@@ -80,7 +126,7 @@ export default function Reservations() {
         confirm({
             title: '批量取消预约',
             icon: <ExclamationCircleOutlined />,
-            content: `确定要取消 ${cancelableIds.length} 条预约吗？此操作不可撤销！`,
+            content: `确定要取消 ${cancelableIds.length} 条预约吗？`,
             okText: '确认取消',
             okType: 'danger',
             cancelText: '返回',
@@ -92,13 +138,12 @@ export default function Reservations() {
         });
     };
 
-    // 导出 Excel
+    // 导出
     const handleExport = () => {
         const dataToExport = selectedRowKeys.length > 0
             ? reservations.filter(r => selectedRowKeys.includes(r.id))
             : reservations;
 
-        // 模拟导出
         const csvContent = [
             '预约时间,客户昵称,联系电话,桌位,订金,状态',
             ...dataToExport.map(r =>
@@ -117,7 +162,7 @@ export default function Reservations() {
         message.success(`已导出 ${dataToExport.length} 条记录`);
     };
 
-    //确认预约
+    // 确认预约
     const handleConfirm = async (id: string) => {
         message.success('已确认预约');
         loadReservations();
@@ -149,7 +194,6 @@ export default function Reservations() {
         return <Tag color={config.color}>{config.text}</Tag>;
     };
 
-    // 表格列定义
     const columns: ColumnsType<Reservation> = [
         {
             title: '预约时间',
@@ -185,13 +229,7 @@ export default function Reservations() {
                 return (
                     <div>
                         <div style={{ fontFamily: 'DIN Alternate', fontWeight: 'bold' }}>¥{record.depositAmount}</div>
-                        <div style={{ fontSize: 12 }}>
-                            {record.depositPaid ? (
-                                <Tag color="green">已支付</Tag>
-                            ) : (
-                                <Tag color="orange">未支付</Tag>
-                            )}
-                        </div>
+                        <Tag color={record.depositPaid ? 'green' : 'orange'}>{record.depositPaid ? '已支付' : '未支付'}</Tag>
                     </div>
                 );
             },
@@ -209,40 +247,18 @@ export default function Reservations() {
                 <Space>
                     {record.status === 'PENDING' && (
                         <>
-                            <Button
-                                type="primary"
-                                size="small"
-                                icon={<CheckOutlined />}
-                                onClick={() => handleConfirm(record.id)}
-                            >
-                                确认
-                            </Button>
-                            <Button
-                                size="small"
-                                icon={<CloseOutlined />}
-                                onClick={() => handleCancel(record.id)}
-                                style={{ background: 'transparent', border: '1px solid #ff4d4f', color: '#ff4d4f' }}
-                            >
-                                取消
-                            </Button>
+                            <Button type="primary" size="small" icon={<CheckOutlined />} onClick={() => handleConfirm(record.id)}>确认</Button>
+                            <Button size="small" icon={<CloseOutlined />} onClick={() => handleCancel(record.id)} style={{ background: 'transparent', border: '1px solid #ff4d4f', color: '#ff4d4f' }}>取消</Button>
                         </>
                     )}
                     {record.status === 'CONFIRMED' && (
-                        <Button
-                            size="small"
-                            icon={<CloseOutlined />}
-                            onClick={() => handleCancel(record.id)}
-                            style={{ background: 'transparent', border: '1px solid #ff4d4f', color: '#ff4d4f' }}
-                        >
-                            取消
-                        </Button>
+                        <Button size="small" icon={<CloseOutlined />} onClick={() => handleCancel(record.id)} style={{ background: 'transparent', border: '1px solid #ff4d4f', color: '#ff4d4f' }}>取消</Button>
                     )}
                 </Space>
             ),
         },
     ];
 
-    // 筛选后的数据
     const filteredData = reservations.filter((item) => {
         if (statusFilter && item.status !== statusFilter) return false;
         if (!searchText) return true;
@@ -254,7 +270,6 @@ export default function Reservations() {
         );
     });
 
-    // 行选择配置
     const rowSelection = {
         selectedRowKeys,
         onChange: (keys: React.Key[]) => setSelectedRowKeys(keys),
@@ -267,14 +282,14 @@ export default function Reservations() {
             <div className="panel-header">
                 <div>
                     <h2>预约管理</h2>
-                    <p>管理所有赛桌预约记录</p>
+                    <p>管理所有赛桌预约记录，支持管理员代客预约</p>
                 </div>
                 <Space>
                     <Button icon={<DownloadOutlined />} onClick={handleExport}>
                         {hasSelected ? `导出选中 (${selectedRowKeys.length})` : '导出全部'}
                     </Button>
-                    <Button type="primary" icon={<ReloadOutlined />} onClick={loadReservations}>
-                        刷新列表
+                    <Button type="primary" icon={<PlusOutlined />} onClick={handleOpenCreate}>
+                        新建预约
                     </Button>
                 </Space>
             </div>
@@ -294,7 +309,6 @@ export default function Reservations() {
                             <Select.Option value="CANCELLED">已取消</Select.Option>
                             <Select.Option value="COMPLETED">已完成</Select.Option>
                         </Select>
-
                         <Search
                             placeholder="搜索客户/手机号/桌位"
                             allowClear
@@ -303,16 +317,11 @@ export default function Reservations() {
                             onChange={(e) => setSearchText(e.target.value)}
                         />
                     </Space>
-
                     {hasSelected && (
                         <Space>
                             <span style={{ color: 'var(--text-secondary)' }}>已选 {selectedRowKeys.length} 项</span>
-                            <Button type="primary" icon={<CheckOutlined />} onClick={handleBatchConfirm}>
-                                批量确认
-                            </Button>
-                            <Button danger icon={<CloseOutlined />} onClick={handleBatchCancel}>
-                                批量取消
-                            </Button>
+                            <Button type="primary" icon={<CheckOutlined />} onClick={handleBatchConfirm}>批量确认</Button>
+                            <Button danger icon={<CloseOutlined />} onClick={handleBatchCancel}>批量取消</Button>
                         </Space>
                     )}
                 </div>
@@ -323,13 +332,47 @@ export default function Reservations() {
                     columns={columns}
                     rowKey="id"
                     rowSelection={rowSelection}
-                    pagination={{
-                        pageSize: 10,
-                        showSizeChanger: true,
-                        showTotal: (total) => `共 ${total} 条`,
-                    }}
+                    pagination={{ pageSize: 10, showSizeChanger: true, showTotal: (total) => `共 ${total} 条` }}
                 />
             </Card>
+
+            {/* 创建预约弹窗 */}
+            <Modal
+                title="新建预约"
+                open={createModalVisible}
+                onOk={handleCreateSubmit}
+                onCancel={() => setCreateModalVisible(false)}
+                okText="创建"
+                cancelText="取消"
+                width={500}
+                destroyOnClose
+            >
+                <Form form={createForm} layout="vertical">
+                    <Form.Item name="memberId" label="选择会员" rules={[{ required: true, message: '请选择会员' }]}>
+                        <Select placeholder="搜索或选择会员" showSearch optionFilterProp="children">
+                            {mockMembers.map(m => (
+                                <Select.Option key={m.id} value={m.id}>{m.nickname} ({m.phone})</Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                    <Form.Item name="tableId" label="选择桌位" rules={[{ required: true, message: '请选择桌位' }]}>
+                        <Select placeholder="选择桌位">
+                            {mockTables.map(t => (
+                                <Select.Option key={t.id} value={t.id}>{t.name}</Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                    <Form.Item name="reservedAt" label="预约时间" rules={[{ required: true, message: '请选择预约时间' }]}>
+                        <DatePicker showTime format="YYYY-MM-DD HH:mm" style={{ width: '100%' }} />
+                    </Form.Item>
+                    <Form.Item name="depositAmount" label="订金金额">
+                        <InputNumber min={0} prefix="¥" style={{ width: '100%' }} placeholder="可选，输入订金金额" />
+                    </Form.Item>
+                    <Form.Item name="remark" label="备注">
+                        <Input.TextArea rows={2} placeholder="可选" />
+                    </Form.Item>
+                </Form>
+            </Modal>
         </div>
     );
 }

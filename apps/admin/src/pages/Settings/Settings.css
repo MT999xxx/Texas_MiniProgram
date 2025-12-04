@@ -1,0 +1,49 @@
+/* Settings.css */
+.settings-page {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.settings-page .ant-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+}
+
+.settings-page .ant-tabs-tab {
+    font-size: 14px;
+    padding: 12px 16px;
+}
+
+.settings-page .ant-tabs-tab-active {
+    color: var(--color-gold-primary) !important;
+}
+
+.settings-page .ant-tabs-ink-bar {
+    background: var(--color-gold-primary);
+}
+
+.settings-page .ant-divider-inner-text {
+    color: var(--color-gold-primary);
+    font-weight: 600;
+}
+
+.settings-page .ant-form-item-label>label {
+    color: var(--text-primary);
+}
+
+.settings-page .ant-form-item-extra {
+    color: var(--text-muted);
+    font-size: 12px;
+}
