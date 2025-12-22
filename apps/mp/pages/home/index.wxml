@@ -1,5 +1,5 @@
 <view class="container">
-  <image class="bg-image" src="/images/耗子.png" mode="aspectFill" />
+  <image class="bg-image" src="{{bgUrl}}" mode="aspectFill" />
   
   <view class="bg-overlay"></view>
 

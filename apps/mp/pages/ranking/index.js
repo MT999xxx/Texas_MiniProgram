@@ -1,5 +1,5 @@
 // pages/ranking/index.js
-const request = require('../../utils/request.js');
+const rankingApi = require('../../api/ranking');
 
 Page({
   data: {
@@ -15,16 +15,20 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-    this.loadRankingData();
+    this.initialLoad = true;
     this.updateDateRange();
+    this.loadRankingData();
   },
 
   /**
    * 生命周期函数--监听页面显示
    */
   onShow() {
-    // 每次显示时刷新数据
-    this.loadRankingData();
+    // 如果不是首次加载（首次加载由 onLoad 触发），则刷新数据
+    if (!this.initialLoad) {
+      this.loadRankingData();
+    }
+    this.initialLoad = false;
   },
 
   /**
@@ -38,8 +42,8 @@ Page({
       currentTab: index
     });
 
-    this.loadRankingData();
     this.updateDateRange();
+    this.loadRankingData();
   },
 
   /**
@@ -84,9 +88,9 @@ Page({
   async loadRankingData() {
     // 映射tab到后端type
     const typeMap = {
-      0: 'weekly',  // 半月榜 -> 周榜
-      1: 'total',   // 年榜 -> 总榜
-      2: 'event'    // 冠军榜 -> 活动榜
+      0: 'monthly', // 半月榜 (Mock使用weekly, API使用monthly或根据需求)
+      1: 'yearly',  // 年榜
+      2: 'champion' // 冠军榜
     };
 
     const type = typeMap[this.data.currentTab];
@@ -94,45 +98,50 @@ Page({
     this.setData({ loading: true, isEmpty: false });
 
     try {
-      // 获取用户信息
-      const userInfo = wx.getStorageSync('userInfo');
-      const userId = userInfo?.id;
+      // 并行获取榜单和我的排名
+      const [listRes, myRankRes] = await Promise.all([
+        rankingApi.getList(type).catch(e => ({ rankings: [] })),
+        rankingApi.getMyRank(type).catch(e => null)
+      ]);
 
-      let response;
+      console.log('排行榜数据:', listRes);
 
-      if (userId) {
-        // 如果已登录，获取排行榜和用户排名
-        response = await request.get(`/loyalty/leaderboard-with-user/${userId}`, {
-          type,
-          limit: 50
-        });
-      } else {
-        // 未登录只获取排行榜
-        response = await request.get('/loyalty/leaderboard', {
-          type,
-          limit: 50
-        });
-      }
-
-      console.log('排行榜数据:', response);
-
-      // 格式化数据
-      const rankingList = (response.rankings || []).map(item => ({
+      // 格式化列表数据
+      const rankingList = (listRes.rankings || []).map(item => ({
         rank: item.rank,
-        name: item.nickname || `用户${item.id.slice(0, 8)}`,
+        name: item.nickname || `用户${item.id ? item.id.toString().slice(-4) : 'xxxx'}`,
         score: this.formatScore(item.points),
         avatar: item.avatar || '/images/会员图标.png',
-        levelName: item.levelName || 'V1 普通会员'
+        levelName: item.levelName || '普通会员'
       }));
+
+      // 格式化我的排名
+      let currentUserRank = null;
+      if (myRankRes) {
+        currentUserRank = {
+          rank: myRankRes.rank || '未上榜',
+          name: myRankRes.nickname || '我',
+          score: this.formatScore(myRankRes.points),
+          avatar: myRankRes.avatar || '/images/会员图标.png'
+        };
+      } else {
+        // 如果API没返回我的排名，尝试从列表中查找
+        // 这里只是fallback，实际应该依赖API
+        const userInfo = wx.getStorageSync('userInfo');
+        if (userInfo && userInfo.id) {
+          // 简单Mock一下
+          currentUserRank = {
+            rank: '未上榜',
+            name: userInfo.nickname,
+            score: '0',
+            avatar: userInfo.avatar
+          };
+        }
+      }
 
       this.setData({
         rankingList,
-        currentUserRank: response.currentUserRank ? {
-          rank: response.currentUserRank.rank || '未上榜',
-          name: response.currentUserRank.nickname || '我',
-          score: this.formatScore(response.currentUserRank.points),
-          avatar: response.currentUserRank.avatar || '/images/会员图标.png'
-        } : null,
+        currentUserRank,
         isEmpty: rankingList.length === 0,
         loading: false
       });
@@ -140,22 +149,27 @@ Page({
     } catch (error) {
       console.error('加载排行榜失败:', error);
 
-      // 使用模拟数据（开发环境）
-      console.log('使用模拟排行榜数据');
-      const mockData = this.getMockRankingData();
-
-      this.setData({
-        rankingList: mockData,
-        currentUserRank: {
-          rank: 15,
-          name: '我',
-          score: '50000',
-          avatar: '/images/会员图标.png'
-        },
-        isEmpty: false,
-        loading: false
-      });
+      // Fallback: 使用模拟数据以保证展示
+      this.useMockData();
     }
+  },
+
+  /**
+   * 使用模拟数据
+   */
+  useMockData() {
+    const mockData = this.getMockRankingData();
+    this.setData({
+      rankingList: mockData,
+      currentUserRank: {
+        rank: 15,
+        name: '我',
+        score: '50000',
+        avatar: '/images/会员图标.png'
+      },
+      isEmpty: false,
+      loading: false
+    });
   },
 
   /**

@@ -2,7 +2,9 @@ const authManager = require('./utils/auth');
 
 App({
   globalData: {
-    apiBase: 'http://localhost:3000',
+    apiBase: 'https://dolichocranic-unomnipotently-therese.ngrok-free.dev',
+    // CDN地址 - 通过 ngrok 隧道访问
+    cdnBase: 'https://dolichocranic-unomnipotently-therese.ngrok-free.dev/static/images',
     userInfo: null,
   },
 

@@ -1,7 +1,12 @@
 // pages/home/index.js
+const app = getApp();
+
 Page({
   data: {
-    // 如果需要动态数据可以在这里添加
+    // CDN或本地图片地址
+    bgUrl: app.globalData.cdnBase
+      ? `${app.globalData.cdnBase}/home_bg.png`
+      : '/images/耗子.png',
   },
 
   onLoad: function (options) {

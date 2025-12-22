@@ -2,14 +2,21 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 import dotenv from 'dotenv';
 import { AppModule } from './modules/app.module';
 
 dotenv.config();
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { cors: true });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+
+  // 静态文件服务 - 用于提供大图片资源
+  app.useStaticAssets(join(process.cwd(), 'public'), {
+    prefix: '/static/',
+  });
 
   const config = new DocumentBuilder()
     .setTitle('Texas Poker Bar Mini Program API')
