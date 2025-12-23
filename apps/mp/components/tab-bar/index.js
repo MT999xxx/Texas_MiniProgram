@@ -12,22 +12,22 @@ Component({
             {
                 pagePath: "/pages/home/index",
                 text: "首页",
-                iconPath: "/images/首页图标2.png"
+                iconPath: "/images/shouye2.png"
             },
             {
                 pagePath: "/pages/table/index",
                 text: "桌面",
-                iconPath: "/images/桌面图标2.png"
+                iconPath: "/images/zhuomian2.png"
             },
             {
                 pagePath: "/pages/ranking/index",
                 text: "排行榜",
-                iconPath: "/images/排行榜图标2.png"
+                iconPath: "/images/paihangbang2.png"
             },
             {
                 pagePath: "/pages/member/index",
                 text: "会员",
-                iconPath: "/images/会员图标2.png"
+                iconPath: "/images/huiyuan2.png"
             }
         ]
     },
