@@ -48,7 +48,7 @@ export default function Login() {
         <div className="login-container">
             <Card className="login-card" bordered={false}>
                 <div className="login-header">
-                    <h1>TUSK ADMIN</h1>
+                    <h1>三条A 管理后台</h1>
                     <h2>德州扑克后台管理系统</h2>
                 </div>
 

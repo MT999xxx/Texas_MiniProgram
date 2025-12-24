@@ -13,6 +13,7 @@ import { EventsModule } from '../events/events.module';
 import { PaymentModule } from '../payment/payment.module';
 import { UploadModule } from '../upload/upload.module';
 import { NoticesModule } from '../notices/notices.module';
+import { StatisticsModule } from '../statistics/statistics.module';
 import { databaseConfig } from '../config/database.config';
 
 @Module({
@@ -31,6 +32,7 @@ import { databaseConfig } from '../config/database.config';
     PaymentModule,
     UploadModule,
     NoticesModule,
+    StatisticsModule,
   ],
 })
 export class AppModule { }

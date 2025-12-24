@@ -99,7 +99,7 @@ export default function MainLayout() {
             >
                 <div className="logo-container">
                     <div className="logo-text">
-                        {collapsed ? 'T' : 'TUSK ADMIN'}
+                        {collapsed ? 'A' : '三条A 管理后台'}
                     </div>
                 </div>
                 <Menu

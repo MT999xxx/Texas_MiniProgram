@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Line, Pie, Bar } from '@ant-design/charts';
-import { Modal, Form, Input, App } from 'antd';
-import { noticesApi, NoticeType } from '../../api/notices';
+import { Modal, Form, Input, App, Select } from 'antd';
+import { utils, writeFile } from 'xlsx';
+import { noticesApi, NoticeType, Notice } from '../../api/notices';
+import { statisticsApi, DashboardSummary } from '../../api/statistics';
 import './Dashboard.css';
 
 // 模拟数据
-const revenueData = [
+const revenueData7d = [
     { date: '11/28', revenue: 12800 },
     { date: '11/29', revenue: 15600 },
     { date: '11/30', revenue: 18200 },
@@ -13,6 +15,25 @@ const revenueData = [
     { date: '12/02', revenue: 19800 },
     { date: '12/03', revenue: 24300 },
     { date: '12/04', revenue: 22100 },
+];
+
+const revenueData1m = [
+    { date: '11/05', revenue: 10500 },
+    { date: '11/10', revenue: 12800 },
+    { date: '11/15', revenue: 18600 },
+    { date: '11/20', revenue: 15400 },
+    { date: '11/25', revenue: 21200 },
+    { date: '11/30', revenue: 19800 },
+    { date: '12/04', revenue: 22100 },
+];
+
+const revenueData6m = [
+    { date: '07月', revenue: 328000 },
+    { date: '08月', revenue: 356000 },
+    { date: '09月', revenue: 412000 },
+    { date: '10月', revenue: 385000 },
+    { date: '11月', revenue: 456000 },
+    { date: '12月', revenue: 221000 },
 ];
 
 const reservationData = [
@@ -33,25 +54,14 @@ const leaderboard = [
     { name: 'Husk·Aiden', score: 12890, tag: '周榜冠军', avatar: '🦊' },
     { name: 'Husk·Yuri', score: 11840, tag: '热度飙升', avatar: '🐺' },
     { name: 'Husk·Jaden', score: 11030, tag: '连胜 5 场', avatar: '🐻' },
+    { name: 'Husk·Zoe', score: 9800, tag: '上升势头', avatar: '🐱' },
+    { name: 'Husk·Leo', score: 8500, tag: '稳如泰山', avatar: '🦁' },
+    { name: 'Husk·Luna', score: 7200, tag: '新晋黑马', avatar: '🐰' },
+    { name: 'Husk·Max', score: 6500, tag: '积分高手', avatar: '🐶' },
+    { name: 'Husk·Mia', score: 5400, tag: '常驻玩家', avatar: '🐼' },
 ];
 
-const reservationStatus = [
-    { title: '主赛桌', value: '09 / 12', desc: '巅峰桌实时余位', accent: 'MAIN' },
-    { title: '副赛桌', value: '04 / 10', desc: '好友拼桌 · 轻松局', accent: 'SIDE' },
-    { title: '练习桌', value: '05 / 08', desc: '快速上手体验', accent: 'TRAINING' },
-];
 
-const events = [
-    { tag: '赛事', title: '德州大师赛 · 火热报名中', time: '周六 19:00', badge: 'TOP1 入场券' },
-    { tag: '福利', title: '新会员注册即送 200 积分', time: '长期有效', badge: '积分加速' },
-    { tag: '公告', title: '周五店内升级，暂停营业一天', time: '12/06(周五)', badge: '营运提示' },
-];
-
-const memberPerks = [
-    { title: '积分兑换', desc: '2000 积分可换专属酒水', icon: '🎁' },
-    { title: '尊享服务', desc: '会员预留座位 · 专属管家', icon: '👑' },
-    { title: '邀请礼遇', desc: '邀友到店双方额外 +100', icon: '🤝' },
-];
 
 export default function Dashboard() {
     const { message } = App.useApp();
@@ -59,6 +69,33 @@ export default function Dashboard() {
     const [noticeType, setNoticeType] = useState<NoticeType>('ANNOUNCEMENT');
     const [noticeForm] = Form.useForm();
     const [submitting, setSubmitting] = useState(false);
+    const [latestNotice, setLatestNotice] = useState<Notice | null>(null);
+    const [latestActivity, setLatestActivity] = useState<Notice | null>(null);
+    const [stats, setStats] = useState<DashboardSummary>({
+        totalReservations: 0,
+        memberVisits: 0,
+        totalRevenue: 0,
+    });
+    const [revenueRange, setRevenueRange] = useState<'7d' | '1m' | '6m'>('7d');
+
+    const fetchData = useCallback(async () => {
+        try {
+            const [noticeRes, activityRes, statsRes] = await Promise.all([
+                noticesApi.getLatest('ANNOUNCEMENT'),
+                noticesApi.getLatest('ACTIVITY'),
+                statisticsApi.getSummary(),
+            ]);
+            setLatestNotice(noticeRes.data);
+            setLatestActivity(activityRes.data);
+            setStats(statsRes.data);
+        } catch (error) {
+            console.error('获取动态数据失败:', error);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     const handleOpenNoticeModal = (type: NoticeType) => {
         setNoticeType(type);
@@ -77,6 +114,7 @@ export default function Dashboard() {
             });
             message.success(`${noticeType === 'ANNOUNCEMENT' ? '公告' : '活动'}发布成功`);
             setNoticeModalVisible(false);
+            fetchData(); // 刷新数据
         } catch (error) {
             console.error('发布失败:', error);
             message.error('发布失败，请检查输入');
@@ -85,89 +123,84 @@ export default function Dashboard() {
         }
     };
 
+    const handleExport = () => {
+        try {
+            const exportData = leaderboard.map((player, index) => ({
+                '序号': index + 1,
+                '名称': player.name,
+                '积分': player.score
+            }));
+
+            const ws = utils.json_to_sheet(exportData);
+            const wb = utils.book_new();
+            utils.book_append_sheet(wb, ws, "积分排行榜");
+
+            // 生成文件名: 积分排行榜_2024-12-24.xlsx
+            const fileName = `积分排行榜_${new Date().toISOString().split('T')[0]}.xlsx`;
+            writeFile(wb, fileName);
+            message.success('排行榜导出成功');
+        } catch (error) {
+            console.error('导出失败:', error);
+            message.error('导出失败，请重试');
+        }
+    };
+
     // 营收趋势图配置
     const revenueConfig = {
-        data: revenueData,
+        data: revenueRange === '7d' ? revenueData7d : revenueRange === '1m' ? revenueData1m : revenueData6m,
         xField: 'date',
         yField: 'revenue',
         smooth: true,
         color: '#D4AF37',
-        areaStyle: {
-            fill: 'l(270) 0:#D4AF3700 1:#D4AF3740',
-        },
-        point: {
-            size: 4,
-            shape: 'circle',
+        area: {
             style: {
-                fill: '#D4AF37',
-                stroke: '#000',
-                lineWidth: 2,
+                fill: 'l(270) 0:#D4AF3700 1:#D4AF3740',
             },
         },
-        xAxis: {
-            label: { style: { fill: '#666' } },
-            line: { style: { stroke: '#333' } },
-        },
-        yAxis: {
-            label: {
-                style: { fill: '#666' },
-                formatter: (v: string) => `¥${Number(v) / 1000}k`,
+        point: true,
+        axis: {
+            x: {
+                labelFill: '#D4AF37',
+                labelFontSize: 11,
+                lineStroke: '#444',
             },
-            grid: { line: { style: { stroke: '#222' } } },
+            y: {
+                labelFill: '#D4AF37',
+                labelFontSize: 11,
+                labelFormatter: (v: any) => revenueRange === '6m' ? `¥${Number(v) / 1000}k` : `¥${Number(v)}`,
+                gridStroke: '#333',
+            },
         },
         tooltip: {
-            formatter: (datum: { revenue: number }) => ({
-                name: '营收',
-                value: `¥${datum.revenue.toLocaleString()}`,
-            }),
+            items: [
+                { name: '营收', channel: 'y', valueFormatter: (v: any) => `¥${v.toLocaleString()}` }
+            ],
         },
     };
 
-    // 预约统计饼图配置
-    const reservationPieConfig = {
-        data: reservationData,
-        angleField: 'value',
-        colorField: 'type',
-        radius: 0.8,
-        innerRadius: 0.6,
-        color: ['#D4AF37', '#AA8A2E', '#F4D03F'],
-        label: {
-            text: 'type',
-            style: { fill: '#999', fontSize: 12 },
-        },
-        legend: {
-            position: 'bottom' as const,
-            itemName: { style: { fill: '#999' } },
-        },
-        statistic: {
-            title: {
-                content: '总预约',
-                style: { color: '#999', fontSize: '14px' },
-            },
-            content: {
-                content: '100',
-                style: { color: '#D4AF37', fontSize: '24px', fontWeight: 'bold' },
-            },
-        },
-    };
 
     // 热门菜品排行配置
     const hotMenuConfig = {
         data: hotMenuData,
-        xField: 'sales',
-        yField: 'name',
+        xField: 'name',
+        yField: 'sales',
         color: '#D4AF37',
-        barBackground: { style: { fill: 'rgba(255,255,255,0.05)' } },
-        xAxis: {
-            label: { style: { fill: '#666' } },
-            grid: { line: { style: { stroke: '#222' } } },
-        },
-        yAxis: {
-            label: { style: { fill: '#999' } },
+        axis: {
+            x: {
+                labelFill: '#D4AF37',
+                labelFontSize: 10,
+                labelAutoRotate: true,
+            },
+            y: {
+                labelFill: '#D4AF37',
+                labelFontSize: 11,
+                gridStroke: '#333',
+            },
         },
         label: {
-            position: 'right' as const,
-            style: { fill: '#D4AF37' },
+            text: 'sales',
+            fill: '#D4AF37',
+            position: 'top',
         },
     };
 
@@ -175,7 +208,7 @@ export default function Dashboard() {
         <div className="dashboard-page">
             <header className="hero-panel">
                 <div className="hero-left">
-                    <span className="hero-badge">重庆店 · 尖牙 TUSK</span>
+                    <span className="hero-badge">重庆店 · 三条A</span>
                     <h1>德州扑克主题酒吧控制台</h1>
                     <p>预约赛桌 · 奢享酒食 · 决战巅峰</p>
                     <div className="hero-actions">
@@ -184,15 +217,15 @@ export default function Dashboard() {
                     </div>
                     <div className="hero-meta">
                         <div>
-                            <strong>128</strong>
+                            <strong>{stats.totalReservations}</strong>
                             <span>今日预约</span>
                         </div>
                         <div>
-                            <strong>56</strong>
+                            <strong>{stats.memberVisits}</strong>
                             <span>会员来店</span>
                         </div>
                         <div>
-                            <strong>￥82,430</strong>
+                            <strong>￥{stats.totalRevenue.toLocaleString()}</strong>
                             <span>预计营收</span>
                         </div>
                     </div>
@@ -201,14 +234,14 @@ export default function Dashboard() {
                     <div className="snake-preview">
                         <div className="glow-circle" />
                         <div className="hero-card">
-                            <span>实时预警</span>
-                            <strong>练习桌已满座 · 转入排队模式</strong>
-                            <p>副赛桌 D3 玩家等待 12 分钟，请调度场控。</p>
+                            <span>最新公告</span>
+                            <strong>{latestNotice?.title || '暂无公告'}</strong>
+                            <p>{latestNotice?.content || '点击下方按钮发布您的第一条公告'}</p>
                         </div>
                         <div className="hero-card outline">
-                            <span>今晚推荐</span>
-                            <strong>至尊狂欢套餐</strong>
-                            <p>三杯精酿 + 牛排拼盘 + 限定甜品</p>
+                            <span>热门活动</span>
+                            <strong>{latestActivity?.title || '暂无活动'}</strong>
+                            <p>{latestActivity?.content || '点击下方按钮发起您的第一场活动'}</p>
                         </div>
                     </div>
                 </div>
@@ -218,19 +251,26 @@ export default function Dashboard() {
             <section className="charts-section">
                 <div className="chart-card large">
                     <div className="chart-header">
-                        <h3>📈 营收趋势 (近7天)</h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <h3>📈 营收趋势</h3>
+                            <Select
+                                value={revenueRange}
+                                onChange={setRevenueRange}
+                                size="small"
+                                popupClassName="dark-select-popup"
+                                variant="borderless"
+                                style={{ color: '#D4AF37', border: '1px solid rgba(212, 175, 55, 0.3)', borderRadius: '4px', background: 'rgba(0,0,0,0.2)' }}
+                                options={[
+                                    { value: '7d', label: '近7天' },
+                                    { value: '1m', label: '近1个月' },
+                                    { value: '6m', label: '近半年' },
+                                ]}
+                            />
+                        </div>
                         <span className="chart-badge">+18.5%</span>
                     </div>
                     <div className="chart-body">
                         <Line {...revenueConfig} />
-                    </div>
-                </div>
-                <div className="chart-card">
-                    <div className="chart-header">
-                        <h3>📊 预约分布</h3>
-                    </div>
-                    <div className="chart-body">
-                        <Pie {...reservationPieConfig} />
                     </div>
                 </div>
                 <div className="chart-card">
@@ -243,37 +283,16 @@ export default function Dashboard() {
                 </div>
             </section>
 
-            <section className="panel reservation-panel">
+
+            <section className="panel leaderboard-panel full-width">
                 <div className="panel-header">
                     <div>
-                        <h2>赛桌预约状态</h2>
-                        <p>实时掌握各桌位负载与等待情况</p>
+                        <h2>积分排行榜</h2>
+                        <p>赛事积分实时刷新 · 激发竞争热度</p>
                     </div>
-                    <button className="btn link">查看预约列表</button>
+                    <button className="btn link" onClick={handleExport}>导出榜单</button>
                 </div>
-                <div className="status-grid">
-                    {reservationStatus.map((item) => (
-                        <div className="status-card" key={item.title}>
-                            <div className="status-head">
-                                <span className="accent">{item.accent}</span>
-                                <strong>{item.value}</strong>
-                            </div>
-                            <p>{item.desc}</p>
-                            <button className="btn ghost" style={{ width: '100%', marginTop: '10px' }}>调度</button>
-                        </div>
-                    ))}
-                </div>
-            </section>
-
-            <section className="grid two-column">
-                <div className="panel leaderboard-panel">
-                    <div className="panel-header">
-                        <div>
-                            <h2>积分排行榜</h2>
-                            <p>赛事积分实时刷新 · 激发竞争热度</p>
-                        </div>
-                        <button className="btn link">导出榜单</button>
-                    </div>
+                <div className="leaderboard-scroll">
                     <ul className="leaderboard">
                         {leaderboard.map((player, index) => (
                             <li key={player.name}>
@@ -288,60 +307,8 @@ export default function Dashboard() {
                         ))}
                     </ul>
                 </div>
-
-                <div className="panel member-panel">
-                    <div className="panel-header">
-                        <div>
-                            <h2>会员权益中心</h2>
-                            <p>升级激励 + 现场推送 = 拉升复购</p>
-                        </div>
-                        <button className="btn link">配置等级</button>
-                    </div>
-                    <div className="member-hero">
-                        <div>
-                            <span>今日新增会员</span>
-                            <strong>+24</strong>
-                        </div>
-                        <div>
-                            <span>会员贡献营收</span>
-                            <strong>￥56,420</strong>
-                        </div>
-                    </div>
-                    <div className="perk-grid">
-                        {memberPerks.map((perk) => (
-                            <div className="perk-card" key={perk.title}>
-                                <div className="perk-icon">{perk.icon}</div>
-                                <div>
-                                    <strong>{perk.title}</strong>
-                                    <p>{perk.desc}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
             </section>
 
-            <section className="panel events-panel">
-                <div className="panel-header">
-                    <div>
-                        <h2>活动与公告</h2>
-                        <p>跟进运营节点 · 与玩家保持沟通</p>
-                    </div>
-                    <button className="btn link">全部活动</button>
-                </div>
-                <div className="event-list">
-                    {events.map((event) => (
-                        <div className="event-card" key={event.title}>
-                            <div className="event-tag">{event.tag}</div>
-                            <div>
-                                <strong>{event.title}</strong>
-                                <p>{event.time}</p>
-                            </div>
-                            <span className="event-badge">{event.badge}</span>
-                        </div>
-                    ))}
-                </div>
-            </section>
 
             <Modal
                 title={noticeType === 'ANNOUNCEMENT' ? '发布公告' : '发起活动'}

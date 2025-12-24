@@ -56,6 +56,7 @@
   font-size: 42px;
   margin: 0 0 12px;
   background: linear-gradient(135deg, #fff 0%, #ccc 100%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: 1px;
@@ -286,7 +287,36 @@
   margin-bottom: 20px;
 }
 
+/* Leaderboard Scroll */
+.leaderboard-scroll {
+  max-height: 480px;
+  overflow-y: auto;
+  padding-right: 12px;
+}
+
+.leaderboard-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.leaderboard-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.leaderboard-scroll::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.3);
+  border-radius: 10px;
+}
+
+.leaderboard-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.5);
+}
+
 /* Grids */
+.panel.full-width {
+  width: 100%;
+}
+
 .grid.two-column {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -522,7 +552,7 @@
 /* Charts Section */
 .charts-section {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr;
   gap: 24px;
   margin-bottom: 32px;
 }
@@ -578,8 +608,8 @@
 .chart-card .recharts-pie-label-text,
 .chart-card .recharts-text,
 .chart-card text {
-  fill: #ffffff !important;
-  color: #ffffff !important;
+  fill: #D4AF37 !important;
+  color: #D4AF37 !important;
   opacity: 1 !important;
   font-size: 11px !important;
   font-weight: 500 !important;
@@ -601,6 +631,25 @@
 .chart-card .recharts-tooltip-label,
 .chart-card .recharts-tooltip-item-list .recharts-tooltip-item {
   color: #ffffff !important;
+}
+
+/* Dark Select Popup */
+.dark-select-popup {
+  background-color: #1a1a1a !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+}
+
+.dark-select-popup .ant-select-item {
+  color: #ccc !important;
+}
+
+.dark-select-popup .ant-select-item-option-selected {
+  background-color: rgba(212, 175, 55, 0.2) !important;
+  color: var(--color-gold-primary) !important;
+}
+
+.dark-select-popup .ant-select-item-option-active {
+  background-color: rgba(255, 255, 255, 0.05) !important;
 }
 
 /* 图例项布局优化 */
