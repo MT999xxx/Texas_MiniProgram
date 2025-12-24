@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Table, Card, Button, Space, Tag, Modal, Form, Input, InputNumber, Select, Tabs, Popconfirm, App } from 'antd';
-import { PlusOutlined, ReloadOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { Table, Card, Button, Space, Tag, Modal, Form, Input, InputNumber, Select, Tabs, Popconfirm, App, Upload, message as antdMessage } from 'antd';
+import { PlusOutlined, ReloadOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined, LoadingOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
+import type { UploadFile, UploadProps } from 'antd';
 import { menuApi, MenuItem, MenuCategory } from '../../api/menu';
 import './Menu.css';
 
@@ -25,6 +26,10 @@ export default function Menu() {
     const [categoryModalType, setCategoryModalType] = useState<'create' | 'edit'>('create');
     const [editingCategory, setEditingCategory] = useState<MenuCategory | null>(null);
     const [categoryForm] = Form.useForm();
+
+    // 图片上传
+    const [uploading, setUploading] = useState(false);
+    const [imageUrl, setImageUrl] = useState<string>();
 
     useEffect(() => {
         loadCategories();
@@ -62,6 +67,7 @@ export default function Menu() {
         setItemModalType('create');
         setEditingItem(null);
         itemForm.resetFields();
+        setImageUrl(undefined);
         setItemModalVisible(true);
     };
 
@@ -76,6 +82,7 @@ export default function Menu() {
             description: item.description,
             imageUrl: item.imageUrl,
         });
+        setImageUrl(item.imageUrl);
         setItemModalVisible(true);
     };
 
@@ -402,42 +409,54 @@ export default function Menu() {
                     <Form.Item name="description" label="描述">
                         <Input.TextArea placeholder="可选，简短描述" rows={2} />
                     </Form.Item>
-                    <Form.Item label="菜品图片">
-                        <Space align="start">
-                            <Form.Item name="imageUrl" noStyle>
-                                <Input placeholder="请输入图片 URL" style={{ width: 330 }} />
-                            </Form.Item>
-                            <Form.Item
-                                noStyle
-                                shouldUpdate={(prevValues, currentValues) => prevValues.imageUrl !== currentValues.imageUrl}
-                            >
-                                {({ getFieldValue }) => {
-                                    const url = getFieldValue('imageUrl');
-                                    return url ? (
-                                        <img
-                                            src={url}
-                                            alt="预览"
-                                            style={{ width: 64, height: 64, borderRadius: 8, objectFit: 'cover', border: '1px solid var(--border-color)' }}
-                                        />
-                                    ) : (
-                                        <div style={{
-                                            width: 64,
-                                            height: 64,
-                                            borderRadius: 8,
-                                            background: 'rgba(255,255,255,0.05)',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            fontSize: 12,
-                                            color: 'var(--text-muted)',
-                                            border: '1px dashed var(--border-color)'
-                                        }}>
-                                            无预览
-                                        </div>
-                                    );
-                                }}
-                            </Form.Item>
-                        </Space>
+                    <Form.Item label="菜品图片" name="imageUrl">
+                        <Upload
+                            name="file"
+                            listType="picture-card"
+                            showUploadList={false}
+                            action="http://localhost:3000/uploads/image"
+                            beforeUpload={(file) => {
+                                const isImage = file.type.startsWith('image/');
+                                if (!isImage) {
+                                    antdMessage.error('只能上传图片文件!');
+                                }
+                                const isLt5M = file.size / 1024 / 1024 < 5;
+                                if (!isLt5M) {
+                                    antdMessage.error('图片必须小于 5MB!');
+                                }
+                                return isImage && isLt5M;
+                            }}
+                            onChange={(info) => {
+                                if (info.file.status === 'uploading') {
+                                    setUploading(true);
+                                    return;
+                                }
+                                if (info.file.status === 'done') {
+                                    setUploading(false);
+                                    const url = info.file.response?.url;
+                                    if (url) {
+                                        // 拼接完整URL
+                                        const fullUrl = `http://localhost:3000${url}`;
+                                        setImageUrl(fullUrl);
+                                        itemForm.setFieldValue('imageUrl', fullUrl);
+                                        antdMessage.success('图片上传成功');
+                                    }
+                                }
+                                if (info.file.status === 'error') {
+                                    setUploading(false);
+                                    antdMessage.error('图片上传失败');
+                                }
+                            }}
+                        >
+                            {imageUrl ? (
+                                <img src={imageUrl} alt="菜品图片" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                                <div style={{ textAlign: 'center' }}>
+                                    {uploading ? <LoadingOutlined /> : <PlusOutlined />}
+                                    <div style={{ marginTop: 8, fontSize: 12 }}>{uploading ? '上传中...' : '点击上传'}</div>
+                                </div>
+                            )}
+                        </Upload>
                     </Form.Item>
                 </Form>
             </Modal>

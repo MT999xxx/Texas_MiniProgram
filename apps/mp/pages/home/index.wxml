@@ -4,11 +4,11 @@
   <view class="bg-overlay"></view>
 
   <view class="header-area">
-    <view class="store-info">
-      <text class="store-name">三条A ></text>
+    <view class="store-info" bindtap="showNotice">
+      <text class="store-name">公告专区 ></text>
     </view>
-    <view class="notice-btn">
-      <text>本店须知</text>
+    <view class="notice-btn" bindtap="showActivity">
+      <text>活动专区</text>
     </view>
   </view>
 
@@ -36,4 +36,19 @@
 
   <tab-bar selected="0"></tab-bar>
 
+  <!-- 自定义黑金弹窗 -->
+  <view class="custom-modal" wx:if="{{modalVisible}}">
+    <view class="modal-mask" bindtap="closeModal"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">{{modalTitle}}</text>
+      </view>
+      <scroll-view scroll-y class="modal-body">
+        <text class="modal-text">{{modalContent}}</text>
+      </scroll-view>
+      <view class="modal-footer">
+        <view class="modal-btn" bindtap="closeModal">朕知道了</view>
+      </view>
+    </view>
+  </view>
 </view>

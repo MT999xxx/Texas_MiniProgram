@@ -11,6 +11,8 @@ import { AuthModule } from '../auth/auth.module';
 import { CouponsModule } from '../coupons/coupons.module';
 import { EventsModule } from '../events/events.module';
 import { PaymentModule } from '../payment/payment.module';
+import { UploadModule } from '../upload/upload.module';
+import { NoticesModule } from '../notices/notices.module';
 import { databaseConfig } from '../config/database.config';
 
 @Module({
@@ -27,6 +29,8 @@ import { databaseConfig } from '../config/database.config';
     CouponsModule,
     EventsModule,
     PaymentModule,
+    UploadModule,
+    NoticesModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }

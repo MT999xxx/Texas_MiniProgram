@@ -43,6 +43,7 @@ export class MenuService {
       stock: dto.stock,
       status: dto.status ?? MenuItemStatus.ON_SALE,
       description: dto.description,
+      imageUrl: dto.imageUrl,
     });
     return this.itemRepo.save(item);
   }
@@ -91,6 +92,7 @@ export class MenuService {
     if (dto.stock !== undefined) item.stock = dto.stock;
     if (dto.status !== undefined) item.status = dto.status;
     if (dto.description !== undefined) item.description = dto.description;
+    if (dto.imageUrl !== undefined) item.imageUrl = dto.imageUrl;
 
     return this.itemRepo.save(item);
   }

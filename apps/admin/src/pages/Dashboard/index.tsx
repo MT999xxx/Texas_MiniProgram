@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import { Line, Pie, Bar } from '@ant-design/charts';
+import { Modal, Form, Input, App } from 'antd';
+import { noticesApi, NoticeType } from '../../api/notices';
 import './Dashboard.css';
 
 // 模拟数据
@@ -51,6 +54,37 @@ const memberPerks = [
 ];
 
 export default function Dashboard() {
+    const { message } = App.useApp();
+    const [noticeModalVisible, setNoticeModalVisible] = useState(false);
+    const [noticeType, setNoticeType] = useState<NoticeType>('ANNOUNCEMENT');
+    const [noticeForm] = Form.useForm();
+    const [submitting, setSubmitting] = useState(false);
+
+    const handleOpenNoticeModal = (type: NoticeType) => {
+        setNoticeType(type);
+        noticeForm.resetFields();
+        setNoticeModalVisible(true);
+    };
+
+    const handleNoticeSubmit = async () => {
+        try {
+            const values = await noticeForm.validateFields();
+            setSubmitting(true);
+            await noticesApi.create({
+                ...values,
+                type: noticeType,
+                isActive: true,
+            });
+            message.success(`${noticeType === 'ANNOUNCEMENT' ? '公告' : '活动'}发布成功`);
+            setNoticeModalVisible(false);
+        } catch (error) {
+            console.error('发布失败:', error);
+            message.error('发布失败，请检查输入');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     // 营收趋势图配置
     const revenueConfig = {
         data: revenueData,
@@ -145,8 +179,8 @@ export default function Dashboard() {
                     <h1>德州扑克主题酒吧控制台</h1>
                     <p>预约赛桌 · 奢享酒食 · 决战巅峰</p>
                     <div className="hero-actions">
-                        <button className="btn primary">发起活动</button>
-                        <button className="btn ghost">发布公告</button>
+                        <button className="btn primary" onClick={() => handleOpenNoticeModal('ACTIVITY')}>发起活动</button>
+                        <button className="btn ghost" onClick={() => handleOpenNoticeModal('ANNOUNCEMENT')}>发布公告</button>
                     </div>
                     <div className="hero-meta">
                         <div>
@@ -308,6 +342,39 @@ export default function Dashboard() {
                     ))}
                 </div>
             </section>
+
+            <Modal
+                title={noticeType === 'ANNOUNCEMENT' ? '发布公告' : '发起活动'}
+                open={noticeModalVisible}
+                onOk={handleNoticeSubmit}
+                onCancel={() => setNoticeModalVisible(false)}
+                confirmLoading={submitting}
+                destroyOnClose
+            >
+                <Form
+                    form={noticeForm}
+                    layout="vertical"
+                    initialValues={{ title: '', content: '' }}
+                >
+                    <Form.Item
+                        name="title"
+                        label="标题"
+                        rules={[{ required: true, message: '请输入标题' }]}
+                    >
+                        <Input placeholder={`请输入${noticeType === 'ANNOUNCEMENT' ? '公告' : '活动'}标题`} />
+                    </Form.Item>
+                    <Form.Item
+                        name="content"
+                        label="内容"
+                        rules={[{ required: true, message: '请输入内容' }]}
+                    >
+                        <Input.TextArea
+                            rows={4}
+                            placeholder={`请输入${noticeType === 'ANNOUNCEMENT' ? '公告' : '活动'}具体内容`}
+                        />
+                    </Form.Item>
+                </Form>
+            </Modal>
         </div>
     );
 }
