@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Table, Card, Button, Space, Tag, message, Modal, Select, Input, Drawer, Timeline, Descriptions, Form, Row, Col, Statistic } from 'antd';
-import { ReloadOutlined, CheckOutlined, EyeOutlined, RollbackOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { Table, Card, Button, Space, Tag, Modal, Select, Input, Drawer, Timeline, Descriptions, Form, Row, Col, Statistic, App } from 'antd';
+import { ReloadOutlined, CheckOutlined, EyeOutlined, RollbackOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import { orderApi, Order, OrderItem } from '../../api/orders';
+import { orderApi, Order } from '../../api/orders';
 import './Orders.css';
 
-const { confirm } = Modal;
 const { Search } = Input;
 
 export default function Orders() {
+    const { message, modal } = App.useApp();
     const [loading, setLoading] = useState(false);
     const [orders, setOrders] = useState<Order[]>([]);
     const [statusFilter, setStatusFilter] = useState<string>();
@@ -33,48 +33,8 @@ export default function Orders() {
     const loadOrders = async () => {
         setLoading(true);
         try {
-            // 模拟数据
-            const mockOrders: Order[] = [
-                {
-                    id: '1', orderNo: 'ORD20231204001',
-                    member: { id: '1', nickname: 'Husk·Aiden', phone: '13800138000' },
-                    table: { id: '1', name: '主赛桌 A1' },
-                    items: [
-                        { id: '1', menuItem: { id: '1', name: '火焰威士忌塔', price: 188 }, quantity: 2, price: 188, subtotal: 376 },
-                        { id: '2', menuItem: { id: '2', name: '冠军定制套餐', price: 268 }, quantity: 1, price: 268, subtotal: 268 },
-                    ],
-                    totalAmount: 644, status: 'PAID', paymentMethod: 'WECHAT', paidAt: '2023-12-04T19:30:00',
-                    createdAt: '2023-12-04T19:25:00', updatedAt: '2023-12-04T19:30:00'
-                },
-                {
-                    id: '2', orderNo: 'ORD20231204002',
-                    member: { id: '2', nickname: 'Husk·Yuri', phone: '13900139000' },
-                    table: { id: '2', name: '副赛桌 B1' },
-                    items: [
-                        { id: '3', menuItem: { id: '3', name: '午夜能量Shot', price: 58 }, quantity: 3, price: 58, subtotal: 174 },
-                    ],
-                    totalAmount: 174, status: 'COMPLETED', paymentMethod: 'ALIPAY', paidAt: '2023-12-04T18:00:00',
-                    createdAt: '2023-12-04T17:55:00', updatedAt: '2023-12-04T20:00:00'
-                },
-                {
-                    id: '3', orderNo: 'ORD20231204003',
-                    member: { id: '3', nickname: 'Tom', phone: '13700137000' },
-                    items: [],
-                    totalAmount: 326, status: 'PENDING',
-                    createdAt: '2023-12-04T20:00:00', updatedAt: '2023-12-04T20:00:00'
-                },
-                {
-                    id: '4', orderNo: 'ORD20231203001',
-                    member: { id: '4', nickname: 'Jerry', phone: '13600136000' },
-                    table: { id: '3', name: '练习桌 C1' },
-                    items: [
-                        { id: '4', menuItem: { id: '4', name: '皇家精酿', price: 68 }, quantity: 4, price: 68, subtotal: 272 },
-                    ],
-                    totalAmount: 272, status: 'REFUNDED', remark: '客户要求退款',
-                    createdAt: '2023-12-03T21:00:00', updatedAt: '2023-12-03T22:00:00'
-                },
-            ];
-            setOrders(mockOrders);
+            const data = await orderApi.list({ status: statusFilter });
+            setOrders(data);
         } catch (error) {
             message.error('加载订单列表失败');
         } finally {
@@ -83,13 +43,12 @@ export default function Orders() {
     };
 
     const loadStats = async () => {
-        // 模拟数据
-        setStats({
-            totalOrders: 128,
-            totalAmount: 82430,
-            completedOrders: 96,
-            averageAmount: 644,
-        });
+        try {
+            const data = await orderApi.getStats();
+            setStats(data);
+        } catch (error) {
+            console.error('加载统计数据失败:', error);
+        }
     };
 
     const handleViewDetail = (order: Order) => {
@@ -98,15 +57,20 @@ export default function Orders() {
     };
 
     const handleComplete = async (order: Order) => {
-        confirm({
+        modal.confirm({
             title: '确认完成订单',
             content: `确定将订单 ${order.orderNo} 标记为已完成吗？`,
             okText: '确认',
             cancelText: '取消',
             onOk: async () => {
-                // await orderApi.updateStatus(order.id, 'COMPLETED');
-                message.success('订单已完成');
-                loadOrders();
+                try {
+                    await orderApi.updateStatus(order.id, 'COMPLETED');
+                    message.success('订单已完成');
+                    loadOrders();
+                    loadStats();
+                } catch (error) {
+                    message.error('操作失败');
+                }
             },
         });
     };
@@ -121,12 +85,14 @@ export default function Orders() {
     const handleRefundSubmit = async () => {
         try {
             const values = await refundForm.validateFields();
-            // await orderApi.refund(selectedOrder!.id, values);
+            await orderApi.refund(selectedOrder!.id, values);
             message.success('退款申请已提交');
             setRefundModalVisible(false);
             loadOrders();
+            loadStats();
         } catch (error) {
             console.error('退款失败:', error);
+            message.error('提交退款失败');
         }
     };
 
@@ -164,7 +130,6 @@ export default function Orders() {
 
     // 筛选后的数据
     const filteredOrders = orders.filter((order) => {
-        if (statusFilter && order.status !== statusFilter) return false;
         if (!searchText) return true;
         const text = searchText.toLowerCase();
         return (
@@ -202,9 +167,9 @@ export default function Orders() {
             title: '金额',
             dataIndex: 'totalAmount',
             key: 'totalAmount',
-            render: (amount: number) => (
+            render: (amount: number | string) => (
                 <span style={{ fontFamily: 'DIN Alternate', fontWeight: 'bold', color: 'var(--color-gold-primary)', fontSize: 16 }}>
-                    ¥{amount.toFixed(2)}
+                    ¥{Number(amount).toFixed(2)}
                 </span>
             ),
         },
@@ -250,7 +215,7 @@ export default function Orders() {
                     <h2>订单管理</h2>
                     <p>管理所有订单，查看详情和处理退款</p>
                 </div>
-                <Button type="primary" icon={<ReloadOutlined />} onClick={loadOrders}>
+                <Button type="primary" icon={<ReloadOutlined />} onClick={() => { loadOrders(); loadStats(); }}>
                     刷新列表
                 </Button>
             </div>
@@ -259,12 +224,12 @@ export default function Orders() {
             <Row gutter={24} style={{ marginBottom: 24 }}>
                 <Col span={6}>
                     <Card className="stat-card">
-                        <Statistic title="今日订单" value={stats.totalOrders} suffix="单" valueStyle={{ color: 'var(--color-gold-primary)' }} />
+                        <Statistic title="订单数量" value={stats.totalOrders} suffix="单" valueStyle={{ color: 'var(--color-gold-primary)' }} />
                     </Card>
                 </Col>
                 <Col span={6}>
                     <Card className="stat-card">
-                        <Statistic title="今日营收" value={stats.totalAmount} prefix="¥" precision={2} valueStyle={{ color: '#52c41a' }} />
+                        <Statistic title="总营收" value={stats.totalAmount} prefix="¥" precision={2} valueStyle={{ color: '#52c41a' }} />
                     </Card>
                 </Col>
                 <Col span={6}>
@@ -279,7 +244,7 @@ export default function Orders() {
                 </Col>
             </Row>
 
-            <Card bordered={false}>
+            <Card variant="borderless">
                 <div className="toolbar">
                     <Space size="middle" style={{ flex: 1 }}>
                         <Select
@@ -331,7 +296,7 @@ export default function Orders() {
                             <Descriptions.Item label="桌位">{selectedOrder.table?.name || '-'}</Descriptions.Item>
                             <Descriptions.Item label="订单金额">
                                 <span style={{ color: 'var(--color-gold-primary)', fontWeight: 'bold' }}>
-                                    ¥{selectedOrder.totalAmount.toFixed(2)}
+                                    ¥{Number(selectedOrder.totalAmount).toFixed(2)}
                                 </span>
                             </Descriptions.Item>
                             <Descriptions.Item label="支付方式">{getPaymentMethodText(selectedOrder.paymentMethod)}</Descriptions.Item>

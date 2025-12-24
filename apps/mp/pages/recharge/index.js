@@ -1,4 +1,5 @@
 const { request } = require('../../utils/request');
+const userApi = require('../../api/user');
 const authManager = require('../../utils/auth');
 const PaymentUtils = require('../../utils/payment');
 
@@ -48,10 +49,7 @@ Page({
     this.setData({ loading: true });
 
     try {
-      const packages = await request({
-        url: '/payment/packages',
-        method: 'GET',
-      });
+      const packages = await userApi.getRechargePackages();
 
       // 处理套餐数据
       const processedPackages = packages.map(pkg => ({
@@ -208,15 +206,8 @@ Page({
       const openid = await this.getUserOpenId();
 
       // 创建充值支付
-      const paymentResult = await request({
-        url: '/payment/recharge',
-        method: 'POST',
-        data: {
-          memberId: this.data.userInfo.id,
-          packageId: rechargePackage.id,
-          paymentMethod: 'WECHAT_PAY',
-          openid: openid,
-        }
+      const paymentResult = await userApi.createRecharge(rechargePackage.id, {
+        openid: openid,
       });
 
       wx.hideLoading();

@@ -82,7 +82,7 @@ const authManager = {
           id: 'mock_' + Date.now(),
           name: userInfo.nickName || '游客',
           nickName: userInfo.nickName || '游客',
-          avatar: userInfo.avatarUrl || '/images/会员图标.png',
+          avatar: userInfo.avatarUrl || '/images/huiyuan2.png',
           phone: '',
           points: 0
         };

@@ -27,6 +27,13 @@ export class TableController {
     return this.tableService.list({ category, status });
   }
 
+  @Get(':id')
+  @ApiOkResponse({ description: '桌位详情' })
+  @ApiBadRequestResponse({ description: '桌位不存在' })
+  getById(@Param('id') id: string) {
+    return this.tableService.findById(id);
+  }
+
   @Patch(':id/status')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: '更新桌位状态成功' })

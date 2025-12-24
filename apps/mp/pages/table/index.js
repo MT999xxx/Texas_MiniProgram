@@ -80,13 +80,27 @@ Page({
             // 假设后端返回结构: { mainTable: {...}, subTable: {...}, seats: [], subSeats: [] }
             // 这里做简单Mock适配
 
-            if (res) {
+            if (res && Array.isArray(res)) {
+                const main = res.find(t => t.category === 'MAIN');
+                const side = res.find(t => t.category === 'SIDE');
+
                 this.setData({
-                    mainTable: { ...this.data.mainTable, ...res.mainTable },
-                    subTable: { ...this.data.subTable, ...res.subTable },
-                    seats: this.mergeSeats(this.data.seats, res.seats),
-                    subSeats: this.mergeSeats(this.data.subSeats, res.subSeats),
-                    waitingList: res.waitingList || []
+                    mainTable: main ? {
+                        id: main.id,
+                        name: main.name,
+                        status: main.status === 'AVAILABLE' ? '可预约' : '进行中',
+                        occupied: 0, // 暂时没有实时人数，使用模拟或0
+                        total: main.capacity,
+                        updateTime: new Date().toLocaleTimeString()
+                    } : this.data.mainTable,
+                    subTable: side ? {
+                        id: side.id,
+                        name: side.name,
+                        status: side.status === 'AVAILABLE' ? '可预约' : '进行中',
+                        occupied: 0,
+                        total: side.capacity,
+                        updateTime: new Date().toLocaleTimeString()
+                    } : this.data.subTable,
                 });
             }
         } catch (error) {

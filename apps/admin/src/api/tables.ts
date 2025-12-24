@@ -52,7 +52,7 @@ export const tableApi = {
 
   // 更新桌位
   async update(id: string, data: UpdateTableDto): Promise<Table> {
-    const response = await client.patch(`/tables/${id}`, data);
+    const response = await client.put(`/tables/${id}`, data);
     return response.data;
   },
 

@@ -16,6 +16,10 @@ export class MenuCategoryEntity {
   @Column({ type: 'int', default: 1 })
   sort!: number;
 
+  @ApiPropertyOptional({ description: '描述' })
+  @Column({ length: 255, nullable: true })
+  description?: string;
+
   @ApiPropertyOptional({ type: () => [MenuItemEntity] })
   @OneToMany(() => MenuItemEntity, (item) => item.category)
   items!: MenuItemEntity[];

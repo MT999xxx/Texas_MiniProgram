@@ -7,7 +7,7 @@ import { WxLoginDto } from './dto/wx-login.dto';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post('wx-login')
   @ApiOperation({ summary: '微信小程序登录' })
@@ -24,6 +24,6 @@ export class AuthController {
   @ApiResponse({ status: 200, description: '获取成功' })
   @ApiResponse({ status: 401, description: '未授权' })
   async getProfile(@Request() req: any) {
-    return req.user;
+    return this.authService.validateUser(req.user.id);
   }
 }

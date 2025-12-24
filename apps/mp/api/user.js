@@ -3,17 +3,14 @@ const {
 } = require('../utils/request');
 
 const userApi = {
-    // 获取用户信息
+    // 获取用户信息 (包含积分、等级)
     getProfile: () => api.get('/auth/profile'),
 
-    // 获取余额信息
-    getBalance: () => api.get('/user/balance'),
+    // 获取充值套餐
+    getRechargePackages: () => api.get('/payment/packages'),
 
-    // 充值
-    recharge: (data) => api.post('/payment/recharge', data),
-
-    // 获取会员等级信息
-    getMembership: () => api.get('/membership/current')
+    // 创建充值支付
+    createRecharge: (packageId, data) => api.post(`/payment/recharge/${packageId}`, data),
 };
 
 module.exports = userApi;

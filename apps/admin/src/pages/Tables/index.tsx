@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Card, Row, Col, Tag, Button, Select, message, Space, Modal, Form, Input, InputNumber } from 'antd';
+import { Card, Row, Col, Tag, Button, Select, Space, Modal, Form, Input, InputNumber, App } from 'antd';
 import { ReloadOutlined, PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import { tableApi, Table, CreateTableDto, UpdateTableDto } from '../../api/tables';
+import { tableApi, Table } from '../../api/tables';
 import './Tables.css';
 
-const { confirm } = Modal;
-
 export default function Tables() {
+    const { message, modal } = App.useApp();
     const [loading, setLoading] = useState(false);
     const [tables, setTables] = useState<Table[]>([]);
     const [categoryFilter, setCategoryFilter] = useState<string | undefined>();
@@ -22,16 +21,8 @@ export default function Tables() {
     const loadTables = async () => {
         setLoading(true);
         try {
-            // 模拟数据 - 实际项目中使用 API
-            const mockData: Table[] = [
-                { id: '1', name: '主赛桌 A1', category: 'MAIN', status: 'AVAILABLE', capacity: 9, description: '巅峰对决桌', createdAt: '', updatedAt: '' },
-                { id: '2', name: '主赛桌 A2', category: 'MAIN', status: 'IN_USE', capacity: 9, description: '巅峰对决桌', createdAt: '', updatedAt: '' },
-                { id: '3', name: '副赛桌 B1', category: 'SIDE', status: 'RESERVED', capacity: 6, description: '轻松局', createdAt: '', updatedAt: '' },
-                { id: '4', name: '副赛桌 B2', category: 'SIDE', status: 'AVAILABLE', capacity: 6, description: '轻松局', createdAt: '', updatedAt: '' },
-                { id: '5', name: '练习桌 C1', category: 'TRAINING', status: 'IN_USE', capacity: 4, description: '新手练习', createdAt: '', updatedAt: '' },
-                { id: '6', name: '餐饮区 D1', category: 'DINING', status: 'MAINTENANCE', capacity: 4, description: '用餐休息', createdAt: '', updatedAt: '' },
-            ];
-            setTables(mockData);
+            const data = await tableApi.list({ category: categoryFilter, status: statusFilter });
+            setTables(data);
         } catch (error) {
             console.error('加载桌位列表失败:', error);
             message.error('加载桌位列表失败');
@@ -67,7 +58,7 @@ export default function Tables() {
 
     // 删除桌位
     const handleDelete = (table: Table) => {
-        confirm({
+        modal.confirm({
             title: '确认删除',
             icon: <ExclamationCircleOutlined />,
             content: `确定要删除桌位「${table.name}」吗？此操作不可撤销！`,
@@ -76,7 +67,7 @@ export default function Tables() {
             cancelText: '取消',
             onOk: async () => {
                 try {
-                    // await tableApi.delete(table.id);
+                    await tableApi.delete(table.id);
                     message.success('删除成功');
                     loadTables();
                 } catch (error) {
@@ -92,10 +83,10 @@ export default function Tables() {
             const values = await form.validateFields();
 
             if (modalType === 'create') {
-                // await tableApi.create(values);
+                await tableApi.create(values);
                 message.success('创建成功');
             } else {
-                // await tableApi.update(editingTable!.id, values);
+                await tableApi.update(editingTable!.id, values);
                 message.success('更新成功');
             }
 
@@ -108,14 +99,14 @@ export default function Tables() {
 
     // 更新桌位状态
     const handleUpdateStatus = async (id: string, status: string) => {
-        confirm({
+        modal.confirm({
             title: '确认更新状态',
             content: `是否将桌位状态更新为：${getStatusText(status)}？`,
             okText: '确认',
             cancelText: '取消',
             onOk: async () => {
                 try {
-                    // await tableApi.updateStatus(id, status);
+                    await tableApi.updateStatus(id, status);
                     message.success('状态更新成功');
                     loadTables();
                 } catch (error) {
@@ -157,13 +148,6 @@ export default function Tables() {
         };
         return map[status] || 'default';
     };
-
-    // 筛选后的数据
-    const filteredTables = tables.filter((table) => {
-        if (categoryFilter && table.category !== categoryFilter) return false;
-        if (statusFilter && table.status !== statusFilter) return false;
-        return true;
-    });
 
     return (
         <div className="tables-page page-enter">
@@ -214,7 +198,7 @@ export default function Tables() {
                 </div>
 
                 <Row gutter={[24, 24]}>
-                    {filteredTables.map((table) => (
+                    {tables.map((table) => (
                         <Col key={table.id} xs={24} sm={12} md={8} lg={6}>
                             <Card
                                 className={`table-card status-${table.status.toLowerCase()}`}
@@ -264,7 +248,7 @@ export default function Tables() {
                     ))}
                 </Row>
 
-                {filteredTables.length === 0 && !loading && (
+                {tables.length === 0 && !loading && (
                     <div className="empty-state">
                         <p>暂无桌位数据</p>
                         <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>

@@ -42,20 +42,20 @@ Page({
         this.setData({ categories });
         // 加载第一个分类的商品
         this.loadMenuItems(categories[0].id);
+      } else {
+        console.log('未找到分类数据');
+        this.setData({ categories: [], goodsList: [] });
       }
     } catch (error) {
       console.error('加载分类失败:', error);
-      wx.showToast({ title: '加载分类失败', icon: 'none' });
+      // 获取更详细的错误信息
+      const errorMsg = error.message || (typeof error === 'string' ? error : '加载分类失败');
+      wx.showToast({ title: errorMsg, icon: 'none' });
 
-      // Fallback Mock
-      this.setData({
-        categories: [
-          { id: 1, name: '热门推荐' },
-          { id: 2, name: '酒水' },
-          { id: 3, name: '小吃' }
-        ]
-      });
-      this.loadMenuItems(1);
+      // 如果没有任何分类，尝试展示一个空状态或者引导刷新
+      if (!this.data.categories.length) {
+        this.setData({ loading: false });
+      }
     }
   },
 
@@ -80,8 +80,8 @@ Page({
       if (!this.data.goodsList.length) {
         this.setData({
           goodsList: [
-            { id: 101, categoryId, name: '特调鸡尾酒', price: 68, description: '微醺时刻，独家特调', image: '/images/桌面图标.png' },
-            { id: 102, categoryId, name: '炸薯条', price: 28, description: '外酥里嫩，经典搭配', image: '/images/桌面图标.png' }
+            { id: 101, categoryId, name: '特调鸡尾酒', price: 68, description: '微醺时刻，独家特调', image: '/images/zhuomian2.png' },
+            { id: 102, categoryId, name: '炸薯条', price: 28, description: '外酥里嫩，经典搭配', image: '/images/zhuomian2.png' }
           ]
         });
       }

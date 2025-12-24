@@ -9,7 +9,7 @@ Page({
   data: {
     isLogin: false, // 添加登录状态
     userInfo: {
-      avatar: '/images/会员图标.png', // 暂时使用通用图标
+      avatar: '/images/huiyuan2.png', // 暂时使用通用图标
       nickname: '点击登录',
       id: ''
     },
@@ -24,9 +24,9 @@ Page({
       coupons: 0
     },
     menuList: [
-      { icon: '/images/首页图标.png', text: '邀请有礼', url: '' }, // 暂时使用通用图标
-      { icon: '/images/桌面图标.png', text: '存积分', url: '' },
-      { icon: '/images/排行榜图标.png', text: '订单列表', url: '' },
+      { icon: '/images/shouye2.png', text: '邀请有礼', url: '' }, // 暂时使用通用图标
+      { icon: '/images/zhuomian2.png', text: '存积分', url: '' },
+      { icon: '/images/paihangbang2.png', text: '订单列表', url: '' },
     ],
     showRechargePopup: false,
     rechargeOptions: [
@@ -167,7 +167,7 @@ Page({
       this.setData({
         isLogin: true,
         userInfo: {
-          avatar: userInfo.avatar || '/images/会员图标.png',
+          avatar: userInfo.avatar || '/images/huiyuan2.png',
           nickname: userInfo.nickname || '德州爱好者',
           id: userInfo.id || ''
         }
@@ -176,7 +176,7 @@ Page({
       this.setData({
         isLogin: false,
         userInfo: {
-          avatar: '/images/会员图标.png',
+          avatar: '/images/huiyuan2.png',
           nickname: '点击登录',
           id: ''
         }

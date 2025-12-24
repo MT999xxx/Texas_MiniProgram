@@ -4,7 +4,7 @@ export interface MenuCategory {
     id: string;
     name: string;
     description?: string;
-    sortOrder: number;
+    sort: number;
     createdAt: string;
     updatedAt: string;
 }
@@ -26,13 +26,13 @@ export interface MenuItem {
 export interface CreateCategoryDto {
     name: string;
     description?: string;
-    sortOrder?: number;
+    sort?: number;
 }
 
 export interface UpdateCategoryDto {
     name?: string;
     description?: string;
-    sortOrder?: number;
+    sort?: number;
 }
 
 export interface CreateItemDto {

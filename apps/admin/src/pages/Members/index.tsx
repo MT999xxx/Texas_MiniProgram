@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Table, Card, Button, Space, Tag, message, Modal, InputNumber } from 'antd';
+import { Table, Card, Button, Space, Tag, InputNumber, App } from 'antd';
 import { ReloadOutlined, PlusOutlined, MinusOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { memberApi, Member } from '../../api/members';
 import './Members.css';
 
 export default function Members() {
+    const { message, modal } = App.useApp();
     const [loading, setLoading] = useState(false);
     const [members, setMembers] = useState<Member[]>([]);
 
@@ -27,7 +28,7 @@ export default function Members() {
 
     const handleAdjustPoints = (member: Member, isAdd: boolean) => {
         let delta = 0;
-        Modal.confirm({
+        modal.confirm({
             title: isAdd ? '增加积分' : '扣除积分',
             content: (
                 <div>
@@ -88,7 +89,7 @@ export default function Members() {
             title: '累计消费',
             dataIndex: 'totalSpent',
             key: 'totalSpent',
-            render: (amount: number) => `¥${amount?.toFixed(2) || '0.00'}`,
+            render: (amount: number | string) => `¥${amount ? Number(amount).toFixed(2) : '0.00'}`,
         },
         {
             title: '注册时间',
@@ -124,7 +125,7 @@ export default function Members() {
 
     return (
         <div className="members-page">
-            <Card>
+            <Card variant="borderless">
                 <div className="toolbar">
                     <Button icon={<ReloadOutlined />} onClick={loadMembers}>
                         刷新

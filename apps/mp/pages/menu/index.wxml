@@ -24,10 +24,10 @@
           <image class="goods-image" src="{{item.image}}" mode="aspectFill" />
           <view class="goods-info">
             <text class="goods-name">{{item.name}}</text>
-            <text class="goods-desc">{{item.desc}}</text>
+            <text class="goods-desc">{{item.description}}</text>
             <view class="price-row">
               <text class="goods-price">¥ {{item.price}}</text>
-              <view class="add-btn" bindtap="addToCart" data-id="{{item.id}}">+</view>
+              <view class="add-btn" bindtap="addToCart" data-id="{{item.id}}" data-name="{{item.name}}" data-price="{{item.price}}">+</view>
             </view>
           </view>
         </view>
@@ -40,7 +40,7 @@
   <view class="cart-bar">
     <view class="cart-info" bindtap="toggleCart">
       <view class="cart-icon-wrapper">
-        <image class="cart-icon" src="/images/购物车.png" />
+        <image class="cart-icon" src="/images/diancan2.png" />
         <view class="cart-badge" wx:if="{{cartCount > 0}}">{{cartCount}}</view>
       </view>
       <view class="cart-price">

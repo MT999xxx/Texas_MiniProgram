@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, MaxLength, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 import { MenuItemStatus } from '../menu-item.entity';
 
 export class CreateMenuItemDto {
@@ -15,12 +16,14 @@ export class CreateMenuItemDto {
 
   @ApiProperty({ description: '单价', minimum: 0 })
   @IsNumber()
-  @IsPositive()
+  @Min(0)
+  @Type(() => Number)
   price!: number;
 
   @ApiProperty({ description: '初始库存', minimum: 0 })
   @IsInt()
   @Min(0)
+  @Type(() => Number)
   stock!: number;
 
   @ApiPropertyOptional({ enum: MenuItemStatus, default: MenuItemStatus.ON_SALE })
@@ -32,5 +35,5 @@ export class CreateMenuItemDto {
   @IsString()
   @IsOptional()
   @MaxLength(120)
-  desc?: string;
+  description?: string;
 }

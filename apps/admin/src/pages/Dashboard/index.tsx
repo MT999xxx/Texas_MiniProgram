@@ -98,8 +98,7 @@ export default function Dashboard() {
         innerRadius: 0.6,
         color: ['#D4AF37', '#AA8A2E', '#F4D03F'],
         label: {
-            type: 'outer',
-            content: '{name} {percentage}',
+            text: 'type',
             style: { fill: '#999', fontSize: 12 },
         },
         legend: {

@@ -1,7 +1,7 @@
 const request = (options = {}) => {
   return new Promise((resolve, reject) => {
     const app = getApp();
-    const apiBase = (app?.globalData?.apiBase || 'http://47.109.44.38:3000').replace(/\/$/, '');
+    const apiBase = (app?.globalData?.apiBase || 'http://localhost:3000').replace(/\/$/, '');
 
     // 获取token
     const token = wx.getStorageSync('token');
@@ -25,6 +25,7 @@ const request = (options = {}) => {
         if (res.statusCode >= 200 && res.statusCode < 300) {
           resolve(res.data);
         } else if (res.statusCode === 401) {
+          console.warn(`[API 401] ${options.url}`);
           // token过期或无效
           wx.removeStorageSync('token');
           wx.removeStorageSync('userInfo');
@@ -47,6 +48,7 @@ const request = (options = {}) => {
 
           reject(new Error('未授权'));
         } else {
+          console.error(`[API Error] ${res.statusCode} ${options.url}`, res.data);
           const msg = res.data?.message || '请求失败';
           if (!options.silent) {
             wx.showToast({ title: msg, icon: 'none' });
@@ -55,6 +57,7 @@ const request = (options = {}) => {
         }
       },
       fail: (err) => {
+        console.error(`[Network Error] ${options.url}`, err);
         if (!options.silent) {
           wx.showToast({ title: '网络异常', icon: 'none' });
         }

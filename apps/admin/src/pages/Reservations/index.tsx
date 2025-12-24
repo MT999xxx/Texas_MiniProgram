@@ -1,37 +1,25 @@
 import { useState, useEffect } from 'react';
-import { Table, Card, Space, Button, Tag, message, Modal, Select, Input, Form, DatePicker, InputNumber } from 'antd';
+import { Table, Card, Space, Button, Tag, Modal, Select, Input, Form, DatePicker, InputNumber, App } from 'antd';
 import { CheckOutlined, CloseOutlined, ReloadOutlined, DownloadOutlined, PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import dayjs from 'dayjs';
 import { reservationApi, Reservation, CreateReservationDto } from '../../api/reservations';
+import { memberApi, Member } from '../../api/members';
+import { tableApi, Table as TableType } from '../../api/tables';
 import './Reservations.css';
 
 const { Search } = Input;
-const { confirm } = Modal;
-
-// 模拟会员数据
-const mockMembers = [
-    { id: '1', nickname: 'Husk·Aiden', phone: '13800138000' },
-    { id: '2', nickname: 'Husk·Yuri', phone: '13900139000' },
-    { id: '3', nickname: 'Tom', phone: '13700137000' },
-    { id: '4', nickname: 'Jerry', phone: '13600136000' },
-];
-
-// 模拟桌位数据
-const mockTables = [
-    { id: '1', name: '主赛桌 A1', category: 'MAIN' },
-    { id: '2', name: '主赛桌 A2', category: 'MAIN' },
-    { id: '3', name: '副赛桌 B1', category: 'SIDE' },
-    { id: '4', name: '副赛桌 B2', category: 'SIDE' },
-    { id: '5', name: '练习桌 C1', category: 'TRAINING' },
-];
 
 export default function Reservations() {
+    const { message, modal } = App.useApp();
     const [loading, setLoading] = useState(false);
     const [reservations, setReservations] = useState<Reservation[]>([]);
     const [statusFilter, setStatusFilter] = useState<string | undefined>();
     const [searchText, setSearchText] = useState('');
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
+    // 数据源
+    const [members, setMembers] = useState<Member[]>([]);
+    const [tables, setTables] = useState<TableType[]>([]);
 
     // 创建预约弹窗
     const [createModalVisible, setCreateModalVisible] = useState(false);
@@ -41,14 +29,8 @@ export default function Reservations() {
     const loadReservations = async () => {
         setLoading(true);
         try {
-            const mockData: Reservation[] = [
-                { id: '1', reservedAt: '2023-12-04T19:00:00', member: { id: '1', nickname: 'Husk·Aiden', phone: '13800138000' }, table: { id: '1', name: '主赛桌 A1', category: 'MAIN' }, depositAmount: 200, depositPaid: true, status: 'CONFIRMED', createdAt: '', updatedAt: '' },
-                { id: '2', reservedAt: '2023-12-04T20:30:00', member: { id: '2', nickname: 'Husk·Yuri', phone: '13900139000' }, table: { id: '3', name: '副赛桌 B2', category: 'SIDE' }, depositAmount: 100, depositPaid: false, status: 'PENDING', createdAt: '', updatedAt: '' },
-                { id: '3', reservedAt: '2023-12-05T18:00:00', member: { id: '3', nickname: 'Tom', phone: '13700137000' }, table: { id: '5', name: '练习桌 C1', category: 'TRAINING' }, depositAmount: 0, depositPaid: false, status: 'PENDING', createdAt: '', updatedAt: '' },
-                { id: '4', reservedAt: '2023-12-05T19:30:00', member: { id: '4', nickname: 'Jerry', phone: '13600136000' }, table: { id: '2', name: '主赛桌 A2', category: 'MAIN' }, depositAmount: 200, depositPaid: true, status: 'PENDING', createdAt: '', updatedAt: '' },
-                { id: '5', reservedAt: '2023-12-06T20:00:00', member: { id: '2', nickname: 'Husk·Yuri', phone: '13900139000' }, table: { id: '4', name: '副赛桌 B1', category: 'SIDE' }, depositAmount: 100, depositPaid: false, status: 'CANCELLED', createdAt: '', updatedAt: '' },
-            ];
-            setReservations(mockData);
+            const data = await reservationApi.list({ status: statusFilter });
+            setReservations(data);
         } catch (error) {
             message.error('加载预约列表失败');
         } finally {
@@ -56,9 +38,29 @@ export default function Reservations() {
         }
     };
 
+    // 加载会员和桌位数据 (用于新建弹窗)
+    const loadSupportData = async () => {
+        try {
+            const [memberData, tableData] = await Promise.all([
+                memberApi.list(),
+                tableApi.list()
+            ]);
+            setMembers(memberData);
+            setTables(tableData);
+        } catch (error) {
+            console.error('加载辅助数据失败:', error);
+        }
+    };
+
     useEffect(() => {
         loadReservations();
     }, [statusFilter]);
+
+    useEffect(() => {
+        if (createModalVisible) {
+            loadSupportData();
+        }
+    }, [createModalVisible]);
 
     // 打开创建预约弹窗
     const handleOpenCreate = () => {
@@ -77,12 +79,13 @@ export default function Reservations() {
                 depositAmount: values.depositAmount,
                 remark: values.remark,
             };
-            // await reservationApi.create(data);
+            await reservationApi.create(data);
             message.success('预约创建成功');
             setCreateModalVisible(false);
             loadReservations();
         } catch (error) {
             console.error('创建失败:', error);
+            message.error('创建预约失败');
         }
     };
 
@@ -97,16 +100,21 @@ export default function Reservations() {
             return;
         }
 
-        confirm({
+        modal.confirm({
             title: '批量确认预约',
             icon: <ExclamationCircleOutlined />,
             content: `确定要确认 ${pendingIds.length} 条预约吗？`,
             okText: '确认',
             cancelText: '取消',
             onOk: async () => {
-                message.success(`已确认 ${pendingIds.length} 条预约`);
-                setSelectedRowKeys([]);
-                loadReservations();
+                try {
+                    await Promise.all(pendingIds.map(id => reservationApi.updateStatus(id as string, 'CONFIRMED')));
+                    message.success(`已确认 ${pendingIds.length} 条预约`);
+                    setSelectedRowKeys([]);
+                    loadReservations();
+                } catch (error) {
+                    message.error('批量确认失败');
+                }
             },
         });
     };
@@ -123,7 +131,7 @@ export default function Reservations() {
             return;
         }
 
-        confirm({
+        modal.confirm({
             title: '批量取消预约',
             icon: <ExclamationCircleOutlined />,
             content: `确定要取消 ${cancelableIds.length} 条预约吗？`,
@@ -131,9 +139,14 @@ export default function Reservations() {
             okType: 'danger',
             cancelText: '返回',
             onOk: async () => {
-                message.success(`已取消 ${cancelableIds.length} 条预约`);
-                setSelectedRowKeys([]);
-                loadReservations();
+                try {
+                    await Promise.all(cancelableIds.map(id => reservationApi.cancel(id as string)));
+                    message.success(`已取消 ${cancelableIds.length} 条预约`);
+                    setSelectedRowKeys([]);
+                    loadReservations();
+                } catch (error) {
+                    message.error('批量取消失败');
+                }
             },
         });
     };
@@ -164,20 +177,30 @@ export default function Reservations() {
 
     // 确认预约
     const handleConfirm = async (id: string) => {
-        message.success('已确认预约');
-        loadReservations();
+        try {
+            await reservationApi.updateStatus(id, 'CONFIRMED');
+            message.success('已确认预约');
+            loadReservations();
+        } catch (error) {
+            message.error('确认失败');
+        }
     };
 
     // 取消预约
     const handleCancel = async (id: string) => {
-        confirm({
+        modal.confirm({
             title: '确认取消预约',
             content: '是否确认取消此预约？',
             okText: '确认',
             cancelText: '返回',
             onOk: async () => {
-                message.success('已取消预约');
-                loadReservations();
+                try {
+                    await reservationApi.cancel(id);
+                    message.success('已取消预约');
+                    loadReservations();
+                } catch (error) {
+                    message.error('取消失败');
+                }
             },
         });
     };
@@ -260,7 +283,6 @@ export default function Reservations() {
     ];
 
     const filteredData = reservations.filter((item) => {
-        if (statusFilter && item.status !== statusFilter) return false;
         if (!searchText) return true;
         const text = searchText.toLowerCase();
         return (
@@ -350,14 +372,14 @@ export default function Reservations() {
                 <Form form={createForm} layout="vertical">
                     <Form.Item name="memberId" label="选择会员" rules={[{ required: true, message: '请选择会员' }]}>
                         <Select placeholder="搜索或选择会员" showSearch optionFilterProp="children">
-                            {mockMembers.map(m => (
+                            {members.map(m => (
                                 <Select.Option key={m.id} value={m.id}>{m.nickname} ({m.phone})</Select.Option>
                             ))}
                         </Select>
                     </Form.Item>
                     <Form.Item name="tableId" label="选择桌位" rules={[{ required: true, message: '请选择桌位' }]}>
                         <Select placeholder="选择桌位">
-                            {mockTables.map(t => (
+                            {tables.map(t => (
                                 <Select.Option key={t.id} value={t.id}>{t.name}</Select.Option>
                             ))}
                         </Select>

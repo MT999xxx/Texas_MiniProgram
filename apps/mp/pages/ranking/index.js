@@ -88,9 +88,9 @@ Page({
   async loadRankingData() {
     // 映射tab到后端type
     const typeMap = {
-      0: 'monthly', // 半月榜 (Mock使用weekly, API使用monthly或根据需求)
-      1: 'yearly',  // 年榜
-      2: 'champion' // 冠军榜
+      0: 'weekly', // 半月榜 -> 周榜
+      1: 'total',  // 年榜 -> 总榜
+      2: 'event'   // 冠军榜 -> 活动榜
     };
 
     const type = typeMap[this.data.currentTab];
@@ -98,10 +98,13 @@ Page({
     this.setData({ loading: true, isEmpty: false });
 
     try {
+      const userInfo = wx.getStorageSync('userInfo');
+      const memberId = userInfo?.id;
+
       // 并行获取榜单和我的排名
       const [listRes, myRankRes] = await Promise.all([
         rankingApi.getList(type).catch(e => ({ rankings: [] })),
-        rankingApi.getMyRank(type).catch(e => null)
+        memberId ? rankingApi.getMyRank(memberId, type).catch(e => null) : Promise.resolve(null)
       ]);
 
       console.log('排行榜数据:', listRes);
@@ -117,12 +120,13 @@ Page({
 
       // 格式化我的排名
       let currentUserRank = null;
-      if (myRankRes) {
+      if (myRankRes && myRankRes.currentUserRank) {
+        const myRank = myRankRes.currentUserRank;
         currentUserRank = {
-          rank: myRankRes.rank || '未上榜',
-          name: myRankRes.nickname || '我',
-          score: this.formatScore(myRankRes.points),
-          avatar: myRankRes.avatar || '/images/会员图标.png'
+          rank: myRank.rank || '未上榜',
+          name: myRank.nickname || '我',
+          score: this.formatScore(myRank.points),
+          avatar: myRank.avatar || '/images/会员图标.png'
         };
       } else {
         // 如果API没返回我的排名，尝试从列表中查找

@@ -12,4 +12,10 @@ export class CreateCategoryDto {
   @IsOptional()
   @IsPositive()
   sort?: number = 1;
+
+  @ApiPropertyOptional({ description: '描述', maxLength: 255 })
+  @IsString()
+  @IsOptional()
+  @MaxLength(255)
+  description?: string;
 }

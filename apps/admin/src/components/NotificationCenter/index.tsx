@@ -128,7 +128,7 @@ export default function NotificationCenter() {
 
     return (
         <Dropdown
-            dropdownRender={() => content}
+            popupRender={() => content}
             trigger={['click']}
             open={open}
             onOpenChange={setOpen}
