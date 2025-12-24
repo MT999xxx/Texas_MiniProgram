@@ -80,8 +80,8 @@ Page({
       if (!this.data.goodsList.length) {
         this.setData({
           goodsList: [
-            { id: 101, categoryId, name: '特调鸡尾酒', price: 68, description: '微醺时刻，独家特调', image: '/images/zhuomian2.png' },
-            { id: 102, categoryId, name: '炸薯条', price: 28, description: '外酥里嫩，经典搭配', image: '/images/zhuomian2.png' }
+            { id: 101, categoryId, name: '特调鸡尾酒', price: 68, description: '微醺时刻，独家特调', imageUrl: '/images/zhuomian2.png' },
+            { id: 102, categoryId, name: '炸薯条', price: 28, description: '外酥里嫩，经典搭配', imageUrl: '/images/zhuomian2.png' }
           ]
         });
       }

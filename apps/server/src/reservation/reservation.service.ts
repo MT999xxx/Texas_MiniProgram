@@ -6,6 +6,7 @@ import { ReservationEntity, ReservationStatus } from './reservation.entity';
 import { TableService } from '../tables/table.service';
 import { TableStatus } from '../tables/table.entity';
 import { RedisService } from '../redis/redis.service';
+import { MembershipService } from '../membership/membership.service';
 
 @Injectable()
 export class ReservationService {
@@ -14,6 +15,7 @@ export class ReservationService {
     private readonly repo: Repository<ReservationEntity>,
     private readonly tableService: TableService,
     private readonly redisService: RedisService,
+    private readonly membershipService: MembershipService,
   ) { }
 
   async create(dto: CreateReservationDto): Promise<ReservationEntity> {
@@ -21,17 +23,23 @@ export class ReservationService {
     if (!table) {
       throw new NotFoundException('Table not found');
     }
-    if (![TableStatus.AVAILABLE, TableStatus.RESERVED].includes(table.status)) {
+    if (![TableStatus.AVAILABLE, TableStatus.RESERVED, TableStatus.IN_USE].includes(table.status)) {
       throw new BadRequestException('Table is not available for reservation');
     }
+
+    // 获取会员信息（如果提供了memberId）
+    const member = dto.memberId ? await this.membershipService.findMemberById(dto.memberId) : undefined;
 
     const entity = this.repo.create({
       customerName: dto.customerName,
       phone: dto.phone,
       partySize: dto.partySize,
       reservedAt: new Date(dto.reservedAt),
+      seatNumber: dto.seatNumber,
+      avatar: dto.avatar,
       note: dto.note,
       table,
+      member: member || undefined,  // 关联会员实体
       memberId: dto.memberId,
       status: ReservationStatus.PENDING,
     });
@@ -90,7 +98,7 @@ export class ReservationService {
     if (!table) {
       throw new NotFoundException('Table not found');
     }
-    if (![TableStatus.AVAILABLE, TableStatus.RESERVED].includes(table.status)) {
+    if (![TableStatus.AVAILABLE, TableStatus.RESERVED, TableStatus.IN_USE].includes(table.status)) {
       throw new BadRequestException('Table is not available for reservation');
     }
 

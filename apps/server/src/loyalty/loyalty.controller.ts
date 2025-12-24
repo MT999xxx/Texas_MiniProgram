@@ -1,11 +1,18 @@
-import { Controller, Get, Query, Param } from '@nestjs/common';
-import { ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Post, Query, Param } from '@nestjs/common';
+import { ApiOkResponse, ApiQuery, ApiTags, ApiOperation } from '@nestjs/swagger';
 import { LoyaltyService } from './loyalty.service';
 
 @ApiTags('Loyalty')
 @Controller('loyalty')
 export class LoyaltyController {
-  constructor(private readonly loyaltyService: LoyaltyService) {}
+  constructor(private readonly loyaltyService: LoyaltyService) { }
+
+  @Post('seed')
+  @ApiOperation({ summary: '创建测试排行榜数据' })
+  @ApiOkResponse({ description: '创建成功' })
+  async seedLeaderboard() {
+    return this.loyaltyService.seedTestData();
+  }
 
   @Get('leaderboard')
   @ApiOkResponse({ description: '排行榜数据' })

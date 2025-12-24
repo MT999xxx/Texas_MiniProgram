@@ -36,4 +36,10 @@ export class CreateMenuItemDto {
   @IsOptional()
   @MaxLength(120)
   description?: string;
+
+  @ApiPropertyOptional({ description: '菜品图片URL', maxLength: 255 })
+  @IsString()
+  @IsOptional()
+  @MaxLength(255)
+  imageUrl?: string;
 }

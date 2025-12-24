@@ -4,11 +4,12 @@ import { ReservationService } from './reservation.service';
 import { ReservationController } from './reservation.controller';
 import { ReservationEntity } from './reservation.entity';
 import { TableModule } from '../tables/table.module';
+import { MembershipModule } from '../membership/membership.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ReservationEntity]), TableModule],
+  imports: [TypeOrmModule.forFeature([ReservationEntity]), TableModule, MembershipModule],
   providers: [ReservationService],
   controllers: [ReservationController],
   exports: [ReservationService, TypeOrmModule],
 })
-export class ReservationModule {}
+export class ReservationModule { }

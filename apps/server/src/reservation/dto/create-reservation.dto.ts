@@ -30,6 +30,16 @@ export class CreateReservationDto {
   @IsDateString()
   reservedAt!: string;
 
+  @ApiPropertyOptional({ description: '座位号' })
+  @IsInt()
+  @IsOptional()
+  seatNumber?: number;
+
+  @ApiPropertyOptional({ description: '用户头像URL' })
+  @IsString()
+  @IsOptional()
+  avatar?: string;
+
   @ApiPropertyOptional({ description: '会员ID' })
   @IsString()
   @IsOptional()

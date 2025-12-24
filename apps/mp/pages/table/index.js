@@ -189,8 +189,29 @@ Page({
 
         // 判断操作类型
         if (seat.status === 'empty') {
+            // 检查是否已有预约（防止重复预约）
+            const seats = this.data[seatArray];
+            const existingReservation = seats.find(s =>
+                s.status === 'reserved' && (s.userId === userId || s.name === userName)
+            );
+            if (existingReservation) {
+                wx.showModal({
+                    title: '已有预约',
+                    content: `你已预约了${existingReservation.seatNum}号位，每人限预约一个座位。是否取消原预约并预约新座位？`,
+                    confirmText: '换座位',
+                    cancelText: '保持原位',
+                    success: (res) => {
+                        if (res.confirm) {
+                            // 取消原预约
+                            const oldIndex = seats.findIndex(s => s.id === existingReservation.id);
+                            this.cancelReservationAndRebook(seatArray, oldIndex, seatindex, userName, userInfo, tabletype);
+                        }
+                    }
+                });
+                return;
+            }
             // 预约
-            this.reserveSeat(seatArray, seatindex, userName, userInfo);
+            this.reserveSeat(seatArray, seatindex, userName, userInfo, tabletype);
         } else if (seat.status === 'reserved') {
             // 取消 (判断是否本人)
             // 这里简单判断，实际应校验ID
@@ -203,22 +224,66 @@ Page({
     },
 
     /**
+     * 取消原预约并预约新座位
+     */
+    async cancelReservationAndRebook(seatArray, oldIndex, newIndex, userName, userInfo, tabletype) {
+        // 先取消原座位
+        const seats = this.data[seatArray];
+        seats[oldIndex] = {
+            ...seats[oldIndex],
+            status: 'empty',
+            name: '',
+            avatar: '',
+            userId: null
+        };
+        this.setData({ [seatArray]: seats });
+
+        // 预约新座位
+        this.reserveSeat(seatArray, newIndex, userName, userInfo, tabletype);
+    },
+
+    /**
      * 预约座位
      */
-    async reserveSeat(seatArray, seatIndex, userName, userInfo) {
+    async reserveSeat(seatArray, seatIndex, userName, userInfo, tabletype) {
         wx.showLoading({ title: '预约中' });
 
         try {
+            // 获取当前桌台ID
+            const tableId = tabletype === 'main' ? this.data.mainTable.id : this.data.subTable.id;
+
+            if (!tableId) {
+                wx.showToast({ title: '桌台信息错误', icon: 'none' });
+                return;
+            }
+
             // 调用API
             await tableApi.reserveSeat({
-                tableType: seatArray === 'seats' ? 'main' : 'sub',
-                seatIndex: seatIndex + 1
+                customerName: userInfo?.nickname || userInfo?.nickName || userInfo?.name || '微信用户',
+                phone: userInfo?.phone || '13888888888', // 如果没设置手机号，暂用默认
+                partySize: 1,
+                tableId: tableId,
+                reservedAt: new Date().toISOString(),
+                seatNumber: seatIndex + 1,
+                avatar: userInfo?.avatar || userInfo?.avatarUrl,  // 发送头像URL
+                memberId: userInfo?.id
             });
 
             wx.hideLoading();
             wx.showToast({ title: '预约成功', icon: 'success' });
 
-            // 刷新数据
+            // 立即更新本地座位状态（乐观更新）
+            const seats = this.data[seatArray];
+            seats[seatIndex] = {
+                ...seats[seatIndex],
+                status: 'reserved',
+                name: userName,
+                avatar: userInfo?.avatar || '/images/huiyuan2.png',
+                userId: userInfo?.id
+            };
+            this.setData({ [seatArray]: seats });
+
+            // 刷新数据（同步后端最新状态）
             this.loadTableData();
 
         } catch (error) {

@@ -45,6 +45,14 @@ export class ReservationEntity {
   @Column({ type: 'datetime' })
   reservedAt!: Date;
 
+  @ApiPropertyOptional({ description: '座位号' })
+  @Column({ type: 'int', nullable: true })
+  seatNumber?: number;
+
+  @ApiPropertyOptional({ description: '用户头像URL' })
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  avatar?: string;
+
   @ApiPropertyOptional({ description: '备注' })
   @Column({ type: 'varchar', length: 200, nullable: true })
   note?: string;

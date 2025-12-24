@@ -36,63 +36,58 @@ export class LoyaltyService {
   }
 
   // 获取排行榜数据
-  async getLeaderboard(type: 'total' | 'weekly' | 'event' = 'total', limit: number = 50) {
-    let startDate: Date | undefined;
+  async getLeaderboard(type: 'total' | 'weekly' | 'event' = 'total', limit: number | string = 50) {
+    try {
+      // 确保 limit 是数字
+      const numLimit = typeof limit === 'string' ? parseInt(limit, 10) : limit;
+      const safeLimit = isNaN(numLimit) ? 50 : numLimit;
 
-    if (type === 'weekly') {
-      // 获取本周开始时间
-      const now = new Date();
-      const weekStart = new Date(now);
-      weekStart.setDate(now.getDate() - now.getDay()); // 周日开始
-      weekStart.setHours(0, 0, 0, 0);
-      startDate = weekStart;
-    }
+      let startDate: Date | undefined;
 
-    let query = this.memberRepo
-      .createQueryBuilder('member')
-      .leftJoinAndSelect('member.level', 'level')
-      .leftJoinAndSelect('member.loyaltyTransactions', 'transactions');
-
-    if (type === 'weekly' && startDate) {
-      query = query.where('transactions.createdAt >= :startDate', { startDate });
-    } else if (type === 'event') {
-      // 活动榜可以根据具体需求筛选特定活动的积分
-      query = query.where('transactions.remark LIKE :eventRemark', { eventRemark: '%活动%' });
-    }
-
-    const members = await query
-      .orderBy('member.points', 'DESC')
-      .limit(limit)
-      .getMany();
-
-    // 计算排行榜数据
-    const rankings = members.map((member, index) => {
-      // 如果是周榜，计算本周积分
-      let points = member.points;
-      if (type === 'weekly' && startDate) {
-        points = member.loyaltyTransactions
-          ?.filter(t => t.createdAt >= startDate!)
-          .reduce((sum, t) => sum + t.points, 0) || 0;
-      } else if (type === 'event') {
-        points = member.loyaltyTransactions
-          ?.filter(t => t.remark?.includes('活动'))
-          .reduce((sum, t) => sum + t.points, 0) || 0;
+      if (type === 'weekly') {
+        // 获取本周开始时间
+        const now = new Date();
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - now.getDay()); // 周日开始
+        weekStart.setHours(0, 0, 0, 0);
+        startDate = weekStart;
       }
 
-      return {
+      let query = this.memberRepo
+        .createQueryBuilder('member')
+        .leftJoinAndSelect('member.level', 'level')
+        .leftJoin('member.loyaltyTransactions', 'transactions');
+
+      if (type === 'weekly' && startDate) {
+        query = query.where('transactions.createdAt >= :startDate', { startDate });
+      } else if (type === 'event') {
+        // 活动榜可以根据具体需求筛选特定活动的积分
+        query = query.where('transactions.remark LIKE :eventRemark', { eventRemark: '%活动%' });
+      }
+
+      const members = await query
+        .orderBy('member.points', 'DESC')
+        .limit(safeLimit)
+        .getMany();
+
+      // 计算排行榜数据
+      const rankings = members.map((member, index) => ({
         rank: index + 1,
         id: member.id,
-        nickname: member.nickname,
+        nickname: member.nickname || '匿名用户',
         avatar: member.avatar,
-        points,
+        points: member.points,
         levelName: member.level?.name || 'V1 普通会员',
         levelNumber: member.level?.threshold || 0
-      };
-    })
-      .filter(member => member.points > 0) // 过滤掉0积分的用户
-      .sort((a, b) => b.points - a.points); // 重新按积分排序
+      }))
+        .filter(member => member.points > 0) // 过滤掉0积分的用户
+        .sort((a, b) => b.points - a.points); // 重新按积分排序
 
-    return rankings;
+      return rankings;
+    } catch (error) {
+      console.error('获取排行榜失败:', error);
+      return [];
+    }
   }
 
   // 获取用户在排行榜中的排名
@@ -139,5 +134,39 @@ export class LoyaltyService {
     });
 
     return this.repo.save(trx);
+  }
+
+  // 创建测试排行榜数据
+  async seedTestData() {
+    const testMembers = [
+      { nickname: '王者荣耀', phone: '13800138001', points: 15800 },
+      { nickname: '德州大师', phone: '13800138002', points: 12500 },
+      { nickname: '小牌手', phone: '13800138003', points: 8200 },
+    ];
+
+    const created = [];
+    for (const testMember of testMembers) {
+      // 检查是否已存在
+      const existing = await this.memberRepo.findOne({ where: { phone: testMember.phone } });
+      if (existing) {
+        // 更新积分
+        existing.points = testMember.points;
+        existing.nickname = testMember.nickname;
+        await this.memberRepo.save(existing);
+        created.push(existing);
+      } else {
+        // 创建新会员（不设置levelCode以避免外键约束）
+        const member = this.memberRepo.create({
+          userId: `test_user_${testMember.phone}`,
+          nickname: testMember.nickname,
+          phone: testMember.phone,
+          points: testMember.points,
+        });
+        await this.memberRepo.save(member);
+        created.push(member);
+      }
+    }
+
+    return { message: '测试数据创建成功', members: created };
   }
 }

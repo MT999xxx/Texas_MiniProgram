@@ -38,6 +38,10 @@ export class MenuItemEntity {
   @Column({ length: 120, nullable: true, name: 'description' })
   description?: string;
 
+  @ApiPropertyOptional({ description: '菜品图片URL' })
+  @Column({ length: 255, nullable: true, name: 'image_url' })
+  imageUrl?: string;
+
   @ApiProperty({ type: String, format: 'date-time' })
   @CreateDateColumn()
   createdAt!: Date;

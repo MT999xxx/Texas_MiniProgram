@@ -2,7 +2,7 @@
   
   <!-- 1. 顶部导航栏 -->
   <view class="header-bar">
-    <view class="store-name">重庆店-尖牙tusk ></view>
+    <view class="store-name">三条A ></view>
     <view class="rule-btn" bindtap="showRules">预约规则与牌桌礼仪</view>
   </view>
 

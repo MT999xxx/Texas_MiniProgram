@@ -2,10 +2,15 @@ import client from './client';
 
 export interface Reservation {
   id: string;
-  member: {
+  customerName?: string;  // 小程序直接预约时填写的客户名
+  phone?: string;         // 小程序直接预约时填写的手机号
+  seatNumber?: number;    // 座位号 (1-9)
+  avatar?: string;        // 小程序直接传的头像URL
+  member?: {
     id: string;
     nickname: string;
     phone: string;
+    avatar?: string;
   };
   table: {
     id: string;

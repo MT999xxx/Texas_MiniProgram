@@ -2,7 +2,7 @@
   
   <!-- 头部区域 -->
   <view class="header-bar">
-    <text class="store-name">重庆店-尖牙tusk ></text>
+    <text class="store-name">三条A ></text>
   </view>
 
   <!-- 内容区域 -->
@@ -21,7 +21,7 @@
     <scroll-view scroll-y class="goods-list">
       <block wx:for="{{goodsList}}" wx:key="id">
         <view class="goods-item">
-          <image class="goods-image" src="{{item.image}}" mode="aspectFill" />
+          <image class="goods-image" src="{{item.imageUrl}}" mode="aspectFill" />
           <view class="goods-info">
             <text class="goods-name">{{item.name}}</text>
             <text class="goods-desc">{{item.description}}</text>

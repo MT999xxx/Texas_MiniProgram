@@ -5,7 +5,7 @@
 
   <view class="header-area">
     <view class="store-info">
-      <text class="store-name">重庆店-尖牙tusk ></text>
+      <text class="store-name">三条A ></text>
     </view>
     <view class="notice-btn">
       <text>本店须知</text>
@@ -13,10 +13,10 @@
   </view>
 
   <view class="center-area">
-    <text class="brand-title">TUSK</text>
+    <text class="brand-title">AAA</text>
     
     <view class="welcome-box">
-      <text class="welcome-text">欢迎来到尖牙tusk</text>
+      <text class="welcome-text">欢迎来到三条A</text>
     </view>
   </view>
 

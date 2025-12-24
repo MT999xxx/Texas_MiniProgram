@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Table, Card, Space, Button, Tag, Modal, Select, Input, Form, DatePicker, InputNumber, App } from 'antd';
 import { CheckOutlined, CloseOutlined, ReloadOutlined, DownloadOutlined, PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -54,6 +54,17 @@ export default function Reservations() {
 
     useEffect(() => {
         loadReservations();
+    }, [statusFilter]);
+
+    // 自动刷新（每10秒拉取一次新数据）
+    const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    useEffect(() => {
+        refreshIntervalRef.current = setInterval(() => {
+            loadReservations();
+        }, 10000); // 每10秒刷新
+        return () => {
+            if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
+        };
     }, [statusFilter]);
 
     useEffect(() => {
@@ -227,12 +238,24 @@ export default function Reservations() {
         {
             title: '客户信息',
             key: 'member',
-            render: (record: Reservation) => (
-                <div>
-                    <div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{record.member?.nickname || '-'}</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{record.member?.phone || '-'}</div>
-                </div>
-            ),
+            render: (record: Reservation) => {
+                const name = record.member?.nickname || record.customerName || '-';
+                const avatarUrl = record.member?.avatar || record.avatar;
+                // 只有 http:// 或 https:// 开头的URL才有效（排除微信临时文件 http://tmp/ 和 wxfile://）
+                const isValidUrl = avatarUrl && (avatarUrl.startsWith('https://') || (avatarUrl.startsWith('http://') && !avatarUrl.startsWith('http://tmp')));
+                return (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        {isValidUrl ? (
+                            <img src={avatarUrl} alt="头像" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />
+                        ) : (
+                            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(212,175,55,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-gold-primary)', fontWeight: 'bold' }}>
+                                {name.charAt(0).toUpperCase()}
+                            </div>
+                        )}
+                        <div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{name}</div>
+                    </div>
+                );
+            },
         },
         {
             title: '桌位',
@@ -245,17 +268,25 @@ export default function Reservations() {
             ),
         },
         {
-            title: '订金',
-            key: 'deposit',
-            render: (record: Reservation) => {
-                if (!record.depositAmount) return <span style={{ color: 'var(--text-muted)' }}>-</span>;
-                return (
-                    <div>
-                        <div style={{ fontFamily: 'DIN Alternate', fontWeight: 'bold' }}>¥{record.depositAmount}</div>
-                        <Tag color={record.depositPaid ? 'green' : 'orange'}>{record.depositPaid ? '已支付' : '未支付'}</Tag>
-                    </div>
-                );
-            },
+            title: '座位',
+            key: 'seatNumber',
+            width: 80,
+            align: 'center' as const,
+            render: (record: Reservation) => (
+                <span style={{
+                    display: 'inline-block',
+                    width: 28,
+                    height: 28,
+                    lineHeight: '28px',
+                    textAlign: 'center',
+                    background: 'rgba(212,175,55,0.15)',
+                    color: 'var(--color-gold-primary)',
+                    borderRadius: '50%',
+                    fontWeight: 'bold',
+                }}>
+                    {record.seatNumber || '-'}
+                </span>
+            ),
         },
         {
             title: '状态',
@@ -270,12 +301,12 @@ export default function Reservations() {
                 <Space>
                     {record.status === 'PENDING' && (
                         <>
-                            <Button type="primary" size="small" icon={<CheckOutlined />} onClick={() => handleConfirm(record.id)}>确认</Button>
-                            <Button size="small" icon={<CloseOutlined />} onClick={() => handleCancel(record.id)} style={{ background: 'transparent', border: '1px solid #ff4d4f', color: '#ff4d4f' }}>取消</Button>
+                            <Button type="primary" icon={<CheckOutlined />} onClick={() => handleConfirm(record.id)}>确认</Button>
+                            <Button danger icon={<CloseOutlined />} onClick={() => handleCancel(record.id)}>取消</Button>
                         </>
                     )}
                     {record.status === 'CONFIRMED' && (
-                        <Button size="small" icon={<CloseOutlined />} onClick={() => handleCancel(record.id)} style={{ background: 'transparent', border: '1px solid #ff4d4f', color: '#ff4d4f' }}>取消</Button>
+                        <Button danger icon={<CloseOutlined />} onClick={() => handleCancel(record.id)}>取消</Button>
                     )}
                 </Space>
             ),

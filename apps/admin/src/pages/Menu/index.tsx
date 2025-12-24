@@ -74,6 +74,7 @@ export default function Menu() {
             price: item.price,
             stock: item.stock,
             description: item.description,
+            imageUrl: item.imageUrl,
         });
         setItemModalVisible(true);
     };
@@ -180,6 +181,35 @@ export default function Menu() {
 
     // 表格列定义
     const columns: ColumnsType<MenuItem> = [
+        {
+            title: '图片',
+            key: 'imageUrl',
+            width: 80,
+            render: (record: MenuItem) => (
+                record.imageUrl ? (
+                    <img
+                        src={record.imageUrl}
+                        alt={record.name}
+                        style={{ width: 48, height: 48, borderRadius: 8, objectFit: 'cover', border: '1px solid var(--border-color)' }}
+                    />
+                ) : (
+                    <div style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 8,
+                        background: 'rgba(255,255,255,0.05)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 12,
+                        color: 'var(--text-muted)',
+                        border: '1px dashed var(--border-color)'
+                    }}>
+                        无图
+                    </div>
+                )
+            ),
+        },
         {
             title: '菜品名称',
             key: 'name',
@@ -371,6 +401,43 @@ export default function Menu() {
                     </Form.Item>
                     <Form.Item name="description" label="描述">
                         <Input.TextArea placeholder="可选，简短描述" rows={2} />
+                    </Form.Item>
+                    <Form.Item label="菜品图片">
+                        <Space align="start">
+                            <Form.Item name="imageUrl" noStyle>
+                                <Input placeholder="请输入图片 URL" style={{ width: 330 }} />
+                            </Form.Item>
+                            <Form.Item
+                                noStyle
+                                shouldUpdate={(prevValues, currentValues) => prevValues.imageUrl !== currentValues.imageUrl}
+                            >
+                                {({ getFieldValue }) => {
+                                    const url = getFieldValue('imageUrl');
+                                    return url ? (
+                                        <img
+                                            src={url}
+                                            alt="预览"
+                                            style={{ width: 64, height: 64, borderRadius: 8, objectFit: 'cover', border: '1px solid var(--border-color)' }}
+                                        />
+                                    ) : (
+                                        <div style={{
+                                            width: 64,
+                                            height: 64,
+                                            borderRadius: 8,
+                                            background: 'rgba(255,255,255,0.05)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            fontSize: 12,
+                                            color: 'var(--text-muted)',
+                                            border: '1px dashed var(--border-color)'
+                                        }}>
+                                            无预览
+                                        </div>
+                                    );
+                                }}
+                            </Form.Item>
+                        </Space>
                     </Form.Item>
                 </Form>
             </Modal>

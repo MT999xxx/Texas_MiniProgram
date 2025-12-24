@@ -171,3 +171,61 @@
     border-color: rgba(255, 255, 255, 0.2);
     color: var(--text-secondary);
 }
+
+/* ========== 统一按钮尺寸 (像素级对齐) ========== */
+
+/* 1. 基础按钮样式：强制所有按钮使用相同的盒子模型 */
+.reservations-page .ant-btn {
+    display: inline-flex !important;
+    /* 使用 flex 确保内部垂直居中 */
+    align-items: center !important;
+    justify-content: center !important;
+    height: 32px !important;
+    /* 总高度固定为 32px */
+    min-width: 90px !important;
+    /* 统一最小宽度 */
+    padding: 0 16px !important;
+    /* 统一左右内边距 */
+    box-sizing: border-box !important;
+    border: 1px solid transparent !important;
+    /* 预设 1px 边框，防止高度跳变 */
+    font-size: 14px !important;
+    border-radius: 4px !important;
+    line-height: 1 !important;
+    /* 消除行高干扰 */
+}
+
+/* 2. 黄色主按钮 (Primary) */
+.reservations-page .ant-btn-primary {
+    background: linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-dark)) !important;
+    border: 1px solid var(--color-gold-primary) !important;
+    color: #000 !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    /* 移除可能产生视觉差的阴影 */
+}
+
+/* 3. 红色取消按钮 (Danger) */
+.reservations-page .ant-btn-dangerous,
+.reservations-page .ant-btn-danger,
+.reservations-page .ant-btn[danger] {
+    background: transparent !important;
+    border: 1px solid #ff4d4f !important;
+    color: #ff4d4f !important;
+}
+
+/* 4. 普通/导出按钮 (Default) */
+.reservations-page .ant-btn-default,
+.reservations-page .ant-btn:not(.ant-btn-primary):not([danger]) {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: var(--text-primary) !important;
+}
+
+/* 5. 按钮内图标大小和间距统一 */
+.reservations-page .ant-btn .anticon {
+    font-size: 14px !important;
+    margin-right: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+}

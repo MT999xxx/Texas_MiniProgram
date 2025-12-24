@@ -518,6 +518,7 @@
     grid-template-columns: 1fr;
   }
 }
+
 /* Charts Section */
 .charts-section {
   display: grid;
@@ -564,6 +565,60 @@
 
 .chart-body {
   height: 220px;
+}
+
+/* 图表内文字颜色优化 - 极端强制白色字体 */
+.chart-card svg text,
+.chart-card svg tspan,
+.chart-card .recharts-cartesian-axis-tick text,
+.chart-card .recharts-cartesian-axis-tick-value,
+.chart-card .recharts-cartesian-axis-tick-value tspan,
+.chart-card .recharts-legend-item-text,
+.chart-card .recharts-label-list text,
+.chart-card .recharts-pie-label-text,
+.chart-card .recharts-text,
+.chart-card text {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+}
+
+/* 坐标轴辅助线颜色 */
+.chart-card .recharts-cartesian-axis-line,
+.chart-card .recharts-cartesian-axis-tick-line {
+  stroke: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* 提示框(Tooltip)颜色优化 */
+.chart-card .recharts-default-tooltip {
+  background-color: rgba(26, 26, 26, 0.9) !important;
+  border: 1px solid var(--color-gold-primary) !important;
+  border-radius: 8px;
+}
+
+.chart-card .recharts-tooltip-label,
+.chart-card .recharts-tooltip-item-list .recharts-tooltip-item {
+  color: #ffffff !important;
+}
+
+/* 图例项布局优化 */
+.chart-card .recharts-legend-item {
+  display: inline-flex !important;
+  align-items: center;
+}
+
+/* 饼图及其他图表的标签线 */
+.chart-card .recharts-pie-label-line,
+.chart-card .recharts-label-list-line {
+  stroke: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* TOP5 列表文字优化 */
+.chart-card ul,
+.chart-card li {
+  color: #ffffff !important;
 }
 
 @media (max-width: 1400px) {

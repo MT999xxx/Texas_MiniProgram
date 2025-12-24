@@ -9,10 +9,10 @@
     <!-- Logo区域 -->
     <view class="logo-section">
       <view class="logo">
-        <text class="logo-text">tusk</text>
+        <text class="logo-text">AAA</text>
       </view>
       <text class="app-name">德州扑克主题酒吧</text>
-      <text class="app-desc">重庆店-尖子tusk</text>
+      <text class="app-desc">三条A</text>
     </view>
 
     <!-- 登录卡片 -->
@@ -71,7 +71,7 @@
 
     <!-- 底部装饰 -->
     <view class="footer">
-      <text class="footer-text">Powered by tusk</text>
+      <text class="footer-text">Powered by 三条A</text>
     </view>
   </view>
 

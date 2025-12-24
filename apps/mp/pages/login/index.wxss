@@ -176,7 +176,7 @@
 
 /* 登录按钮 */
 .login-btn {
-  width: 100%; /* 相对于减少了内边距的card，宽度显得更宽 */
+  width: 100% !important; /* 强制占满卡片宽度 */
   background: linear-gradient(135deg, #f6c244, #d9a01b);
   border: none;
   border-radius: 120rpx;
