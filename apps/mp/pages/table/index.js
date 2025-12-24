@@ -8,7 +8,7 @@ Page({
         // CDN或本地图片地址
         tableBgUrl: app.globalData.cdnBase
             ? `${app.globalData.cdnBase}/table_bg.png`
-            : '/images/圆桌背景2.png',
+            : '/images/yuyue2.png',
         // 主赛事桌信息
         mainTable: {
             name: '主赛事桌',
@@ -138,15 +138,15 @@ Page({
                 total: 9
             },
             seats: [
-                { id: 1, status: 'reserved', name: '正男70...', avatar: '/images/会员图标.png', seatNum: 1 },
-                { id: 2, status: 'playing', name: '阿威', avatar: '/images/会员图标.png', seatNum: 2 },
+                { id: 1, status: 'reserved', name: '正男70...', avatar: '/images/huiyuan2.png', seatNum: 1 },
+                { id: 2, status: 'playing', name: '阿威', avatar: '/images/huiyuan2.png', seatNum: 2 },
                 { id: 3, status: 'empty', name: '', avatar: '', seatNum: 3 },
-                { id: 4, status: 'reserved', name: '宝宝', avatar: '/images/会员图标.png', seatNum: 4 },
+                { id: 4, status: 'reserved', name: '宝宝', avatar: '/images/huiyuan2.png', seatNum: 4 },
                 { id: 5, status: 'empty', name: '', avatar: '', seatNum: 5 },
-                { id: 6, status: 'reserved', name: 'xx', avatar: '/images/会员图标.png', seatNum: 6 },
-                { id: 7, status: 'reserved', name: '已预约', avatar: '/images/会员图标.png', seatNum: 7 },
+                { id: 6, status: 'reserved', name: 'xx', avatar: '/images/huiyuan2.png', seatNum: 6 },
+                { id: 7, status: 'reserved', name: '已预约', avatar: '/images/huiyuan2.png', seatNum: 7 },
                 { id: 8, status: 'empty', name: '', avatar: '', seatNum: 8 },
-                { id: 9, status: 'reserved', name: 'MikeC...', avatar: '/images/会员图标.png', seatNum: 9 },
+                { id: 9, status: 'reserved', name: 'MikeC...', avatar: '/images/huiyuan2.png', seatNum: 9 },
             ],
             subTable: {
                 name: '副赛事桌',
@@ -156,7 +156,7 @@ Page({
                 occupied: 0,
                 total: 9
             },
-            waitingList: ['/images/会员图标.png', '/images/会员图标.png']
+            waitingList: ['/images/huiyuan2.png', '/images/huiyuan2.png']
         });
     },
 
@@ -231,7 +231,7 @@ Page({
                 ...seats[seatIndex],
                 status: 'reserved',
                 name: userName,
-                avatar: userInfo?.avatar || '/images/会员图标.png',
+                avatar: userInfo?.avatar || '/images/huiyuan2.png',
                 userId: userInfo?.id
             };
             this.setData({ [seatArray]: seats });

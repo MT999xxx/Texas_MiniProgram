@@ -143,6 +143,45 @@ Page({
   },
 
   /**
+   * 退出登录
+   */
+  onLogout() {
+    wx.showModal({
+      title: '提示',
+      content: '确定要退出登录吗？',
+      success: (res) => {
+        if (res.confirm) {
+          authManager.clearAuth();
+          // Reset page data
+          this.setData({
+            isLogin: false,
+            userInfo: {
+              avatar: '/images/huiyuan2.png',
+              nickname: '点击登录',
+              id: ''
+            },
+            stats: {
+              coins: 0,
+              points: 0,
+              coupons: 0
+            }
+          });
+          wx.showToast({
+            title: '已退出登录',
+            icon: 'success'
+          });
+
+          // 如果app.js有全局用户信息也需要清理
+          const app = getApp();
+          if (app && app.globalData) {
+            app.globalData.userInfo = null;
+          }
+        }
+      }
+    });
+  },
+
+  /**
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
@@ -161,18 +200,33 @@ Page({
    */
   async onShow() {
     // 检查登录状态
-    const isLoggedIn = await authManager.checkLogin();
-    if (isLoggedIn) {
-      const userInfo = authManager.getUserInfo();
-      this.setData({
-        isLogin: true,
-        userInfo: {
-          avatar: userInfo.avatar || '/images/huiyuan2.png',
-          nickname: userInfo.nickname || '德州爱好者',
-          id: userInfo.id || ''
-        }
-      });
-    } else {
+    try {
+      const isLoggedIn = await authManager.checkLogin();
+      if (isLoggedIn) {
+        const userInfo = authManager.getUserInfo();
+        // Update globalData in app.js if needed, though this is a page context
+        // getApp().globalData.userInfo = userInfo; // Example if app.js needs it
+        console.log('自动登录成功:', userInfo);
+        this.setData({
+          isLogin: true,
+          userInfo: {
+            avatar: userInfo.avatar || '/images/huiyuan2.png',
+            nickname: userInfo.nickname || userInfo.nickName || '德州爱好者', // Handle both nickName and nickname
+            id: userInfo.id || ''
+          }
+        });
+      } else {
+        this.setData({
+          isLogin: false,
+          userInfo: {
+            avatar: '/images/huiyuan2.png',
+            nickname: '点击登录',
+            id: ''
+          }
+        });
+      }
+    } catch (error) {
+      console.warn('自动登录过程异常:', error);
       this.setData({
         isLogin: false,
         userInfo: {

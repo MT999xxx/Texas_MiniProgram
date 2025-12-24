@@ -58,6 +58,11 @@
     </block>
   </view>
 
+  <!-- 3.1 退出登录按钮 (仅登录可见) -->
+  <view class="logout-section" wx:if="{{isLogin}}">
+    <button class="logout-btn" bindtap="onLogout">退出登录</button>
+  </view>
+
   <!-- 底部导航栏 -->
   <tab-bar selected="3"></tab-bar>
 

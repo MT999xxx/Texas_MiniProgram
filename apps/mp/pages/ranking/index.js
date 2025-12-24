@@ -114,7 +114,7 @@ Page({
         rank: item.rank,
         name: item.nickname || `用户${item.id ? item.id.toString().slice(-4) : 'xxxx'}`,
         score: this.formatScore(item.points),
-        avatar: item.avatar || '/images/会员图标.png',
+        avatar: item.avatar || '/images/huiyuan2.png',
         levelName: item.levelName || '普通会员'
       }));
 
@@ -126,7 +126,7 @@ Page({
           rank: myRank.rank || '未上榜',
           name: myRank.nickname || '我',
           score: this.formatScore(myRank.points),
-          avatar: myRank.avatar || '/images/会员图标.png'
+          avatar: myRank.avatar || '/images/huiyuan2.png'
         };
       } else {
         // 如果API没返回我的排名，尝试从列表中查找
@@ -169,7 +169,7 @@ Page({
         rank: 15,
         name: '我',
         score: '50000',
-        avatar: '/images/会员图标.png'
+        avatar: '/images/huiyuan2.png'
       },
       isEmpty: false,
       loading: false
@@ -189,14 +189,14 @@ Page({
    */
   getMockRankingData() {
     return [
-      { rank: 1, name: 'XYZ-3245', score: '176570', avatar: '/images/会员图标.png' },
-      { rank: 2, name: '不语-9218', score: '141000', avatar: '/images/会员图标.png' },
-      { rank: 3, name: '🍃🍃🍃-3118', score: '131000', avatar: '/images/会员图标.png' },
-      { rank: 4, name: 'kaka-6621', score: '128000', avatar: '/images/会员图标.png' },
-      { rank: 5, name: 'SX-6926', score: '112700', avatar: '/images/会员图标.png' },
-      { rank: 6, name: 'Spirit Reaper-1763', score: '90000', avatar: '/images/会员图标.png' },
-      { rank: 7, name: '渝都Vincent-9899', score: '88000', avatar: '/images/会员图标.png' },
-      { rank: 8, name: '秦智-7890', score: '85000', avatar: '/images/会员图标.png' }
+      { rank: 1, name: 'XYZ-3245', score: '176570', avatar: '/images/huiyuan2.png' },
+      { rank: 2, name: '不语-9218', score: '141000', avatar: '/images/huiyuan2.png' },
+      { rank: 3, name: '🍃🍃🍃-3118', score: '131000', avatar: '/images/huiyuan2.png' },
+      { rank: 4, name: 'kaka-6621', score: '128000', avatar: '/images/huiyuan2.png' },
+      { rank: 5, name: 'SX-6926', score: '112700', avatar: '/images/huiyuan2.png' },
+      { rank: 6, name: 'Spirit Reaper-1763', score: '90000', avatar: '/images/huiyuan2.png' },
+      { rank: 7, name: '渝都Vincent-9899', score: '88000', avatar: '/images/huiyuan2.png' },
+      { rank: 8, name: '秦智-7890', score: '85000', avatar: '/images/huiyuan2.png' }
     ];
   },
 

@@ -49,6 +49,7 @@ export class AuthService {
       member = this.memberRepo.create({
         userId: wxSession.openid,
         nickname: dto.nickname || '新用户',
+        avatar: dto.avatarUrl,
         phone: '',
         points: 0,
         level: defaultLevel || undefined,
@@ -59,6 +60,7 @@ export class AuthService {
     } else if (dto.nickname || dto.avatarUrl) {
       // 更新用户信息
       if (dto.nickname) member.nickname = dto.nickname;
+      if (dto.avatarUrl) member.avatar = dto.avatarUrl;
       await this.memberRepo.save(member);
     }
 
@@ -77,6 +79,7 @@ export class AuthService {
         id: member.id,
         userId: member.userId,
         nickname: member.nickname,
+        avatar: member.avatar,
         phone: member.phone,
         points: member.points,
         level: member.level,

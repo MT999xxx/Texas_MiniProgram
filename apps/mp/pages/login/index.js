@@ -3,7 +3,9 @@ const authManager = require('../../utils/auth');
 Page({
   data: {
     loading: false,
-    showGuestTip: true
+    showGuestTip: true,
+    avatarUrl: '',
+    nickname: ''
   },
 
   async onLoad(options) {
@@ -17,29 +19,38 @@ Page({
     }
   },
 
+  // 选择头像
+  onChooseAvatar(e) {
+    const { avatarUrl } = e.detail;
+    console.log('选择头像成功:', avatarUrl);
+    this.setData({ avatarUrl });
+  },
+
+  // 输入昵称
+  onInputNickname(e) {
+    const nickname = e.detail.value;
+    this.setData({ nickname });
+  },
+
   // 点击登录按钮
-  onLoginClick() {
-    console.log('点击了登录按钮');
+  async onLoginClick() {
+    console.log('点击了登录确认按钮');
+
+    if (!this.data.nickname) {
+      wx.showToast({ title: '请输入昵称', icon: 'none' });
+      return;
+    }
 
     // 显示加载状态
     this.setData({ loading: true });
 
-    // 调用微信授权
-    wx.getUserProfile({
-      desc: '登录获取您的昵称、头像',
-      success: (res) => {
-        console.log('获取用户信息成功:', res.userInfo);
-        this.handleLogin(res.userInfo);
-      },
-      fail: (err) => {
-        console.error('获取用户信息失败:', err);
-        this.setData({ loading: false });
-        wx.showToast({
-          title: '授权失败',
-          icon: 'none'
-        });
-      }
-    });
+    // 直接使用用户输入的信息登录
+    const userInfo = {
+      nickName: this.data.nickname,
+      avatarUrl: this.data.avatarUrl || '/images/huiyuan2.png'
+    };
+
+    this.handleLogin(userInfo);
   },
 
   // 处理登录

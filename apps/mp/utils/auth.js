@@ -76,15 +76,17 @@ const authManager = {
         return response.user;
       } catch (apiError) {
         console.warn('后端API调用失败，使用模拟登录:', apiError);
+        console.log('API Error Details:', apiError.message || apiError);
 
         // Fallback: 使用模拟登录（开发环境）
         const mockUser = {
           id: 'mock_' + Date.now(),
-          name: userInfo.nickName || '游客',
-          nickName: userInfo.nickName || '游客',
+          name: userInfo.nickName || '微信用户',
+          nickName: userInfo.nickName || '微信用户',
           avatar: userInfo.avatarUrl || '/images/huiyuan2.png',
           phone: '',
-          points: 0
+          points: 0,
+          level: { name: '普通会员', code: 'V1' }
         };
 
         const mockToken = 'mock_token_' + Date.now();
@@ -92,7 +94,7 @@ const authManager = {
         // 保存模拟登录信息
         this.setAuth(mockToken, mockUser);
 
-        console.log('模拟登录成功:', mockUser);
+        console.log('模拟登录成功 (Persistence Enabled):', mockUser);
 
         return mockUser;
       }
@@ -106,12 +108,19 @@ const authManager = {
   async checkLogin() {
     // 先检查本地存储
     if (this.loadAuth()) {
+      // 如果是模拟Token，直接认为有效（仅用于本地开发演示）
+      if (this.token && this.token.startsWith('mock_token_')) {
+        console.log('检测到模拟Token，跳过后端验证');
+        return true;
+      }
+
       try {
         // 验证token是否有效
         const { request } = require('./request');
         const user = await request({
           url: '/auth/profile',
-          method: 'GET'
+          method: 'GET',
+          silent: true // 验证过程不弹出错误提示
         });
 
         // 更新用户信息
@@ -121,7 +130,7 @@ const authManager = {
         return true;
       } catch (error) {
         // token无效，清除登录信息
-        console.log('Token已过期，需要重新登录');
+        console.log('Token验证失败或已过期');
         this.clearAuth();
         return false;
       }
@@ -148,6 +157,14 @@ const authManager = {
         }
       });
     });
+  },
+
+  // 获取当前用户信息
+  getUserInfo() {
+    if (!this.userInfo) {
+      this.loadAuth();
+    }
+    return this.userInfo;
   }
 };
 

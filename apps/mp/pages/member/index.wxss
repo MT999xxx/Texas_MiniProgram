@@ -317,3 +317,27 @@ page {
   background: linear-gradient(90deg, #FFD700, #FFA000);
   color: #000;
 }
+
+/* --- 5. 退出登录 --- */
+.logout-section {
+  margin: 60rpx 30rpx 100rpx;
+}
+
+.logout-btn {
+  background-color: transparent;
+  color: #666;
+  font-size: 28rpx;
+  border-radius: 50rpx;
+  border: 1rpx solid #333;
+  padding: 10rpx 0;
+  width: 100%;
+}
+
+.logout-btn::after {
+  border: none;
+}
+
+.logout-btn.button-hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #888;
+}
