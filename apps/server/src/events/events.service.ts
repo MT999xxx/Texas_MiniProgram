@@ -101,6 +101,10 @@ export class EventsService {
     const event = await this.findById(eventId);
     const member = await this.membershipService.findMemberById(dto.memberId);
 
+    if (!member) {
+      throw new NotFoundException('会员不存在');
+    }
+
     // 检查活动状态
     if (event.status !== EventStatus.UPCOMING && event.status !== EventStatus.ONGOING) {
       throw new BadRequestException('活动已结束或已取消，无法报名');

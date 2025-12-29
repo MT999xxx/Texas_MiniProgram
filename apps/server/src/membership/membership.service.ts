@@ -13,7 +13,7 @@ export class MembershipService {
     private readonly levelRepo: Repository<MembershipLevelEntity>,
     @InjectRepository(MemberEntity)
     private readonly memberRepo: Repository<MemberEntity>,
-  ) {}
+  ) { }
 
   createLevel(dto: CreateLevelDto) {
     const level = this.levelRepo.create({
@@ -33,10 +33,11 @@ export class MembershipService {
   async createMember(dto: CreateMemberDto) {
     let level: MembershipLevelEntity | undefined;
     if (dto.levelCode) {
-      level = await this.levelRepo.findOne({ where: { code: dto.levelCode } });
-      if (!level) {
+      const foundLevel = await this.levelRepo.findOne({ where: { code: dto.levelCode } });
+      if (!foundLevel) {
         throw new NotFoundException('Level not found');
       }
+      level = foundLevel;
     }
     const member = this.memberRepo.create({
       userId: dto.userId,

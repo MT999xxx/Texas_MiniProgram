@@ -25,7 +25,8 @@ export class NotificationService {
       await this.saveNotificationRecord(notification);
 
       this.logger.log(`通知发送成功: ${notification.type}`);
-    } catch (error) {
+    } catch (err) {
+      const error = err as Error;
       this.logger.error(`通知发送失败: ${error.message}`, error.stack);
       // 通知失败不应该影响主流程，所以这里只记录错误
     }
@@ -119,8 +120,8 @@ export class NotificationService {
   }
 
   // 根据通知类型获取模板ID
-  private getTemplateId(type: string): string {
-    const templateMap = {
+  private getTemplateId(type: NotificationData['type']): string {
+    const templateMap: Record<NotificationData['type'], string> = {
       'PAYMENT_SUCCESS': 'template_payment_success',
       'PAYMENT_FAILED': 'template_payment_failed',
       'RECHARGE_SUCCESS': 'template_recharge_success',

@@ -51,15 +51,17 @@ export class OrdersService {
     let reservation: ReservationEntity | undefined;
     let table: TableEntity | undefined;
     if (dto.reservationId) {
-      reservation = await this.reservationRepo.findOne({ where: { id: dto.reservationId }, relations: ['table'] });
-      if (!reservation) throw new NotFoundException('Reservation not found');
+      const foundReservation = await this.reservationRepo.findOne({ where: { id: dto.reservationId }, relations: ['table'] });
+      if (!foundReservation) throw new NotFoundException('Reservation not found');
+      reservation = foundReservation;
       table = reservation.table;
       if (reservation.status !== ReservationStatus.CHECKED_IN) {
         await this.reservationService.updateStatus(reservation.id, ReservationStatus.CHECKED_IN);
       }
     } else if (dto.tableId) {
-      table = await this.tableRepo.findOne({ where: { id: dto.tableId } });
-      if (!table) throw new NotFoundException('Table not found');
+      const foundTable = await this.tableRepo.findOne({ where: { id: dto.tableId } });
+      if (!foundTable) throw new NotFoundException('Table not found');
+      table = foundTable;
       if (table.status === TableStatus.AVAILABLE) {
         await this.tableService.updateStatus(table.id, TableStatus.IN_USE);
       }
@@ -75,14 +77,16 @@ export class OrdersService {
     // 验证并处理优惠券
     let userCoupon: UserCouponEntity | undefined;
     if (dto.userCouponId) {
-      userCoupon = await this.userCouponRepo.findOne({
+      const foundCoupon = await this.userCouponRepo.findOne({
         where: { id: dto.userCouponId, member: { id: dto.memberId } },
         relations: ['coupon', 'member'],
       });
 
-      if (!userCoupon) {
+      if (!foundCoupon) {
         throw new NotFoundException('User coupon not found');
       }
+
+      userCoupon = foundCoupon;
 
       if (userCoupon.status !== UserCouponStatus.AVAILABLE) {
         throw new BadRequestException('Coupon is not available');
@@ -138,12 +142,12 @@ export class OrdersService {
       await this.userCouponRepo.save(userCoupon);
     }
 
-    const order: OrderEntity = this.orderRepo.create({
+    const order = this.orderRepo.create({
       orderNumber: this.generateOrderNumber(),
-      member,
+      member: member || undefined,
       reservation,
       table,
-      userCoupon,
+      // userCoupon,  // TODO: 优惠券功能待实现，当前 OrderEntity 中未定义此属性
       originalAmount: dto.originalAmount || originalAmount,
       discountAmount: dto.discountAmount || discountAmount,
       totalAmount: dto.finalAmount || finalAmount,

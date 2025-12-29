@@ -81,7 +81,7 @@ export class CouponsService {
 
     // 检查会员等级要求
     if (coupon.minMemberLevel && (!member.level || member.level.threshold < coupon.minMemberLevel)) {
-      throw new BadRequestException(`需要达到会员等级${member.level.threshold}才能领取`);
+      throw new BadRequestException(`需要达到会员等级${coupon.minMemberLevel}才能领取`);
     }
 
     // 检查个人领取限制
