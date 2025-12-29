@@ -5,10 +5,8 @@ const authManager = require('../../utils/auth');
 
 Page({
     data: {
-        // CDN或本地图片地址
-        tableBgUrl: app.globalData.cdnBase
-            ? `${app.globalData.cdnBase}/table_bg.png`
-            : '/images/yuyue2.png',
+        // 本地圆桌背景图片
+        tableBgUrl: '/images/table_bg.jpg',
         // 主赛事桌信息
         mainTable: {
             name: '主赛事桌',
