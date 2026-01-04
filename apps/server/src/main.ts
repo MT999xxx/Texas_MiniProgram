@@ -10,7 +10,16 @@ import { AppModule } from './modules/app.module';
 dotenv.config();
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, { cors: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // 配置 CORS - 允许所有来源
+  app.enableCors({
+    origin: true, // 允许所有来源
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    credentials: true,
+  });
+
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   // 静态文件服务 - 用于提供大图片资源

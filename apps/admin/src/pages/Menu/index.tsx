@@ -414,7 +414,7 @@ export default function Menu() {
                             name="file"
                             listType="picture-card"
                             showUploadList={false}
-                            action="http://localhost:3000/uploads/image"
+                            action={`${import.meta.env.VITE_API_BASE || 'http://localhost:3000'}/uploads/image`}
                             beforeUpload={(file) => {
                                 const isImage = file.type.startsWith('image/');
                                 if (!isImage) {
@@ -436,7 +436,7 @@ export default function Menu() {
                                     const url = info.file.response?.url;
                                     if (url) {
                                         // 拼接完整URL
-                                        const fullUrl = `http://localhost:3000${url}`;
+                                        const fullUrl = `${import.meta.env.VITE_API_BASE || 'http://localhost:3000'}${url}`;
                                         setImageUrl(fullUrl);
                                         itemForm.setFieldValue('imageUrl', fullUrl);
                                         antdMessage.success('图片上传成功');
