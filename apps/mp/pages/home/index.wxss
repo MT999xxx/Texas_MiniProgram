@@ -9,6 +9,7 @@ page {
   height: 100vh;
   position: relative;
   overflow: hidden;
+  padding: 0 !important; /* 强制覆盖全局 padding，实现完美全屏定位 */
 }
 
 /* 背景图全屏铺满 */
@@ -37,7 +38,7 @@ page {
   position: absolute;
   top: 0;
   left: 0;
-  width: 95%;
+  width: 100%; /* 改为 100% */
   padding: 0 40rpx;
   padding-top: calc(20rpx + env(safe-area-inset-top)); 
   display: flex;
@@ -48,21 +49,27 @@ page {
 }
 
 .store-name {
-  color: #FFD700; /* 亮金色 */
+  color: #8b0000; /* 亮金色 */
   font-size: 34rpx;
   font-weight: 900;
   text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
 }
 
+.notice-content {
+  font-size: 26rpx;
+  color: #cc9999;
+  flex: 1;
+}
+
 .notice-btn {
   background-color: rgba(0, 0, 0, 0.6);
-  border: 2rpx solid #FFD700;
+  border: 2rpx solid #8b0000;
   padding: 10rpx 30rpx;
   border-radius: 40rpx;
 }
 
 .notice-btn text {
-  color: #FFD700;
+  color: #8b0000;
   font-size: 24rpx;
   font-weight: bold;
 }
@@ -70,12 +77,9 @@ page {
 /* --- 2. 中间核心区域 --- */
 .center-area {
   position: absolute;
-  top: 38%; /* 稍微往上提一点，给下面留空间 */
-  left: 50%;
-  transform: translate(-53%, -50%);
-  
-  width: 100%; /* 关键：改为100%，让内部子元素来控制宽度 */
-  
+  top: 20%;
+  left: 0; /* 直接对齐左侧 */
+  width: 100%; /* 占满全宽 */
   z-index: 10;
   display: flex;
   flex-direction: column;
@@ -84,15 +88,16 @@ page {
 
 /* 巨大的 TUSK (明亮、粗壮) */
 .brand-title {
-  font-size: 220rpx; /* 字体超大 */
+  font-size: 220rpx;
   font-weight: 900;
-  color: #FFC107; /* 鲜亮金色 */
+  color: #8b0000;
   letter-spacing: 8rpx;
   line-height: 0.8;
   margin-bottom: 10rpx;
   font-style: italic;
   text-shadow: 0 10rpx 20rpx rgba(0,0,0,0.6);
-  transform: skewX(-10deg); /* 强制斜体 */
+  transform: skewX(-10deg);
+  text-align: center; /* 确保文字居中 */
 }
 
 /* 欢迎黑盒子 */
@@ -100,7 +105,7 @@ page {
   /* 1. 宽度与下面保持一致 */
   width: 90%; 
   
-  background-color: #262322;
+  background-color: #000000;
   border-radius: 30rpx; /* 圆角稍微大一点 */
   padding: 40rpx 50rpx; /* 增加内边距 */
   
@@ -109,16 +114,17 @@ page {
   justify-content: center;
   
   box-sizing: border-box;
-  margin-top: 10rpx; /* 离TUSK近一点 */
+  margin-top: 30rpx; /* 离TUSK近一点 */
   margin-left: auto; /* 左右自动居中 */
   margin-right: auto;
   
   box-shadow: 0 10rpx 20rpx rgba(0,0,0,0.5);
+  border: 1rpx solid #330000;
 }
 
 /* 欢迎语字体变大 */
 .welcome-text {
-  color: #DDDDDD;
+  color: #cc3333;
   font-size: 40rpx; /* 增大字体 (原28rpx) */
   font-weight: bold; /* 加粗 */
   letter-spacing: 20rpx; /* 字间距 */
@@ -130,7 +136,7 @@ page {
 
 
 .nickname-btn text {
-  color: #FFD700;
+  color: #8b0000;
   font-size: 26rpx;
   font-weight: bold;
 }
@@ -140,7 +146,7 @@ page {
   /* ====== 核心定位 ====== */
   position: absolute;
   left: 50%;
-  transform: translateX(-53%); /* 修正为 -50% 实现完美居中 */
+  transform: translateX(-50%); /* 修正为 -50% 实现完美居中 */
   z-index: 10;
   display: flex;
   justify-content: space-around;
@@ -149,10 +155,10 @@ page {
   /* ====== 尺寸和位置 ====== */
   
   /* 1. 宽度：锁定为 90%，与上面 welcome-box 对齐 */
-  width: 90%;  
+  width:90%;  
 
   /* 2. 高度 */
-  height: 550rpx; 
+  height: 580rpx; 
 
   /* 3. 位置：悬浮 */
   bottom: 210rpx;     
@@ -161,20 +167,21 @@ page {
   padding-top: 80rpx; 
 
   /* ====== 样式 ====== */
-  background-color: #262322;
+  background-color: #000000;
   
   /* 因为悬浮了，建议四个角都变圆，像一张卡片 */
   border-radius: 50rpx; 
   
   /* 增加阴影，更有层次感 */
   box-shadow: 0 10rpx 30rpx rgba(0,0,0,0.6);
+  border: 1rpx solid #330000;
 }
 
 .action-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 500rpx;
+  width: 320rpx; /* 修复宽度溢出问题，原 500rpx 太大 */
 }
 
 /* 图标大大大 */
@@ -185,14 +192,20 @@ page {
 }
 
 .action-title {
-  color: #FFC107;
+  color: #8b0000;
   font-size: 40rpx;
   font-weight: 900;
   margin-bottom: 6rpx;
 }
 
+.stats-label {
+  font-size: 24rpx;
+  color: #cc9999;
+  margin-bottom: 8rpx;
+}
+
 .action-subtitle {
-  color: #666;
+  color: #996666;
   font-size: 24rpx;
   font-weight: 500;
   text-transform: uppercase;
@@ -257,10 +270,11 @@ page {
 }
 
 .modal-text {
-  color: #ffffff;
   font-size: 28rpx;
+  color: #996666;
   line-height: 1.6;
-  text-align: justify;
+  margin-bottom: 48rpx;
+  text-align: center;
 }
 
 .modal-footer {

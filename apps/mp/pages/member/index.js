@@ -24,9 +24,9 @@ Page({
       coupons: 0
     },
     menuList: [
-      { icon: '/images/shouye2.png', text: '邀请有礼', url: '' }, // 暂时使用通用图标
-      { icon: '/images/zhuomian2.png', text: '存积分', url: '' },
-      { icon: '/images/paihangbang2.png', text: '订单列表', url: '' },
+      { icon: '/images/shouye2.jpg', text: '邀请有礼', url: '' }, // 暂时使用通用图标
+      { icon: '/images/zhuomian2.jpg', text: '存积分', url: '' },
+      { icon: '/images/paihangbang2.jpg', text: '订单列表', url: '' },
     ],
     showRechargePopup: false,
     rechargeOptions: [

@@ -1,26 +1,34 @@
-# Progress Update
-
-## [Date/Time]: 2025-12-29 15:10
+## [Date/Time]: 2026-01-05 10:30
 
 ### [Status]: Done
 
 ### [Changes]:
-1. **后端构建错误修复** - 修复了多个 TypeScript 编译错误：
-   - `orders.service.ts`: 修复了 `findOne` 返回 `null` 与 `undefined` 类型不匹配的问题，使用 `foundX` 模式进行类型收窄；移除了 `userCoupon` 属性（因 `OrderEntity` 中未定义）
-   - `notification.service.ts`: 修复了 `catch` 块中 `unknown` 类型的 `error` 变量访问问题，添加了 `templateMap` 的类型注解
-   - `coupons.service.ts`: 修复了可能为 `undefined` 的 `member.level.threshold` 访问问题
-   - `events.service.ts`: 添加了 `member` 空值检查
-   - `membership.service.ts`: 修复了 `findOne` 返回类型不匹配问题
-
-2. **前端构建** - Admin 前端已成功构建到 `apps/admin/dist`
+1. **会员页及其他区域背景黑化**：
+   - 将会员中心页（member）的“会员卡片”（member-card）和“功能列表”（menu-list）背景由深灰色修改为纯黑色（#000000）。
+   - 同时将金额充值弹窗（modal-content）的背景也修改为纯黑色，保持交互层级视觉统一。
+2. **首页组件背景黑化**（已完成）：
+   - 已完成首页欢迎框及操作面板的黑化处理。
+3. **全局导航栏黑化**（已完成）：
+   - 已完成底部 TabBar 的背景黑化处理。
 
 ### [Next Step]:
-用户需要重新上传修复后的代码到服务器：
-1. 用 WinSCP 上传 `apps/server/src` 到 `/var/www/texas-miniprogram/apps/server/src`
-2. 用 WinSCP 上传 `apps/admin/dist` 到 `/var/www/texas-miniprogram/apps/admin/dist`
-3. SSH 登录服务器执行：
-   ```bash
-   cd /var/www/texas-miniprogram/apps/server
-   npm run build
-   pm2 restart texas-api
-   ```
+1. 用户在开发者工具中全面检查首页和会员页的纯黑背景效果。
+2. 确认整体视觉的高级感和黑红配色方案是否符合预期。
+
+## [Date/Time]: 2026-01-04 23:15
+
+### [Status]: Done
+
+### [Changes]:
+1. **图标透明度修复**：
+   - 修复了“点餐”和“预约”图标出现马赛克（棋盘格）背景的问题。
+   - **根本原因**：JPG 格式不支持透明度。之前的修改将 `.png` 切换为了 `.jpg`，导致图片编辑器的透明背景预览（网格线）被直接固化在了 JPG 图片像素中。
+   - **解决方案**：将图标文件后缀重新切回支持透明度的 `.png` 格式。
+2. **首页布局对齐修复**（已完成）：
+   - 修复了首页由于全局内边距导致的对齐偏移，并优化了操作面板项的宽度。
+3. **小程序全量字体颜色变更**（已完成）：
+   - 统一使用酒红配套色系，确保主体风格一致。
+
+### [Next Step]:
+1. 用户在微信开发者工具中预览首页和菜单页，确认图标背景是否恢复透明。
+2. 继续进行全流程验证。

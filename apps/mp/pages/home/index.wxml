@@ -22,12 +22,12 @@
 
   <view class="bottom-panel">
     <view class="action-item" bindtap="goToMenu">
-      <image class="action-icon" src="/images/diancan2.png" mode="aspectFit" />
+      <image class="action-icon" src="/images/diancan2.jpg" mode="aspectFit" />
       <text class="action-title">点餐</text>
     </view>
 
     <view class="action-item" bindtap="goToReservation">
-      <image class="action-icon" src="/images/yuyue2.png" mode="aspectFit" />
+      <image class="action-icon" src="/images/yuyue2.jpg" mode="aspectFit" />
       <text class="action-title">预约</text>
     </view>
   </view>

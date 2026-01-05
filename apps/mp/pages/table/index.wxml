@@ -23,7 +23,7 @@
     <!-- 信息卡片 -->
     <view class="info-card">
       <view class="info-item">
-        <image class="info-icon" src="/images/zhuomian2.png" /> <!-- 暂时用这个图标代替筹码 -->
+        <image class="info-icon" src="/images/zhuomian2.jpg" /> <!-- 暂时用这个图标代替筹码 -->
         <view class="info-text">
           <text class="label">基础积分</text>
           <text class="value">{{mainTable.score}}</text>
@@ -31,7 +31,7 @@
       </view>
       <view class="divider"></view>
       <view class="info-item">
-        <image class="info-icon" src="/images/huiyuan2.png" /> <!-- 暂时用这个图标代替人像 -->
+        <image class="info-icon" src="/images/huiyuan2.jpg" /> <!-- 暂时用这个图标代替人像 -->
         <view class="info-text">
           <text class="label">座位</text>
           <text class="value">{{mainTable.occupied}}/{{mainTable.total}}</text>
@@ -89,7 +89,7 @@
     <!-- 信息卡片 (副桌) -->
     <view class="info-card">
       <view class="info-item">
-        <image class="info-icon" src="/images/zhuomian2.png" />
+        <image class="info-icon" src="/images/zhuomian2.jpg" />
         <view class="info-text">
           <text class="label">基础积分</text>
           <text class="value">{{subTable.score}}</text>
@@ -97,7 +97,7 @@
       </view>
       <view class="divider"></view>
       <view class="info-item">
-        <image class="info-icon" src="/images/huiyuan2.png" />
+        <image class="info-icon" src="/images/huiyuan2.jpg" />
         <view class="info-text">
           <text class="label">座位</text>
           <text class="value">{{subTable.occupied}}/{{subTable.total}}</text>

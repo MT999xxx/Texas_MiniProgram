@@ -15,11 +15,11 @@
     "pages/ranking/index"
   ],
   "window": {
-    "navigationBarBackgroundColor": "#1c1c1e",
+    "navigationBarBackgroundColor": "#120a0a",
     "navigationBarTitleText": "三条A - 德州扑克主题酒吧",
     "navigationBarTextStyle": "white",
     "backgroundTextStyle": "light",
-    "backgroundColor": "#0f172a"
+    "backgroundColor": "#120a0a"
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json"

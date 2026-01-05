@@ -26,7 +26,7 @@
   right: -20%;
   width: 400rpx;
   height: 400rpx;
-  background: radial-gradient(circle, rgba(251, 191, 36, 0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(139, 0, 0, 0.1) 0%, transparent 70%);
 }
 
 .total-points {
@@ -38,13 +38,13 @@
   display: block;
   font-size: 88rpx;
   font-weight: bold;
-  color: #fbbf24;
+  color: #8b0000;
   margin-bottom: 8rpx;
 }
 
 .points-label {
   font-size: 28rpx;
-  color: #94a3b8;
+  color: #996666;
 }
 
 .points-trend {
@@ -67,12 +67,12 @@
 }
 
 .trend-value.used {
-  color: #f59e0b;
+  color: #8b0000;
 }
 
 .trend-label {
   font-size: 24rpx;
-  color: #64748b;
+  color: #996666;
 }
 
 /* 功能区 */
@@ -102,13 +102,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(251, 191, 36, 0.1);
+  background: rgba(139, 0, 0, 0.1);
   border-radius: 50%;
 }
 
 .function-text {
   font-size: 24rpx;
-  color: #cbd5e1;
+  color: #cc9999;
   text-align: center;
 }
 
@@ -141,13 +141,13 @@
 .tab-item {
   padding: 8rpx 16rpx;
   font-size: 28rpx;
-  color: #64748b;
+  color: #996666;
   border-bottom: 2rpx solid transparent;
 }
 
 .tab-item.active {
-  color: #fbbf24;
-  border-bottom-color: #fbbf24;
+  color: #8b0000;
+  border-bottom-color: #8b0000;
 }
 
 .details-list {
@@ -211,7 +211,7 @@
 }
 
 .transaction-amount.used {
-  color: #f59e0b;
+  color: #8b0000;
 }
 
 .transaction-meta {
@@ -222,7 +222,7 @@
 
 .transaction-date {
   font-size: 24rpx;
-  color: #64748b;
+  color: #996666;
 }
 
 .transaction-status {
@@ -317,7 +317,7 @@
   display: block;
   font-size: 30rpx;
   font-weight: bold;
-  color: #fbbf24;
+  color: #8b0000;
   margin-bottom: 16rpx;
 }
 
@@ -365,17 +365,18 @@
 
 .exchange-points {
   font-size: 28rpx;
-  color: #fbbf24;
+  color: #8b0000;
   font-weight: bold;
 }
 
 .exchange-btn {
-  padding: 16rpx 32rpx;
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: #1e293b;
-  font-size: 24rpx;
+  background: linear-gradient(135deg, #8b0000, #4a0e0e);
+  color: #ffebeb;
+  font-size: 28rpx;
   font-weight: bold;
-  border-radius: 32rpx;
+  padding: 12rpx 32rpx;
+  border-radius: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(139, 0, 0, 0.3);
   border: none;
 }
 

@@ -23,16 +23,16 @@
 }
 
 .tab-item.active {
-  border-bottom-color: #fbbf24;
+  border-bottom-color: #8b0000;
 }
 
 .tab-text {
   font-size: 30rpx;
-  color: #64748b;
+  color: #996666;
 }
 
 .tab-item.active .tab-text {
-  color: #fbbf24;
+  color: #8b0000;
   font-weight: bold;
 }
 
@@ -52,7 +52,7 @@
 }
 
 .event-card:active {
-  border-color: rgba(251, 191, 36, 0.3);
+  border-color: rgba(139, 0, 0, 0.3);
   transform: scale(0.98);
 }
 
@@ -81,8 +81,8 @@
 }
 
 .status-UPCOMING {
-  background: rgba(251, 191, 36, 0.9);
-  color: #1e293b;
+  background: rgba(139, 0, 0, 0.9);
+  color: #ffffff;
 }
 
 .status-ONGOING {
@@ -105,7 +105,7 @@
   top: 16rpx;
   left: 16rpx;
   background: rgba(15, 23, 42, 0.8);
-  color: #fbbf24;
+  color: #8b0000;
   padding: 6rpx 16rpx;
   border-radius: 16rpx;
   font-size: 20rpx;
@@ -138,11 +138,11 @@
 
 .time-text {
   font-size: 24rpx;
-  color: #fbbf24;
-  background: rgba(251, 191, 36, 0.1);
+  color: #8b0000;
+  background: rgba(139, 0, 0, 0.1);
   padding: 4rpx 12rpx;
   border-radius: 8rpx;
-  border: 1rpx solid rgba(251, 191, 36, 0.3);
+  border: 1rpx solid rgba(139, 0, 0, 0.3);
 }
 
 .event-description {
@@ -151,7 +151,7 @@
 
 .event-description text {
   font-size: 28rpx;
-  color: #cbd5e1;
+  color: #cc9999;
   line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -183,7 +183,7 @@
 
 .detail-text {
   font-size: 26rpx;
-  color: #94a3b8;
+  color: #996666;
   flex: 1;
 }
 
@@ -202,7 +202,7 @@
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%);
+  background: linear-gradient(90deg, #8b0000 0%, #4a0e0e 100%);
   transition: width 0.3s;
   border-radius: 4rpx;
 }
@@ -222,12 +222,17 @@
   min-width: 140rpx;
 }
 
-.btn-register {
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-  color: #1e293b;
+.btn-.register-btn {
+  background: linear-gradient(135deg, #8b0000, #4a0e0e);
+  color: #ffebeb;
+  font-size: 30rpx;
   font-weight: bold;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 40rpx;
 }
-
 .btn-registered {
   background: rgba(34, 197, 94, 0.1);
   border: 2rpx solid rgba(34, 197, 94, 0.3) !important;

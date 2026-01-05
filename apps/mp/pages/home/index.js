@@ -7,7 +7,7 @@ console.log('home/index.js loaded');
 Page({
   data: {
     // 暂时使用本地图片，避免CDN 404问题
-    bgUrl: '/images/hourse.jpg',
+    bgUrl: '/images/hourse2.jpg',
     modalVisible: false,
     modalTitle: '',
     modalContent: '',

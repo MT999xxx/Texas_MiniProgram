@@ -30,25 +30,25 @@ page {
 }
 
 .user-nickname {
-  color: #FFD700;
+  color: #8b0000;
   font-size: 36rpx;
   font-weight: bold;
   margin-bottom: 8rpx;
 }
 
 .user-id {
-  color: #888;
+  color: #996666;
   font-size: 24rpx;
 }
 
 /* --- 2. 会员卡片区域 --- */
 .member-card {
-  background-color: #25252b; /* 深灰背景 */
+  background-color: #000000;
   border-radius: 30rpx;
   padding: 40rpx 30rpx;
   margin-bottom: 40rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.2);
-  border: 1rpx solid #333;
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.5);
+  border: 1rpx solid #330000;
 }
 
 .card-header {
@@ -61,7 +61,7 @@ page {
 }
 
 .level-tag {
-  color: #fff;
+  color: #8b0000;
   font-size: 48rpx;
   font-weight: 900;
   margin-right: 16rpx;
@@ -69,7 +69,7 @@ page {
 }
 
 .level-name {
-  color: #fff;
+  color: #cc3333;
   font-size: 32rpx;
   font-weight: bold;
 }
@@ -82,12 +82,12 @@ page {
 }
 
 .progress-text {
-  color: #666;
+  color: #996666;
   font-size: 22rpx;
 }
 
 .view-more {
-  color: #FFD700;
+  color: #8b0000;
   font-size: 22rpx;
 }
 
@@ -97,8 +97,8 @@ page {
   justify-content: space-around;
   align-items: center;
   padding: 30rpx 0;
-  border-top: 1rpx solid #333;
-  border-bottom: 1rpx solid #333;
+  border-top: 1rpx solid #330000;
+  border-bottom: 1rpx solid #330000;
   margin-bottom: 40rpx;
 }
 
@@ -109,41 +109,41 @@ page {
 }
 
 .stat-value {
-  color: #FFD700;
+  color: #8b0000;
   font-size: 40rpx;
   font-weight: bold;
   margin-bottom: 8rpx;
 }
 
 .stat-label {
-  color: #888;
+  color: #996666;
   font-size: 24rpx;
 }
 
 .stat-divider {
   width: 2rpx;
   height: 40rpx;
-  background-color: #444;
+  background-color: #330000;
 }
 
 /* 充值按钮 */
 .recharge-btn {
-  background: linear-gradient(90deg, #FFD700, #FFA000);
-  color: #000;
+  background: linear-gradient(90deg, #8b0000, #4a0e0e);
+  color: #fff;
   font-weight: bold;
   border-radius: 50rpx;
   font-size: 32rpx;
   padding: 10rpx 0;
   width: 80%;
-  box-shadow: 0 4rpx 12rpx rgba(255, 215, 0, 0.3);
+  box-shadow: 0 4rpx 12rpx rgba(139, 0, 0, 0.3);
 }
 
 /* --- 3. 功能菜单列表 --- */
 .menu-list {
-  background-color: #25252b;
+  background-color: #000000;
   border-radius: 30rpx;
   padding: 10rpx 30rpx;
-  border: 1rpx solid #333;
+  border: 1rpx solid #330000;
 }
 
 .menu-item {
@@ -151,7 +151,7 @@ page {
   justify-content: space-between;
   align-items: center;
   padding: 30rpx 0;
-  border-bottom: 1rpx solid #333;
+  border-bottom: 1rpx solid #330000;
 }
 
 .menu-item:last-child {
@@ -171,12 +171,12 @@ page {
 }
 
 .menu-text {
-  color: #fff;
+  color: #cc3333;
   font-size: 30rpx;
 }
 
 .menu-arrow {
-  color: #666;
+  color: #8b0000;
   font-size: 28rpx;
 }
 
@@ -196,15 +196,15 @@ page {
 
 .modal-content {
   width: 85%;
-  background-color: #25252b;
+  background-color: #000000;
   border-radius: 30rpx;
   padding: 40rpx 30rpx;
-  border: 1rpx solid #333;
+  border: 1rpx solid #8b0000;
   box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.5);
 }
 
 .modal-title {
-  color: #FFD700;
+  color: #8b0000;
   font-size: 36rpx;
   font-weight: bold;
   text-align: center;
@@ -220,7 +220,7 @@ page {
 
 .amount-item {
   width: 48%;
-  background-color: #333;
+  background-color: #222;
   border-radius: 16rpx;
   padding: 30rpx 10rpx;
   margin-bottom: 20rpx;
@@ -233,33 +233,33 @@ page {
 }
 
 .amount-item.active {
-  background-color: rgba(255, 215, 0, 0.1);
-  border-color: #FFD700;
+  background-color: rgba(139, 0, 0, 0.1);
+  border-color: #8b0000;
 }
 
 .amount-value {
-  color: #fff;
+  color: #cc3333;
   font-size: 40rpx;
   font-weight: bold;
   margin-bottom: 10rpx;
 }
 
 .amount-item.active .amount-value {
-  color: #FFD700;
+  color: #8b0000;
 }
 
 .amount-desc {
-  color: #888;
+  color: #996666;
   font-size: 22rpx;
   text-align: center;
 }
 
 .amount-item.active .amount-desc {
-  color: #FFD700;
+  color: #8b0000;
 }
 
 .input-container {
-  background-color: #333;
+  background-color: #222;
   border-radius: 50rpx;
   padding: 20rpx 40rpx;
   display: flex;
@@ -270,26 +270,26 @@ page {
 
 .custom-input {
   flex: 1;
-  color: #fff;
+  color: #cc3333;
   font-size: 32rpx;
   text-align: center;
 }
 
 .input-placeholder {
-  color: #666;
+  color: #663333;
 }
 
 .clear-btn {
   position: absolute;
   right: 20rpx;
-  color: #888;
+  color: #8b0000;
   padding: 10rpx;
   font-size: 28rpx;
 }
 
 .bonus-tip {
   text-align: center;
-  color: #ccc;
+  color: #cc9999;
   font-size: 26rpx;
   margin-bottom: 40rpx;
 }
@@ -309,13 +309,13 @@ page {
 }
 
 .cancel-btn {
-  background-color: #444;
-  color: #ccc;
+  background-color: #333;
+  color: #996666;
 }
 
 .submit-btn {
-  background: linear-gradient(90deg, #FFD700, #FFA000);
-  color: #000;
+  background: linear-gradient(90deg, #8b0000, #4a0e0e);
+  color: #fff;
 }
 
 /* --- 5. 退出登录 --- */
@@ -325,10 +325,10 @@ page {
 
 .logout-btn {
   background-color: transparent;
-  color: #666;
+  color: #996666;
   font-size: 28rpx;
   border-radius: 50rpx;
-  border: 1rpx solid #333;
+  border: 1rpx solid #330000;
   padding: 10rpx 0;
   width: 100%;
 }
@@ -338,6 +338,6 @@ page {
 }
 
 .logout-btn.button-hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: #888;
+  background-color: rgba(139, 0, 0, 0.05);
+  color: #8b0000;
 }

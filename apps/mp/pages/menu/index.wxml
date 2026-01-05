@@ -40,7 +40,7 @@
   <view class="cart-bar">
     <view class="cart-info" bindtap="toggleCart">
       <view class="cart-icon-wrapper">
-        <image class="cart-icon" src="/images/diancan2.png" />
+        <image class="cart-icon" src="/images/diancan2.JPG" />
         <view class="cart-badge" wx:if="{{cartCount > 0}}">{{cartCount}}</view>
       </view>
       <view class="cart-price">
