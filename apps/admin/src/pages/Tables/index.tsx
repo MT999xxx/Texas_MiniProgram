@@ -1,8 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Card, Row, Col, Tag, Button, Select, Space, Modal, Form, Input, InputNumber, App } from 'antd';
-import { ReloadOutlined, PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { Card, Row, Col, Tag, Button, Select, Space, Modal, Form, Input, InputNumber, App, Drawer, Tabs, List, Badge, Empty, Spin } from 'antd';
+import { ReloadOutlined, PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined, ShoppingCartOutlined, MinusOutlined } from '@ant-design/icons';
 import { tableApi, Table } from '../../api/tables';
+import { menuApi, MenuCategory, MenuItem } from '../../api/menu';
+import { orderApi } from '../../api/orders';
 import './Tables.css';
+
+// 购物车项类型
+interface CartItem {
+    item: MenuItem;
+    quantity: number;
+}
 
 export default function Tables() {
     const { message, modal } = App.useApp();
@@ -17,6 +25,16 @@ export default function Tables() {
     const [editingTable, setEditingTable] = useState<Table | null>(null);
     const [form] = Form.useForm();
 
+    // 点餐抽屉状态
+    const [orderDrawerVisible, setOrderDrawerVisible] = useState(false);
+    const [selectedTable, setSelectedTable] = useState<Table | null>(null);
+    const [menuCategories, setMenuCategories] = useState<MenuCategory[]>([]);
+    const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+    const [menuLoading, setMenuLoading] = useState(false);
+    const [activeCategory, setActiveCategory] = useState<string>('');
+    const [cart, setCart] = useState<Map<string, CartItem>>(new Map());
+    const [submitting, setSubmitting] = useState(false);
+
     // 加载桌位列表
     const loadTables = async () => {
         setLoading(true);
@@ -28,6 +46,27 @@ export default function Tables() {
             message.error('加载桌位列表失败');
         } finally {
             setLoading(false);
+        }
+    };
+
+    // 加载菜单数据
+    const loadMenu = async () => {
+        setMenuLoading(true);
+        try {
+            const [categories, items] = await Promise.all([
+                menuApi.listCategories(),
+                menuApi.listItems(),
+            ]);
+            setMenuCategories(categories);
+            setMenuItems(items.filter(item => item.status === 'ON_SALE'));
+            if (categories.length > 0) {
+                setActiveCategory(categories[0].id);
+            }
+        } catch (error) {
+            console.error('加载菜单失败:', error);
+            message.error('加载菜单失败');
+        } finally {
+            setMenuLoading(false);
         }
     };
 
@@ -116,6 +155,86 @@ export default function Tables() {
         });
     };
 
+    // 打开点餐抽屉
+    const handleOpenOrder = (table: Table) => {
+        setSelectedTable(table);
+        setCart(new Map());
+        setOrderDrawerVisible(true);
+        loadMenu();
+    };
+
+    // 添加商品到购物车
+    const addToCart = (item: MenuItem) => {
+        setCart(prev => {
+            const newCart = new Map(prev);
+            const existing = newCart.get(item.id);
+            if (existing) {
+                newCart.set(item.id, { ...existing, quantity: existing.quantity + 1 });
+            } else {
+                newCart.set(item.id, { item, quantity: 1 });
+            }
+            return newCart;
+        });
+    };
+
+    // 减少购物车商品数量
+    const removeFromCart = (itemId: string) => {
+        setCart(prev => {
+            const newCart = new Map(prev);
+            const existing = newCart.get(itemId);
+            if (existing && existing.quantity > 1) {
+                newCart.set(itemId, { ...existing, quantity: existing.quantity - 1 });
+            } else {
+                newCart.delete(itemId);
+            }
+            return newCart;
+        });
+    };
+
+    // 计算购物车总数量
+    const getCartCount = () => {
+        let count = 0;
+        cart.forEach(item => count += item.quantity);
+        return count;
+    };
+
+    // 计算购物车总金额
+    const getCartTotal = () => {
+        let total = 0;
+        cart.forEach(item => total += item.item.price * item.quantity);
+        return total;
+    };
+
+    // 提交订单
+    const handleSubmitOrder = async () => {
+        if (cart.size === 0) {
+            message.warning('请先添加商品到购物车');
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            const items = Array.from(cart.values()).map(cartItem => ({
+                menuItemId: cartItem.item.id,
+                quantity: cartItem.quantity,
+            }));
+
+            await orderApi.create({
+                tableId: selectedTable!.id,
+                items,
+            });
+
+            message.success(`已为「${selectedTable!.name}」创建订单`);
+            setOrderDrawerVisible(false);
+            setCart(new Map());
+        } catch (error) {
+            console.error('创建订单失败:', error);
+            message.error('创建订单失败');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     // 状态文本映射
     const getStatusText = (status: string) => {
         const map: Record<string, string> = {
@@ -147,6 +266,11 @@ export default function Tables() {
             MAINTENANCE: 'red',
         };
         return map[status] || 'default';
+    };
+
+    // 获取当前分类下的菜品
+    const getCurrentCategoryItems = () => {
+        return menuItems.filter(item => item.category?.id === activeCategory);
     };
 
     return (
@@ -205,6 +329,7 @@ export default function Tables() {
                                 size="small"
                                 loading={loading}
                                 actions={[
+                                    <ShoppingCartOutlined key="order" onClick={() => handleOpenOrder(table)} title="点餐" />,
                                     <EditOutlined key="edit" onClick={() => handleEdit(table)} />,
                                     <DeleteOutlined key="delete" onClick={() => handleDelete(table)} style={{ color: '#ff4d4f' }} />,
                                 ]}
@@ -310,6 +435,145 @@ export default function Tables() {
                     </Form.Item>
                 </Form>
             </Modal>
+
+            {/* 点餐抽屉 */}
+            <Drawer
+                title={`${selectedTable?.name || ''} - 点餐`}
+                placement="right"
+                width={600}
+                open={orderDrawerVisible}
+                onClose={() => setOrderDrawerVisible(false)}
+                extra={
+                    <Badge count={getCartCount()} offset={[-5, 5]}>
+                        <ShoppingCartOutlined style={{ fontSize: 20 }} />
+                    </Badge>
+                }
+                footer={
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                            <span style={{ marginRight: 16 }}>共 {getCartCount()} 件</span>
+                            <span style={{ fontSize: 18, fontWeight: 'bold', color: '#d4a84b' }}>
+                                ¥{getCartTotal().toFixed(2)}
+                            </span>
+                        </div>
+                        <Button
+                            type="primary"
+                            onClick={handleSubmitOrder}
+                            loading={submitting}
+                            disabled={cart.size === 0}
+                        >
+                            提交订单
+                        </Button>
+                    </div>
+                }
+            >
+                {menuLoading ? (
+                    <div style={{ textAlign: 'center', padding: 40 }}>
+                        <Spin size="large" />
+                    </div>
+                ) : (
+                    <div style={{ display: 'flex', gap: 16 }}>
+                        {/* 分类列表 */}
+                        <div style={{ width: 120, flexShrink: 0 }}>
+                            <Tabs
+                                tabPosition="left"
+                                activeKey={activeCategory}
+                                onChange={setActiveCategory}
+                                items={menuCategories.map(cat => ({
+                                    key: cat.id,
+                                    label: cat.name,
+                                }))}
+                            />
+                        </div>
+
+                        {/* 菜品列表 */}
+                        <div style={{ flex: 1 }}>
+                            {getCurrentCategoryItems().length === 0 ? (
+                                <Empty description="该分类暂无商品" />
+                            ) : (
+                                <List
+                                    dataSource={getCurrentCategoryItems()}
+                                    renderItem={(item) => {
+                                        const cartItem = cart.get(item.id);
+                                        return (
+                                            <List.Item
+                                                actions={[
+                                                    cartItem ? (
+                                                        <Space>
+                                                            <Button
+                                                                size="small"
+                                                                icon={<MinusOutlined />}
+                                                                onClick={() => removeFromCart(item.id)}
+                                                            />
+                                                            <span style={{ minWidth: 20, textAlign: 'center' }}>
+                                                                {cartItem.quantity}
+                                                            </span>
+                                                            <Button
+                                                                size="small"
+                                                                type="primary"
+                                                                icon={<PlusOutlined />}
+                                                                onClick={() => addToCart(item)}
+                                                            />
+                                                        </Space>
+                                                    ) : (
+                                                        <Button
+                                                            size="small"
+                                                            type="primary"
+                                                            icon={<PlusOutlined />}
+                                                            onClick={() => addToCart(item)}
+                                                        >
+                                                            添加
+                                                        </Button>
+                                                    ),
+                                                ]}
+                                            >
+                                                <List.Item.Meta
+                                                    title={item.name}
+                                                    description={
+                                                        <div>
+                                                            <span style={{ color: '#d4a84b', fontWeight: 'bold' }}>
+                                                                ¥{item.price}
+                                                            </span>
+                                                            {item.description && (
+                                                                <span style={{ marginLeft: 8, color: '#999' }}>
+                                                                    {item.description}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    }
+                                                />
+                                            </List.Item>
+                                        );
+                                    }}
+                                />
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* 购物车内容 */}
+                {cart.size > 0 && (
+                    <div style={{ marginTop: 24, borderTop: '1px solid #333', paddingTop: 16 }}>
+                        <h4 style={{ marginBottom: 12 }}>已选商品</h4>
+                        <List
+                            size="small"
+                            dataSource={Array.from(cart.values())}
+                            renderItem={(cartItem) => (
+                                <List.Item
+                                    actions={[
+                                        <span>x{cartItem.quantity}</span>,
+                                        <span style={{ color: '#d4a84b' }}>
+                                            ¥{(cartItem.item.price * cartItem.quantity).toFixed(2)}
+                                        </span>,
+                                    ]}
+                                >
+                                    {cartItem.item.name}
+                                </List.Item>
+                            )}
+                        />
+                    </div>
+                )}
+            </Drawer>
         </div>
     );
 }

@@ -46,7 +46,20 @@ export interface RefundDto {
     amount?: number;
 }
 
+export interface CreateOrderDto {
+    tableId?: string;
+    memberId?: string;
+    items: { menuItemId: string; quantity: number }[];
+    note?: string;
+}
+
 export const orderApi = {
+    // 创建订单 (帮客户点餐)
+    async create(data: CreateOrderDto): Promise<Order> {
+        const response = await client.post('/orders', data);
+        return response.data;
+    },
+
     // 获取订单列表
     async list(params?: OrderListParams): Promise<Order[]> {
         const response = await client.get('/orders', { params });
