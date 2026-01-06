@@ -74,39 +74,50 @@ Page({
      */
     async loadTableData() {
         try {
+            console.log('正在加载桌台数据...');
             const res = await tableApi.getStatus();
+            console.log('桌台API返回:', res);
+
             // 假设后端返回结构: { mainTable: {...}, subTable: {...}, seats: [], subSeats: [] }
             // 这里做简单Mock适配
 
-            if (res && Array.isArray(res)) {
+            if (res && Array.isArray(res) && res.length > 0) {
                 const main = res.find(t => t.category === 'MAIN');
                 const side = res.find(t => t.category === 'SIDE');
 
+                console.log('主桌:', main);
+                console.log('副桌:', side);
+
+                // 如果找不到 MAIN/SIDE 类型，尝试使用第一个/第二个桌台
+                const mainTable = main || res[0];
+                const sideTable = side || res[1];
+
                 this.setData({
-                    mainTable: main ? {
-                        id: main.id,
-                        name: main.name,
-                        status: main.status === 'AVAILABLE' ? '可预约' : '进行中',
+                    mainTable: mainTable ? {
+                        id: mainTable.id,
+                        name: mainTable.name || '主赛事桌',
+                        status: mainTable.status === 'AVAILABLE' ? '可预约' : '进行中',
                         occupied: 0, // 暂时没有实时人数，使用模拟或0
-                        total: main.capacity,
+                        total: mainTable.capacity || 9,
                         updateTime: new Date().toLocaleTimeString()
                     } : this.data.mainTable,
-                    subTable: side ? {
-                        id: side.id,
-                        name: side.name,
-                        status: side.status === 'AVAILABLE' ? '可预约' : '进行中',
+                    subTable: sideTable ? {
+                        id: sideTable.id,
+                        name: sideTable.name || '副赛事桌',
+                        status: sideTable.status === 'AVAILABLE' ? '可预约' : '进行中',
                         occupied: 0,
-                        total: side.capacity,
+                        total: sideTable.capacity || 9,
                         updateTime: new Date().toLocaleTimeString()
                     } : this.data.subTable,
                 });
+            } else {
+                console.log('API返回数据为空或格式不正确，使用Mock数据');
+                this.useMockData();
             }
         } catch (error) {
             console.error('加载桌台信息失败', error);
             // Fallback: 如果是第一次加载且失败，使用默认Mock数据展示
-            if (this.data.mainTable.status === '加载中') {
-                this.useMockData();
-            }
+            this.useMockData();
         }
     },
 
@@ -128,9 +139,10 @@ Page({
     useMockData() {
         this.setData({
             mainTable: {
+                id: 'mock-main-table',  // Mock ID for reservation
                 name: '主赛事桌',
-                updateTime: '08:32:01',
-                status: '进行中',
+                updateTime: new Date().toLocaleTimeString(),
+                status: '可预约',
                 score: '20/40',
                 occupied: 6,
                 total: 9
@@ -147,9 +159,10 @@ Page({
                 { id: 9, status: 'reserved', name: 'MikeC...', avatar: '/images/huiyuan2.jpg', seatNum: 9 },
             ],
             subTable: {
+                id: 'mock-side-table',  // Mock ID for reservation
                 name: '副赛事桌',
-                updateTime: '08:32:01',
-                status: '进行中',
+                updateTime: new Date().toLocaleTimeString(),
+                status: '可预约',
                 score: '20/40',
                 occupied: 0,
                 total: 9

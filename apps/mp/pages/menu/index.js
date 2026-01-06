@@ -339,10 +339,15 @@ Page({
         price: item.price,
       }));
 
+      // 获取当前用户信息
+      const userInfo = authManager.getUserInfo();
+      const memberId = userInfo?.id;
+
       // 创建订单
       const order = await menuApi.submitOrder({
         items,
         totalAmount: this.data.cartAmount,
+        memberId: memberId,
         note: '',
       });
 

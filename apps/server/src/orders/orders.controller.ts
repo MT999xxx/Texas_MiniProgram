@@ -8,7 +8,7 @@ import { OrderStatus } from './order.entity';
 @ApiTags('Orders')
 @Controller('orders')
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(private readonly ordersService: OrdersService) { }
 
   @Post()
   @ApiCreatedResponse({ description: '创建订单成功' })
@@ -26,6 +26,13 @@ export class OrdersController {
   ) {
     return this.ordersService.list({ status, memberId, tableId });
   }
+
+  @Get('stats')
+  @ApiOkResponse({ description: '订单统计数据' })
+  getStats() {
+    return this.ordersService.getStats();
+  }
+
 
   @Get(':id')
   @ApiOkResponse({ description: '订单详情' })

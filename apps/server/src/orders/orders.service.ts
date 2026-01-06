@@ -176,6 +176,31 @@ export class OrdersService {
     });
   }
 
+  /**
+   * 获取订单统计数据
+   */
+  async getStats() {
+    // 获取所有订单
+    const orders = await this.orderRepo.find();
+
+    // 计算各项统计
+    const totalOrders = orders.length;
+    const totalAmount = orders
+      .filter(o => o.status === OrderStatus.PAID || o.status === OrderStatus.COMPLETED)
+      .reduce((sum, o) => sum + Number(o.totalAmount || 0), 0);
+    const completedOrders = orders.filter(o => o.status === OrderStatus.COMPLETED || o.status === OrderStatus.PAID).length;
+    const averageAmount = completedOrders > 0 ? totalAmount / completedOrders : 0;
+
+    return {
+      totalOrders,       // 订单数量
+      totalAmount,       // 总营收
+      completedOrders,   // 已完成
+      averageAmount,     // 客单价
+    };
+  }
+
+
+
   async findById(id: string) {
     const order = await this.orderRepo.findOne({
       where: { id },
