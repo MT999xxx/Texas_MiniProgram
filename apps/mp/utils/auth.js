@@ -57,7 +57,7 @@ const authManager = {
 
       // 2. 发送到后端验证
       try {
-        const { request } = require('./request');
+        const request = require('./request');
         const response = await request({
           url: '/auth/wx-login',
           method: 'POST',
@@ -117,7 +117,7 @@ const authManager = {
 
       try {
         // 验证token是否有效
-        const { request } = require('./request');
+        const request = require('./request');
         const user = await request({
           url: '/auth/profile',
           method: 'GET',
