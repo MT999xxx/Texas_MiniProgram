@@ -9,7 +9,7 @@ Page({
   data: {
     isLogin: false, // 添加登录状态
     userInfo: {
-      avatar: '/images/huiyuan2.png', // 暂时使用通用图标
+      avatar: '/images/huiyuan2.jpg', // 暂时使用通用图标
       nickname: '点击登录',
       id: ''
     },
@@ -156,7 +156,7 @@ Page({
           this.setData({
             isLogin: false,
             userInfo: {
-              avatar: '/images/huiyuan2.png',
+              avatar: '/images/huiyuan2.jpg',
               nickname: '点击登录',
               id: ''
             },
@@ -210,7 +210,7 @@ Page({
         this.setData({
           isLogin: true,
           userInfo: {
-            avatar: userInfo.avatar || '/images/huiyuan2.png',
+            avatar: userInfo.avatar || '/images/huiyuan2.jpg',
             nickname: userInfo.nickname || userInfo.nickName || '德州爱好者', // Handle both nickName and nickname
             id: userInfo.id || ''
           }
@@ -219,7 +219,7 @@ Page({
         this.setData({
           isLogin: false,
           userInfo: {
-            avatar: '/images/huiyuan2.png',
+            avatar: '/images/huiyuan2.jpg',
             nickname: '点击登录',
             id: ''
           }
@@ -230,7 +230,7 @@ Page({
       this.setData({
         isLogin: false,
         userInfo: {
-          avatar: '/images/huiyuan2.png',
+          avatar: '/images/huiyuan2.jpg',
           nickname: '点击登录',
           id: ''
         }

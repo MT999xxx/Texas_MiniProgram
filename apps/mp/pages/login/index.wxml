@@ -26,7 +26,7 @@
       <view class="profile-setup">
         <view class="avatar-wrapper">
           <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
-            <image class="avatar-img" src="{{avatarUrl || '/images/huiyuan2.png'}}" />
+            <image class="avatar-img" src="{{avatarUrl || '/images/huiyuan2.jpg'}}" />
             <view class="avatar-edit-tag">
               <text class="tag-icon">📸</text>
             </view>

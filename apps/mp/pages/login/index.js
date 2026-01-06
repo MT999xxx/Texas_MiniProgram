@@ -47,7 +47,7 @@ Page({
     // 直接使用用户输入的信息登录
     const userInfo = {
       nickName: this.data.nickname,
-      avatarUrl: this.data.avatarUrl || '/images/huiyuan2.png'
+      avatarUrl: this.data.avatarUrl || '/images/huiyuan2.jpg'
     };
 
     this.handleLogin(userInfo);

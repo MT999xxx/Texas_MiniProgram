@@ -2,10 +2,10 @@ const authManager = require('./utils/auth');
 
 App({
   globalData: {
-    // 本地开发环境地址
-    apiBase: 'http://localhost:3000',
+    // 生产环境地址
+    apiBase: 'http://47.109.44.38:3000',
     // 静态文件服务地址
-    cdnBase: 'http://localhost:3000/static/images',
+    cdnBase: 'http://47.109.44.38:3000/static/images',
     userInfo: null,
   },
 

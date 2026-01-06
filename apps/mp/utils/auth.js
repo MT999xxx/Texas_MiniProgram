@@ -84,7 +84,7 @@ const authManager = {
           name: userInfo.nickName || '微信用户',
           nickname: userInfo.nickName || '微信用户',  // 预约代码使用 nickname
           nickName: userInfo.nickName || '微信用户',
-          avatar: userInfo.avatarUrl || '/images/huiyuan2.png',
+          avatar: userInfo.avatarUrl || '/images/huiyuan2.jpg',
           phone: '',
           points: 0,
           level: { name: '普通会员', code: 'V1' }
