@@ -88,8 +88,8 @@ export class AuthService {
   }
 
   private async getWxSession(code: string): Promise<WxSession> {
-    const appid = process.env.WX_APPID;
-    const secret = process.env.WX_SECRET;
+    const appid = process.env.WECHAT_APP_ID;
+    const secret = process.env.WECHAT_APP_SECRET;
 
     if (!appid || !secret) {
       // 开发环境：返回模拟数据
