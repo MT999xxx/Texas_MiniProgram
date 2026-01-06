@@ -2,10 +2,10 @@ const authManager = require('./utils/auth');
 
 App({
   globalData: {
-    // 生产环境地址
-    apiBase: 'http://47.109.44.38:3000',
+    // 生产环境地址 (HTTPS)
+    apiBase: 'https://dezhoubar.xyz/api',
     // 静态文件服务地址
-    cdnBase: 'http://47.109.44.38:3000/static/images',
+    cdnBase: 'https://dezhoubar.xyz/api/static/images',
     userInfo: null,
   },
 
