@@ -1,9 +1,9 @@
 // 支付工具类
+const request = require('./request');
+
 class PaymentUtils {
   // 查询支付状态
   static async queryPaymentStatus(paymentId) {
-    const { request } = require('./request');
-
     try {
       const payment = await request({
         url: `/payment/status/${paymentId}`,
@@ -255,16 +255,10 @@ class PaymentUtils {
    * @returns {Promise}
    */
   static async createOrderPayment(orderId, options = {}) {
-    const { request } = require('./request');
-
     return this.createAndPay(
       async () => {
         const openid = wx.getStorageSync('openid');
-        const result = await request({
-          url: `/payment/order/${orderId}`,
-          method: 'POST',
-          data: { openid },
-        });
+        const result = await request.post(`/payment/order/${orderId}`, { openid });
         return result;
       },
       {
@@ -282,16 +276,10 @@ class PaymentUtils {
    * @returns {Promise}
    */
   static async createReservationPayment(reservationId, depositAmount, options = {}) {
-    const { request } = require('./request');
-
     return this.createAndPay(
       async () => {
         const openid = wx.getStorageSync('openid');
-        const result = await request({
-          url: `/payment/reservation/${reservationId}`,
-          method: 'POST',
-          data: { depositAmount, openid },
-        });
+        const result = await request.post(`/payment/reservation/${reservationId}`, { depositAmount, openid });
         return result;
       },
       {
@@ -308,16 +296,10 @@ class PaymentUtils {
    * @returns {Promise}
    */
   static async createRechargePayment(packageId, options = {}) {
-    const { request } = require('./request');
-
     return this.createAndPay(
       async () => {
         const openid = wx.getStorageSync('openid');
-        const result = await request({
-          url: `/payment/recharge/${packageId}`,
-          method: 'POST',
-          data: { openid },
-        });
+        const result = await request.post(`/payment/recharge/${packageId}`, { openid });
         return result;
       },
       {

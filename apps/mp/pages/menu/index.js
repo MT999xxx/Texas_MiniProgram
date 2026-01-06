@@ -198,7 +198,7 @@ Page({
       cart,
       cartItems,
       cartCount: count,
-      cartAmount: amount, // keep as number for calc
+      cartAmount: parseFloat(amount.toFixed(2)), // Fix floating point precision
     });
 
     // 保存到缓存
