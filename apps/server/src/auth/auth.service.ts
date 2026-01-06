@@ -41,9 +41,10 @@ export class AuthService {
 
     if (!member) {
       // 获取默认会员等级（threshold 最小的等级）
-      const defaultLevel = await this.levelRepo.findOne({
-        order: { threshold: 'ASC' },
-      });
+      const defaultLevel = await this.levelRepo
+        .createQueryBuilder('level')
+        .orderBy('level.threshold', 'ASC')
+        .getOne();
 
       // 创建新用户
       member = this.memberRepo.create({

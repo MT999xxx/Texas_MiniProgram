@@ -11,11 +11,13 @@ import { MembershipLevelEntity } from '../membership/membership-level.entity';
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.register({
-      secret: process.env.JWT_SECRET || 'texas-poker-secret-key-2024',
-      signOptions: {
-        expiresIn: '30d', // Token有效期30天
-      },
+    JwtModule.registerAsync({
+      useFactory: () => ({
+        secret: process.env.JWT_SECRET || 'texas-poker-secret-key-2024',
+        signOptions: {
+          expiresIn: '30d', // Token有效期30天
+        },
+      }),
     }),
     TypeOrmModule.forFeature([MemberEntity, MembershipLevelEntity]),
   ],
@@ -23,4 +25,4 @@ import { MembershipLevelEntity } from '../membership/membership-level.entity';
   providers: [AuthService, JwtStrategy],
   exports: [AuthService, JwtStrategy, PassportModule],
 })
-export class AuthModule {}
+export class AuthModule { }

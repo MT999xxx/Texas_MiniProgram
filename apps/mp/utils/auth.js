@@ -9,6 +9,10 @@ const authManager = {
     this.userInfo = userInfo;
     wx.setStorageSync('token', token);
     wx.setStorageSync('userInfo', userInfo);
+    // 单独保存 openid 供支付使用
+    if (userInfo && userInfo.userId) {
+      wx.setStorageSync('openid', userInfo.userId);
+    }
   },
 
   // 获取存储的登录信息
@@ -29,6 +33,7 @@ const authManager = {
     this.userInfo = null;
     wx.removeStorageSync('token');
     wx.removeStorageSync('userInfo');
+    wx.removeStorageSync('openid');
   },
 
   // 检查是否已登录
