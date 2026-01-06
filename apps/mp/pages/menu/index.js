@@ -355,13 +355,24 @@ Page({
         cancelText: '稍后支付',
         success: async (res) => {
           if (res.confirm) {
-            // 立即支付 (Mock)
-            wx.showLoading({ title: '支付中...' });
-            setTimeout(() => {
-              wx.hideLoading();
+            // 调用真实支付
+            const PaymentUtils = require('../../utils/payment');
+            try {
+              const result = await PaymentUtils.createOrderPayment(order.id, {
+                successCallback: () => {
+                  this.clearCartAndNavigate();
+                },
+                failCallback: (err) => {
+                  if (!err.cancelled) {
+                    wx.showToast({ title: err.message || '支付失败', icon: 'none' });
+                  }
+                },
+              });
+            } catch (error) {
+              console.error('支付失败:', error);
+              // 即使支付失败，订单已创建，可以稍后支付
               this.clearCartAndNavigate();
-              wx.showToast({ title: '支付成功', icon: 'success' });
-            }, 1500);
+            }
           } else {
             // 稍后支付，跳转到订单列表
             this.clearCartAndNavigate();

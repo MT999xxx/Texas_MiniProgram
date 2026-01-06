@@ -35,25 +35,114 @@ export class WechatPayService {
     return this.configService.validateConfig();
   }
 
-  // 创建小程序支付订单（简化版）
+  // 创建小程序支付订单（JSAPI v3）
   async createJsapiOrder(request: WechatPayOrderRequest): Promise<WechatPayOrderResponse | null> {
     if (!this.isAvailable()) {
       this.logger.warn('微信支付配置不完整，返回测试数据');
-      // 返回测试数据，方便开发调试
       return this.createMockPaymentResponse(request);
     }
 
     try {
       const config = this.configService.getConfig();
+      const certificates = this.configService.getCertificateContent();
 
-      // 正式环境：调用微信支付API
-      // TODO: 实现真实的微信支付API调用
-      this.logger.log('微信支付功能需要完整配置后才能使用，当前返回测试数据');
-      return this.createMockPaymentResponse(request);
+      if (!certificates) {
+        this.logger.error('无法读取支付证书');
+        return this.createMockPaymentResponse(request);
+      }
 
-    } catch (error) {
-      this.logger.error('创建微信支付订单异常:', error);
+      // 构建请求参数
+      const orderData = {
+        appid: config.appId,
+        mchid: config.mchId,
+        description: request.description,
+        out_trade_no: request.outTradeNo,
+        notify_url: request.notifyUrl || config.notifyUrl,
+        amount: {
+          total: request.amount, // 金额，单位：分
+          currency: 'CNY',
+        },
+        payer: {
+          openid: request.openid,
+        },
+      };
+
+      // 生成签名
+      const timestamp = Math.floor(Date.now() / 1000).toString();
+      const nonceStr = this.generateNonceStr();
+      const method = 'POST';
+      const url = '/v3/pay/transactions/jsapi';
+      const body = JSON.stringify(orderData);
+
+      // 构建签名串
+      const signMessage = `${method}\n${url}\n${timestamp}\n${nonceStr}\n${body}\n`;
+
+      // RSA-SHA256 签名
+      const sign = createSign('RSA-SHA256');
+      sign.update(signMessage);
+      const signature = sign.sign(certificates.key, 'base64');
+
+      // 构建 Authorization 头
+      const authHeader = `WECHATPAY2-SHA256-RSA2048 mchid="${config.mchId}",nonce_str="${nonceStr}",signature="${signature}",timestamp="${timestamp}",serial_no="${this.getCertSerialNo(certificates.cert)}"`;
+
+      // 调用微信支付API
+      const response = await axios.post(
+        'https://api.mch.weixin.qq.com/v3/pay/transactions/jsapi',
+        orderData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': authHeader,
+          },
+        }
+      );
+
+      this.logger.log(`微信支付订单创建成功: ${response.data.prepay_id}`);
+
+      // 生成小程序调起支付所需参数
+      const prepayId = response.data.prepay_id;
+      const payTimestamp = Math.floor(Date.now() / 1000).toString();
+      const payNonceStr = this.generateNonceStr();
+      const packageStr = `prepay_id=${prepayId}`;
+
+      const paySign = this.generatePaySign({
+        appId: config.appId,
+        timeStamp: payTimestamp,
+        nonceStr: payNonceStr,
+        package: packageStr,
+      });
+
+      return {
+        prepayId,
+        timeStamp: payTimestamp,
+        nonceStr: payNonceStr,
+        package: packageStr,
+        paySign,
+        signType: 'RSA',
+      };
+
+    } catch (error: any) {
+      this.logger.error('创建微信支付订单异常:', error?.response?.data || error.message);
       return null;
+    }
+  }
+
+  // 获取证书序列号
+  private getCertSerialNo(certContent: string): string {
+    try {
+      // 简易方式：从证书中提取序列号
+      // 实际项目建议使用 node-forge 或 openssl 提取
+      const match = certContent.match(/-----BEGIN CERTIFICATE-----[\s\S]+?-----END CERTIFICATE-----/);
+      if (match) {
+        // 返回一个占位符，实际需要从证书提取真正的序列号
+        // 您需要在商户平台查看证书序列号并配置到环境变量
+        return process.env.WECHAT_CERT_SERIAL_NO || 'YOUR_CERT_SERIAL_NO';
+      }
+      return '';
+    } catch (error) {
+      this.logger.error('获取证书序列号失败:', error);
+      return '';
     }
   }
 
