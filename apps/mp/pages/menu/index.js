@@ -1,6 +1,7 @@
 // pages/menu/index.js
 const menuApi = require('../../api/menu');
 const authManager = require('../../utils/auth');
+const PaymentUtils = require('../../utils/payment');
 
 Page({
   data: {
@@ -356,9 +357,8 @@ Page({
         success: async (res) => {
           if (res.confirm) {
             // 调用真实支付
-            const PaymentUtils = require('../../utils/payment');
             try {
-              const result = await PaymentUtils.createOrderPayment(order.id, {
+              await PaymentUtils.createOrderPayment(order.id, {
                 successCallback: () => {
                   this.clearCartAndNavigate();
                 },
