@@ -326,7 +326,7 @@ export class PaymentService {
 
   // ========== 查询接口 ==========
 
-  // 查询支付状态
+  // 查询支付状态（带同步）
   async getPaymentStatus(paymentId: string) {
     const payment = await this.paymentRepo.findOne({
       where: { id: paymentId },
@@ -337,8 +337,40 @@ export class PaymentService {
       throw new NotFoundException('支付记录不存在');
     }
 
+    // 如果状态还是 PENDING 或 PROCESSING，主动查询微信支付
+    if (payment.status === PaymentStatus.PENDING || payment.status === PaymentStatus.PROCESSING) {
+      try {
+        const wechatResult = await this.wechatPayService.queryOrder(payment.paymentOrderNo);
+
+        if (wechatResult && wechatResult.trade_state) {
+          this.logger.log(`微信支付状态: ${wechatResult.trade_state}`);
+
+          if (wechatResult.trade_state === 'SUCCESS') {
+            // 支付成功，更新状态
+            payment.status = PaymentStatus.SUCCESS;
+            payment.thirdPartyOrderNo = wechatResult.transaction_id;
+            payment.paidAt = new Date();
+            await this.paymentRepo.save(payment);
+
+            // 处理支付成功逻辑
+            await this.handlePaymentSuccess(payment);
+
+            this.logger.log(`支付状态同步成功: ${paymentId} -> SUCCESS`);
+          } else if (wechatResult.trade_state === 'CLOSED' || wechatResult.trade_state === 'PAYERROR') {
+            // 支付失败/关闭
+            payment.status = PaymentStatus.FAILED;
+            await this.paymentRepo.save(payment);
+          }
+        }
+      } catch (error) {
+        this.logger.error('查询微信支付状态异常:', error);
+        // 查询失败不影响返回当前状态
+      }
+    }
+
     return payment;
   }
+
 
   // 获取充值套餐列表
   async getRechargePackages() {

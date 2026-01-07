@@ -31,9 +31,9 @@ class PaymentUtils {
   // 轮询查询支付状态
   static async pollPaymentStatus(paymentId, options = {}) {
     const {
-      maxAttempts = 30,      // 最大查询次数
-      interval = 2000,       // 查询间隔（毫秒）
-      timeout = 60000,       // 总超时时间（毫秒）
+      maxAttempts = 20,      // 最大查询次数
+      interval = 3000,       // 查询间隔（毫秒）
+      timeout = 120000,      // 总超时时间（毫秒）
       onProgress = null,     // 进度回调
     } = options;
 
@@ -44,15 +44,17 @@ class PaymentUtils {
       const poll = async () => {
         attempts++;
 
-        // 检查是否超时
-        if (Date.now() - startTime > timeout) {
-          reject(new Error('查询超时'));
-          return;
-        }
-
-        // 检查是否超过最大尝试次数
-        if (attempts > maxAttempts) {
-          reject(new Error('查询次数超限'));
+        // 检查是否超时或超过最大尝试次数
+        if (Date.now() - startTime > timeout || attempts > maxAttempts) {
+          // 不再抛出错误，而是返回pending状态让用户自行处理
+          console.log('支付状态查询结束，未收到支付结果');
+          resolve({
+            status: 'PENDING',
+            isPaid: false,
+            isFailed: false,
+            isTimeout: true,
+            message: '支付结果待确认，请稍后在订单中查看'
+          });
           return;
         }
 
@@ -76,9 +78,22 @@ class PaymentUtils {
           }
 
           // 继续轮询
+          console.log(`查询支付状态进度: ${attempts}/${maxAttempts}`);
           setTimeout(poll, interval);
         } catch (error) {
-          reject(error);
+          console.error('查询支付状态出错:', error);
+          // 查询出错时继续尝试，而不是直接失败
+          if (attempts < maxAttempts) {
+            setTimeout(poll, interval);
+          } else {
+            resolve({
+              status: 'PENDING',
+              isPaid: false,
+              isFailed: false,
+              isTimeout: true,
+              message: '支付结果待确认'
+            });
+          }
         }
       };
 
@@ -86,6 +101,7 @@ class PaymentUtils {
       poll();
     });
   }
+
 
   // 格式化支付状态文本
   static formatPaymentStatus(status) {

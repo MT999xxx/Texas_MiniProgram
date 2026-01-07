@@ -170,10 +170,51 @@ export class WechatPayService {
       return { trade_state: 'SUCCESS', transaction_id: `mock_${outTradeNo}` };
     }
 
-    // TODO: 实现真实的订单查询
-    this.logger.log(`查询订单: ${outTradeNo}`);
-    return null;
+    try {
+      const config = this.configService.getConfig();
+      const certificates = this.configService.getCertificateContent();
+
+      if (!certificates) {
+        this.logger.error('无法读取支付证书');
+        return null;
+      }
+
+      // 生成签名
+      const timestamp = Math.floor(Date.now() / 1000).toString();
+      const nonceStr = this.generateNonceStr();
+      const method = 'GET';
+      const url = `/v3/pay/transactions/out-trade-no/${outTradeNo}?mchid=${config.mchId}`;
+
+      // 构建签名串
+      const signMessage = `${method}\n${url}\n${timestamp}\n${nonceStr}\n\n`;
+
+      // RSA-SHA256 签名
+      const sign = createSign('RSA-SHA256');
+      sign.update(signMessage);
+      const signature = sign.sign(certificates.key, 'base64');
+
+      // 构建 Authorization 头
+      const authHeader = `WECHATPAY2-SHA256-RSA2048 mchid="${config.mchId}",nonce_str="${nonceStr}",signature="${signature}",timestamp="${timestamp}",serial_no="${this.getCertSerialNo(certificates.cert)}"`;
+
+      // 调用微信支付API查询订单
+      const response = await axios.get(
+        `https://api.mch.weixin.qq.com/v3/pay/transactions/out-trade-no/${outTradeNo}?mchid=${config.mchId}`,
+        {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': authHeader,
+          },
+        }
+      );
+
+      this.logger.log(`查询订单成功: ${outTradeNo}, 状态: ${response.data.trade_state}`);
+      return response.data;
+    } catch (error: any) {
+      this.logger.error('查询订单失败:', error?.response?.data || error.message);
+      return null;
+    }
   }
+
 
   // 关闭订单
   async closeOrder(outTradeNo: string): Promise<boolean> {

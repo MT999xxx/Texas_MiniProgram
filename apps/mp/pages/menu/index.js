@@ -14,6 +14,10 @@ Page({
     cartAmount: 0, // 购物车总金额
     showCart: false, // 是否显示购物车详情
     loading: false,
+    // 桌位相关
+    tables: [], // 桌位列表
+    selectedTableId: '', // 选中的桌位ID
+    selectedTableName: '', // 选中的桌位名称
   },
 
   /**
@@ -21,6 +25,7 @@ Page({
    */
   onLoad(options) {
     this.loadCategories();
+    this.loadTables();
     this.loadCartFromStorage();
   },
 
@@ -87,6 +92,50 @@ Page({
         });
       }
     }
+  },
+
+  /**
+   * 加载桌位列表
+   */
+  async loadTables() {
+    // 先设置默认桌位，确保界面不会空白
+    const defaultTables = [
+      { id: 'table-1', name: '1号桌' },
+      { id: 'table-2', name: '2号桌' },
+      { id: 'table-3', name: '3号桌' },
+      { id: 'table-4', name: '4号桌' },
+      { id: 'table-5', name: '5号桌' }
+    ];
+
+    this.setData({ tables: defaultTables });
+
+    try {
+      const tableApi = require('../../api/table');
+      const tables = await tableApi.getStatus();
+      console.log('桌位API返回:', tables);
+
+      if (tables && Array.isArray(tables) && tables.length > 0) {
+        // 使用所有返回的桌位，不进行状态过滤
+        this.setData({ tables: tables });
+        console.log('已加载桌位:', tables.length, '个');
+      } else {
+        console.log('API返回桌位为空，使用默认桌位');
+      }
+    } catch (error) {
+      console.error('加载桌位失败，使用默认桌位:', error);
+    }
+  },
+
+  /**
+   * 选择桌位
+   */
+  selectTable(e) {
+    const { tableId, tableName } = e.currentTarget.dataset;
+    this.setData({
+      selectedTableId: tableId,
+      selectedTableName: tableName
+    });
+    wx.showToast({ title: `已选择${tableName}`, icon: 'success', duration: 1000 });
   },
 
   /**
@@ -343,11 +392,12 @@ Page({
       const userInfo = authManager.getUserInfo();
       const memberId = userInfo?.id;
 
-      // 创建订单
+      // 创建订单 (包含会员ID和桌位ID)
       const order = await menuApi.submitOrder({
         items,
         totalAmount: this.data.cartAmount,
         memberId: memberId,
+        tableId: this.data.selectedTableId || undefined,
         note: '',
       });
 

@@ -142,22 +142,36 @@ export default function Orders() {
     const columns: ColumnsType<Order> = [
         {
             title: '订单号',
-            dataIndex: 'orderNo',
             key: 'orderNo',
-            render: (orderNo: string) => (
-                <span style={{ fontFamily: 'monospace', color: 'var(--color-gold-primary)' }}>{orderNo}</span>
+            width: 80,
+            render: (_: any, __: Order, index: number) => (
+                <span style={{ fontFamily: 'monospace', color: 'var(--color-gold-primary)', fontWeight: 'bold' }}>{index + 1}</span>
             ),
         },
         {
             title: '客户信息',
             key: 'member',
             render: (record: Order) => (
-                <div>
-                    <div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{record.member?.nickname || '-'}</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{record.member?.phone || '-'}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {record.member?.avatar ? (
+                        <img
+                            src={record.member.avatar}
+                            alt={record.member.nickname}
+                            style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }}
+                        />
+                    ) : (
+                        <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#8b0000', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 14 }}>
+                            {record.member?.nickname?.charAt(0) || '?'}
+                        </div>
+                    )}
+                    <div>
+                        <div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{record.member?.nickname || '-'}</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{record.member?.phone || '-'}</div>
+                    </div>
                 </div>
             ),
         },
+
         {
             title: '桌位',
             key: 'table',

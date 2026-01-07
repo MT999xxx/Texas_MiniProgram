@@ -5,6 +5,24 @@
     <text class="store-name">三条A ></text>
   </view>
 
+  <!-- 桌位选择 -->
+  <view class="table-selector">
+    <text class="table-label">选择桌位：</text>
+    <scroll-view scroll-x class="table-scroll">
+      <view 
+        wx:for="{{tables}}" 
+        wx:key="id" 
+        class="table-item {{selectedTableId === item.id ? 'selected' : ''}}"
+        bindtap="selectTable"
+        data-table-id="{{item.id}}"
+        data-table-name="{{item.name}}"
+      >
+        {{item.name}}
+      </view>
+    </scroll-view>
+    <text class="selected-table" wx:if="{{selectedTableName}}">已选: {{selectedTableName}}</text>
+  </view>
+
   <!-- 内容区域 -->
   <view class="content-container">
     

@@ -19,7 +19,9 @@ export interface Order {
         id: string;
         nickname: string;
         phone: string;
+        avatar?: string;
     };
+
     table?: {
         id: string;
         name: string;
