@@ -70,6 +70,18 @@ Page({
     },
 
     /**
+     * 头像加载失败时使用默认头像
+     */
+    onAvatarError(e) {
+        const { seatindex, tabletype } = e.currentTarget.dataset;
+        const seatArray = tabletype === 'main' ? 'seats' : 'subSeats';
+        const key = `${seatArray}[${seatindex}].avatar`;
+        this.setData({
+            [key]: '/images/huiyuan2.jpg'
+        });
+    },
+
+    /**
      * 加载桌台数据
      */
     async loadTableData() {
@@ -110,6 +122,9 @@ Page({
                         updateTime: new Date().toLocaleTimeString()
                     } : this.data.subTable,
                 });
+
+                // 加载预约信息并更新座位状态
+                await this.loadReservations(mainTable?.id, sideTable?.id);
             } else {
                 console.log('API返回数据为空或格式不正确，使用Mock数据');
                 this.useMockData();
@@ -120,6 +135,88 @@ Page({
             this.useMockData();
         }
     },
+
+    /**
+     * 加载预约信息并更新座位状态
+     */
+    async loadReservations(mainTableId, sideTableId) {
+        try {
+            // 获取所有有效预约
+            const reservations = await tableApi.getAllReservations();
+            console.log('预约列表:', reservations);
+
+            if (!reservations || !Array.isArray(reservations)) {
+                console.log('没有预约数据');
+                return;
+            }
+
+            // 初始化空座位
+            const mainSeats = Array(9).fill(0).map((_, i) => ({
+                id: i + 1,
+                status: 'empty',
+                name: '',
+                avatar: '',
+                seatNum: i + 1
+            }));
+            const subSeats = Array(9).fill(0).map((_, i) => ({
+                id: i + 1,
+                status: 'empty',
+                name: '',
+                avatar: '',
+                seatNum: i + 1
+            }));
+
+            // 只处理 PENDING 和 CONFIRMED 状态的预约
+            const activeReservations = reservations.filter(r =>
+                r.status === 'PENDING' || r.status === 'CONFIRMED'
+            );
+            console.log('有效预约数量:', activeReservations.length);
+
+            // 根据预约更新座位状态
+            activeReservations.forEach(reservation => {
+
+                const seatNumber = reservation.seatNumber;
+                if (!seatNumber || seatNumber < 1 || seatNumber > 9) return;
+
+                const seatIndex = seatNumber - 1;
+                const seatData = {
+                    id: seatNumber,
+                    status: 'reserved',
+                    name: reservation.member?.nickname || reservation.customerName || '已预约',
+                    avatar: reservation.member?.avatar || reservation.avatar || '/images/huiyuan2.jpg',
+                    seatNum: seatNumber,
+                    userId: reservation.member?.id || reservation.memberId,
+                    reservationId: reservation.id
+                };
+
+                // 根据桌台ID分配到对应座位
+                if (reservation.table?.id === mainTableId || reservation.tableId === mainTableId) {
+                    mainSeats[seatIndex] = seatData;
+                } else if (reservation.table?.id === sideTableId || reservation.tableId === sideTableId) {
+                    subSeats[seatIndex] = seatData;
+                }
+            });
+
+            // 更新座位数据
+            this.setData({
+                seats: mainSeats,
+                subSeats: subSeats
+            });
+
+            // 更新占用数量
+            const mainOccupied = mainSeats.filter(s => s.status !== 'empty').length;
+            const subOccupied = subSeats.filter(s => s.status !== 'empty').length;
+            this.setData({
+                'mainTable.occupied': mainOccupied,
+                'subTable.occupied': subOccupied
+            });
+
+            console.log('座位状态已更新:', { mainSeats, subSeats });
+        } catch (error) {
+            console.error('加载预约信息失败:', error);
+        }
+    },
+
 
     mergeSeats(currentSeats, apiSeats) {
         if (!apiSeats) return currentSeats;
@@ -238,20 +335,41 @@ Page({
      * 取消原预约并预约新座位
      */
     async cancelReservationAndRebook(seatArray, oldIndex, newIndex, userName, userInfo, tabletype) {
-        // 先取消原座位
-        const seats = this.data[seatArray];
-        seats[oldIndex] = {
-            ...seats[oldIndex],
-            status: 'empty',
-            name: '',
-            avatar: '',
-            userId: null
-        };
-        this.setData({ [seatArray]: seats });
+        wx.showLoading({ title: '换座中' });
 
-        // 预约新座位
-        this.reserveSeat(seatArray, newIndex, userName, userInfo, tabletype);
+        try {
+            // 获取旧座位的预约ID
+            const seats = this.data[seatArray];
+            const oldSeat = seats[oldIndex];
+
+            if (oldSeat.reservationId) {
+                // 先调用服务器取消旧预约
+                await tableApi.cancelReservation(oldSeat.reservationId);
+                console.log('旧预约已取消:', oldSeat.reservationId);
+            }
+
+            // 更新本地旧座位状态
+            seats[oldIndex] = {
+                ...seats[oldIndex],
+                status: 'empty',
+                name: '',
+                avatar: '',
+                userId: null,
+                reservationId: null
+            };
+            this.setData({ [seatArray]: seats });
+
+            wx.hideLoading();
+
+            // 预约新座位
+            this.reserveSeat(seatArray, newIndex, userName, userInfo, tabletype);
+        } catch (error) {
+            wx.hideLoading();
+            console.error('换座失败:', error);
+            wx.showToast({ title: error.message || '换座失败', icon: 'none' });
+        }
     },
+
 
     /**
      * 预约座位
@@ -319,29 +437,46 @@ Page({
      * 取消预约
      */
     cancelReservation(seatArray, seatIndex) {
+        const seat = this.data[seatArray][seatIndex];
+
         wx.showModal({
             title: '提示',
             content: '确定取消预约吗？',
             success: async (res) => {
                 if (res.confirm) {
-                    // TODO: API call
-                    // await tableApi.cancelReservation(...)
+                    wx.showLoading({ title: '取消中' });
 
-                    // Mock update
-                    const seats = this.data[seatArray];
-                    seats[seatIndex] = {
-                        ...seats[seatIndex],
-                        status: 'empty',
-                        name: '',
-                        avatar: '',
-                        userId: null
-                    };
-                    this.setData({ [seatArray]: seats });
-                    wx.showToast({ title: '已取消预约', icon: 'success' });
+                    try {
+                        // 调用服务器取消预约
+                        if (seat.reservationId) {
+                            await tableApi.cancelReservation(seat.reservationId);
+                            console.log('预约已取消:', seat.reservationId);
+                        }
+
+                        // 更新本地状态
+                        const seats = this.data[seatArray];
+                        seats[seatIndex] = {
+                            ...seats[seatIndex],
+                            status: 'empty',
+                            name: '',
+                            avatar: '',
+                            userId: null,
+                            reservationId: null
+                        };
+                        this.setData({ [seatArray]: seats });
+
+                        wx.hideLoading();
+                        wx.showToast({ title: '已取消预约', icon: 'success' });
+                    } catch (error) {
+                        wx.hideLoading();
+                        console.error('取消预约失败:', error);
+                        wx.showToast({ title: error.message || '取消失败', icon: 'none' });
+                    }
                 }
             }
         });
     },
+
 
     /**
      * 检查用户是否已有预约

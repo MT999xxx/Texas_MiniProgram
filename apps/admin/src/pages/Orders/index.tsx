@@ -151,26 +151,33 @@ export default function Orders() {
         {
             title: '客户信息',
             key: 'member',
-            render: (record: Order) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    {record.member?.avatar ? (
-                        <img
-                            src={record.member.avatar}
-                            alt={record.member.nickname}
-                            style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }}
-                        />
-                    ) : (
-                        <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#8b0000', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 14 }}>
-                            {record.member?.nickname?.charAt(0) || '?'}
+            render: (record: Order) => {
+                const avatarUrl = record.member?.avatar;
+                // 只有 https:// 开头的 URL 才是有效的（排除 http://tmp/ 等临时文件）
+                const isValidUrl = avatarUrl && avatarUrl.startsWith('https://');
+
+                return (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        {isValidUrl ? (
+                            <img
+                                src={avatarUrl}
+                                alt={record.member?.nickname}
+                                style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }}
+                            />
+                        ) : (
+                            <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#8b0000', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 14 }}>
+                                {record.member?.nickname?.charAt(0) || '?'}
+                            </div>
+                        )}
+                        <div>
+                            <div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{record.member?.nickname || '-'}</div>
+                            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{record.member?.phone || '-'}</div>
                         </div>
-                    )}
-                    <div>
-                        <div style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>{record.member?.nickname || '-'}</div>
-                        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{record.member?.phone || '-'}</div>
                     </div>
-                </div>
-            ),
+                );
+            },
         },
+
 
         {
             title: '桌位',

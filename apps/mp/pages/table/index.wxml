@@ -61,12 +61,13 @@
 
           <!-- 已预约/游戏中 -->
           <block wx:else>
-            <image class="avatar" src="{{item.avatar}}" />
+            <image class="avatar" src="{{item.avatar || '/images/huiyuan2.jpg'}}" binderror="onAvatarError" data-seatindex="{{index}}" data-tabletype="main" />
             <text class="nickname">{{item.name}}</text>
             <view class="status-tag {{item.status === 'playing' ? 'playing-tag' : 'reserved-tag'}}">
               {{item.status === 'playing' ? '游戏中' : '已预约'}}
             </view>
           </block>
+
 
         </view>
       </block>
@@ -127,12 +128,13 @@
 
           <!-- 已预约/游戏中 -->
           <block wx:else>
-            <image class="avatar" src="{{item.avatar}}" />
+            <image class="avatar" src="{{item.avatar || '/images/huiyuan2.jpg'}}" binderror="onAvatarError" data-seatindex="{{index}}" data-tabletype="sub" />
             <text class="nickname">{{item.name}}</text>
             <view class="status-tag {{item.status === 'playing' ? 'playing-tag' : 'reserved-tag'}}">
               {{item.status === 'playing' ? '游戏中' : '已预约'}}
             </view>
           </block>
+
 
         </view>
       </block>

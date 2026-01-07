@@ -27,6 +27,57 @@ export class ReservationService {
       throw new BadRequestException('Table is not available for reservation');
     }
 
+    // 检查该座位是否已被预约
+    if (dto.seatNumber) {
+      const existingSeat = await this.repo.findOne({
+        where: {
+          table: { id: dto.tableId },
+          seatNumber: dto.seatNumber,
+          status: ReservationStatus.PENDING,
+        },
+      });
+      if (existingSeat) {
+        throw new BadRequestException('该座位已被预约');
+      }
+
+      // 同时检查 CONFIRMED 状态
+      const confirmedSeat = await this.repo.findOne({
+        where: {
+          table: { id: dto.tableId },
+          seatNumber: dto.seatNumber,
+          status: ReservationStatus.CONFIRMED,
+        },
+      });
+      if (confirmedSeat) {
+        throw new BadRequestException('该座位已被预约');
+      }
+    }
+
+    // 检查该用户是否已在此桌台有预约
+    if (dto.memberId) {
+      const existingUserReservation = await this.repo.findOne({
+        where: {
+          table: { id: dto.tableId },
+          memberId: dto.memberId,
+          status: ReservationStatus.PENDING,
+        },
+      });
+      if (existingUserReservation) {
+        throw new BadRequestException('您在该桌台已有预约，每人限预约一个座位');
+      }
+
+      const confirmedUserReservation = await this.repo.findOne({
+        where: {
+          table: { id: dto.tableId },
+          memberId: dto.memberId,
+          status: ReservationStatus.CONFIRMED,
+        },
+      });
+      if (confirmedUserReservation) {
+        throw new BadRequestException('您在该桌台已有预约，每人限预约一个座位');
+      }
+    }
+
     // 获取会员信息（如果提供了memberId）
     const member = dto.memberId ? await this.membershipService.findMemberById(dto.memberId) : undefined;
 
@@ -48,6 +99,7 @@ export class ReservationService {
     await this.redisService.getClient().set(`table:${table.id}:status`, TableStatus.RESERVED);
     return saved;
   }
+
 
   async updateStatus(id: string, status: ReservationStatus): Promise<ReservationEntity> {
     const reservation = await this.repo.findOne({ where: { id }, relations: ['table'] });

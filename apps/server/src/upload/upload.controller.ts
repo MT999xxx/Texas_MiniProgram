@@ -76,4 +76,52 @@ export class UploadController {
             filename: file.filename,
         };
     }
+
+    @Post('avatar')
+    @ApiOperation({ summary: '上传头像' })
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                file: {
+                    type: 'string',
+                    format: 'binary',
+                    description: '头像图片',
+                },
+            },
+        },
+    })
+    @ApiOkResponse({
+        description: '上传成功',
+        schema: {
+            type: 'object',
+            properties: {
+                url: { type: 'string', description: '头像完整URL' },
+            },
+        },
+    })
+    @UseInterceptors(
+        FileInterceptor('file', {
+            storage: imageStorage,
+            fileFilter: imageFileFilter,
+            limits: {
+                fileSize: 2 * 1024 * 1024, // 2MB 限制
+            },
+        }),
+    )
+    uploadAvatar(@UploadedFile() file: Express.Multer.File) {
+        if (!file) {
+            throw new BadRequestException('请选择头像图片');
+        }
+
+        // 返回头像完整 URL（用于网页显示）
+        const baseUrl = process.env.BASE_URL || 'https://dezhoubar.xyz';
+        const url = `${baseUrl}/static/uploads/${file.filename}`;
+        return {
+            url,
+            filename: file.filename,
+        };
+    }
 }
+

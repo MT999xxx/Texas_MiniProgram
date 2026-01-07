@@ -44,7 +44,7 @@ Page({
     // 显示加载状态
     this.setData({ loading: true });
 
-    // 直接使用用户输入的信息登录
+    // 使用用户输入的信息登录
     const userInfo = {
       nickName: this.data.nickname,
       avatarUrl: this.data.avatarUrl || '/images/huiyuan2.jpg'
@@ -52,6 +52,8 @@ Page({
 
     this.handleLogin(userInfo);
   },
+
+
 
   // 处理登录
   async handleLogin(userInfo) {
