@@ -1,4 +1,5 @@
-const { request } = require('../../utils/request');
+const request = require('../../utils/request');
+
 const authManager = require('../../utils/auth');
 
 Page({

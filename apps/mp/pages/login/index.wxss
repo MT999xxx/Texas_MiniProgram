@@ -246,6 +246,28 @@
   font-weight: 600;
 }
 
+.agreement-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agreement-checkbox {
+  transform: scale(0.7);
+  margin-right: 10rpx;
+}
+
+/* 复选框内部样式定制 (可选，取决于基础库版本) */
+.wx-checkbox-input {
+  background: transparent !important;
+  border-color: rgba(139, 0, 0, 0.4) !important;
+}
+
+.wx-checkbox-input-checked {
+  background: #8b0000 !important;
+  border-color: #8b0000 !important;
+}
+
 /* 游客提示 */
 .guest-tip {
   margin-top: 100rpx;

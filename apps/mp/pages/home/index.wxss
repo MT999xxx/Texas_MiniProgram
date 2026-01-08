@@ -240,7 +240,7 @@ page {
   width: 80%;
   max-height: 70%;
   background-color: #1a1a1a;
-  border: 2rpx solid #FFD700;
+  border: 2rpx solid #8b0000;
   border-radius: 30rpx;
   display: flex;
   flex-direction: column;
@@ -259,7 +259,7 @@ page {
 }
 
 .modal-title {
-  color: #FFD700;
+  color: #8b0000;
   font-size: 36rpx;
   font-weight: bold;
   letter-spacing: 4rpx;
@@ -283,15 +283,15 @@ page {
   padding: 30rpx;
   display: flex;
   justify-content: center;
-  border-top: 1rpx solid rgba(255, 215, 0, 0.2);
+  border-top: 1rpx solid rgba(139, 0, 0, 0.2);
 }
 
 .modal-btn {
-  background: linear-gradient(135deg, #FFD700, #B8860B);
-  color: #000;
+  background: linear-gradient(135deg, #8b0000, #4a0e0e);
+  color: #ffebeb;
   font-size: 30rpx;
   font-weight: bold;
   padding: 20rpx 80rpx;
   border-radius: 50rpx;
-  box-shadow: 0 4rpx 15rpx rgba(255, 215, 0, 0.3);
+  box-shadow: 0 4rpx 15rpx rgba(139, 0, 0, 0.3);
 }

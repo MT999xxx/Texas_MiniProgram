@@ -5,7 +5,8 @@ Page({
     loading: false,
     showGuestTip: true,
     avatarUrl: '',
-    nickname: ''
+    nickname: '',
+    isAgreed: false
   },
 
   async onLoad(options) {
@@ -32,12 +33,23 @@ Page({
     this.setData({ nickname });
   },
 
+  // 协议状态切换
+  onAgreementChange(e) {
+    const isAgreed = e.detail.value.length > 0;
+    this.setData({ isAgreed });
+  },
+
   // 点击登录按钮
   async onLoginClick() {
     console.log('点击了登录确认按钮');
 
     if (!this.data.nickname) {
       wx.showToast({ title: '请输入昵称', icon: 'none' });
+      return;
+    }
+
+    if (!this.data.isAgreed) {
+      wx.showToast({ title: '请先阅读并同意用户协议和隐私政策', icon: 'none' });
       return;
     }
 
@@ -136,8 +148,8 @@ Page({
   // 查看用户协议
   showUserAgreement() {
     wx.showModal({
-      title: '用户协议',
-      content: '这里是用户协议的内容...',
+      title: '用户服务协议',
+      content: '欢迎使用三条A小程序。本协议是您与三条A之间关于您使用本小程序服务所订立的协议。您在使用本小程序提供的点餐、预约及会员服务时，请务必审慎阅读、充分理解各条款内容。',
       showCancel: false,
       confirmText: '我知道了'
     });
@@ -147,7 +159,7 @@ Page({
   showPrivacyPolicy() {
     wx.showModal({
       title: '隐私政策',
-      content: '这里是隐私政策的内容...',
+      content: '我们非常重视您的个人信息保护。为了向您提供点餐、桌面预约和会员权益服务，我们会收集您的头像、昵称、手机号及订单信息。我们承诺将严格按照法律法规及隐私保护指引的要求保护您的个人信息。',
       showCancel: false,
       confirmText: '我知道了'
     });

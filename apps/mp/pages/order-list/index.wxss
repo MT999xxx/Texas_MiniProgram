@@ -1,15 +1,16 @@
 /* 页面容器 */
 .container {
   min-height: 100vh;
-  background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+  background: #000000;
 }
 
 /* 标签页 */
 .tabs {
   display: flex;
-  background: rgba(30, 41, 59, 0.8);
+  background: #000000;
   backdrop-filter: blur(10rpx);
   padding: 0 24rpx;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.05);
 }
 
 .tab-item {
@@ -96,7 +97,7 @@
 }
 
 .order-item {
-  background: rgba(30, 41, 59, 0.8);
+  background: #121212;
   backdrop-filter: blur(10rpx);
   border-radius: 20rpx;
   padding: 32rpx;
@@ -179,7 +180,7 @@
   align-items: center;
   margin-bottom: 24rpx;
   padding: 12rpx 20rpx;
-  background: rgba(15, 23, 42, 0.4);
+  background: #1a1a1a;
   border-radius: 12rpx;
 }
 
@@ -215,7 +216,7 @@
   display: flex;
   align-items: center;
   padding: 20rpx 24rpx;
-  background: rgba(15, 23, 42, 0.3);
+  background: #1a1a1a;
   border-bottom: 2rpx solid rgba(255, 255, 255, 0.05);
 }
 

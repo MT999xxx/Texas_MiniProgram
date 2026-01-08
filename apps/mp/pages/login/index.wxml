@@ -36,8 +36,9 @@
         
         <view class="nickname-input-group">
           <text class="nickname-label">昵称</text>
-          <input type="nickname" class="nickname-input" placeholder="请输入或选择昵称" bindinput="onInputNickname" bindchange="onInputNickname" value="{{nickname}}" placeholder-style="color: rgba(255,255,255,0.3)" />
+          <input type="text" class="nickname-input" placeholder="请输入昵称" bindinput="onInputNickname" bindchange="onInputNickname" value="{{nickname}}" placeholder-style="color: rgba(255,255,255,0.3)" maxlength="20" />
         </view>
+
       </view>
 
       <!-- 登录按钮 -->
@@ -62,10 +63,15 @@
 
       <!-- 协议 -->
       <view class="agreement">
-        <text class="agreement-text">登录即表示同意</text>
-        <text class="agreement-link" bindtap="showUserAgreement">《用户协议》</text>
-        <text class="agreement-text">和</text>
-        <text class="agreement-link" bindtap="showPrivacyPolicy">《隐私政策》</text>
+        <checkbox-group bindchange="onAgreementChange">
+          <label class="agreement-label">
+            <checkbox value="agreed" checked="{{isAgreed}}" color="#8b0000" class="agreement-checkbox" />
+            <text class="agreement-text">我已阅读并同意</text>
+            <text class="agreement-link" catchtap="showUserAgreement">《用户协议》</text>
+            <text class="agreement-text">和</text>
+            <text class="agreement-link" catchtap="showPrivacyPolicy">《隐私政策》</text>
+          </label>
+        </checkbox-group>
       </view>
     </view>
 

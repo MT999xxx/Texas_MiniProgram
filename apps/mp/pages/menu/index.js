@@ -74,10 +74,29 @@ Page({
     try {
       const items = await menuApi.getGoods(categoryId);
 
+      // 处理图片 URL，确保是完整路径
+      const BASE_URL = 'https://dezhoubar.xyz';
+      const processedItems = (items || []).map(item => {
+        let imageUrl = item.imageUrl || item.image || '';
+
+        // 如果是相对路径，添加域名前缀
+        // API返回 /api/static/uploads/... 需要完整 URL
+        if (imageUrl && !imageUrl.startsWith('http')) {
+          imageUrl = BASE_URL + imageUrl;
+        }
+
+        return {
+          ...item,
+          imageUrl
+        };
+      });
+
+
       this.setData({
-        goodsList: items || [],
+        goodsList: processedItems,
         loading: false,
       });
+
     } catch (error) {
       console.error('加载商品失败:', error);
       this.setData({ loading: false });

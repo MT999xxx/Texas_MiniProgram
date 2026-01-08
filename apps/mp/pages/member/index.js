@@ -24,10 +24,11 @@ Page({
       coupons: 0
     },
     menuList: [
-      { icon: '/images/shouye2.jpg', text: '邀请有礼', url: '' }, // 暂时使用通用图标
-      { icon: '/images/zhuomian2.jpg', text: '存积分', url: '' },
-      { icon: '/images/paihangbang2.jpg', text: '订单列表', url: '' },
+      { icon: '/images/shouye2.jpg', text: '我的订单', url: '/pages/order-list/index' },
+      { icon: '/images/zhuomian2.jpg', text: '我的预约', url: '/pages/reservation/index' },
+      { icon: '/images/paihangbang2.jpg', text: '我的优惠券', url: '' },
     ],
+
     showRechargePopup: false,
     rechargeOptions: [
       { amount: 500, bonus: 7500, desc: '赠送7500积分' },
@@ -47,6 +48,29 @@ Page({
       // 未登录，跳转登录页
       wx.navigateTo({
         url: '/pages/login/index'
+      });
+    }
+  },
+
+  /**
+   * 菜单项点击
+   */
+  onMenuClick(e) {
+    const index = e.currentTarget.dataset.index;
+    const item = this.data.menuList[index];
+
+    if (item && item.url) {
+      wx.navigateTo({
+        url: item.url,
+        fail: () => {
+          // 如果navigateTo失败（可能是tabbar页面），尝试switchTab
+          wx.switchTab({ url: item.url });
+        }
+      });
+    } else {
+      wx.showToast({
+        title: '功能开发中',
+        icon: 'none'
       });
     }
   },

@@ -103,20 +103,36 @@ Page({
 
       // 并行获取榜单和我的排名
       const [listRes, myRankRes] = await Promise.all([
-        rankingApi.getList(type).catch(e => ({ rankings: [] })),
+        rankingApi.getList(type).catch(e => {
+          console.error('获取排行榜失败:', e);
+          return { rankings: [] };
+        }),
         memberId ? rankingApi.getMyRank(memberId, type).catch(e => null) : Promise.resolve(null)
       ]);
 
-      console.log('排行榜数据:', listRes);
+      console.log('排行榜原始数据:', listRes);
+
+      // 处理不同的返回格式
+      // API 可能返回 { rankings: [...] } 或直接返回 [...]
+      let rankings = [];
+      if (Array.isArray(listRes)) {
+        rankings = listRes;
+      } else if (listRes && listRes.rankings) {
+        rankings = listRes.rankings;
+      }
 
       // 格式化列表数据
-      const rankingList = (listRes.rankings || []).map(item => ({
+      const rankingList = rankings.map(item => ({
         rank: item.rank,
         name: item.nickname || `用户${item.id ? item.id.toString().slice(-4) : 'xxxx'}`,
         score: this.formatScore(item.points),
-        avatar: item.avatar || '/images/huiyuan2.jpg',
+        avatar: (item.avatar && item.avatar.startsWith('http') && !item.avatar.startsWith('http://tmp'))
+          ? item.avatar
+          : '/images/huiyuan2.jpg',
         levelName: item.levelName || '普通会员'
       }));
+
+      console.log('格式化后的排行榜:', rankingList);
 
       // 格式化我的排名
       let currentUserRank = null;
