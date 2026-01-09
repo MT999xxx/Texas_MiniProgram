@@ -23,8 +23,8 @@ Page({
     specProduct: {},
     packageOptions: [
       { label: '单瓶', value: 'single', quantity: 1, priceMultiplier: 1 },
-      { label: '半打', value: 'half_dozen', quantity: 12, priceMultiplier: 11 },
-      { label: '一打', value: 'dozen', quantity: 24, priceMultiplier: 22 }
+      { label: '半打', value: 'half_dozen', quantity: 6, priceMultiplier: 5.5 },
+      { label: '一打', value: 'dozen', quantity: 12, priceMultiplier: 11 }
     ],
     temperatureOptions: [
       { label: '冰冻', value: 'cold' },
@@ -231,13 +231,13 @@ Page({
   showSpecDialog(product) {
     // 动态计算价格（使用后端配置的价格，如果没有则用乘数计算）
     const singlePrice = parseFloat(product.price) || 0;
-    const halfDozenPrice = product.halfDozenPrice ? parseFloat(product.halfDozenPrice) : (singlePrice * 11);
-    const dozenPrice = product.dozenPrice ? parseFloat(product.dozenPrice) : (singlePrice * 22);
+    const halfDozenPrice = product.halfDozenPrice ? parseFloat(product.halfDozenPrice) : (singlePrice * 5.5);
+    const dozenPrice = product.dozenPrice ? parseFloat(product.dozenPrice) : (singlePrice * 11);
 
     const packageOptions = [
       { label: '单瓶', value: 'single', quantity: 1, totalPrice: singlePrice.toFixed(2) },
-      { label: '半打', value: 'half_dozen', quantity: 12, totalPrice: halfDozenPrice.toFixed(2) },
-      { label: '一打', value: 'dozen', quantity: 24, totalPrice: dozenPrice.toFixed(2) }
+      { label: '半打', value: 'half_dozen', quantity: 6, totalPrice: halfDozenPrice.toFixed(2) },
+      { label: '一打', value: 'dozen', quantity: 12, totalPrice: dozenPrice.toFixed(2) }
     ];
 
     this.setData({

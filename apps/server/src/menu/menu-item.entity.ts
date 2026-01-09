@@ -42,11 +42,11 @@ export class MenuItemEntity {
   @Column({ length: 255, nullable: true, name: 'image_url' })
   imageUrl?: string;
 
-  @ApiPropertyOptional({ description: '半打价格（12瓶）' })
+  @ApiPropertyOptional({ description: '半打价格（6瓶）' })
   @Column({ type: 'decimal', precision: 8, scale: 2, nullable: true, name: 'half_dozen_price' })
   halfDozenPrice?: number;
 
-  @ApiPropertyOptional({ description: '一打价格（24瓶）' })
+  @ApiPropertyOptional({ description: '一打价格（12瓶）' })
   @Column({ type: 'decimal', precision: 8, scale: 2, nullable: true, name: 'dozen_price' })
   dozenPrice?: number;
 

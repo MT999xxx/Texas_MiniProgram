@@ -43,14 +43,14 @@ export class CreateMenuItemDto {
   @MaxLength(255)
   imageUrl?: string;
 
-  @ApiPropertyOptional({ description: '半打价格（12瓶）', minimum: 0 })
+  @ApiPropertyOptional({ description: '半打价格（6瓶）', minimum: 0 })
   @IsNumber()
   @IsOptional()
   @Min(0)
   @Type(() => Number)
   halfDozenPrice?: number;
 
-  @ApiPropertyOptional({ description: '一打价格（24瓶）', minimum: 0 })
+  @ApiPropertyOptional({ description: '一打价格（12瓶）', minimum: 0 })
   @IsNumber()
   @IsOptional()
   @Min(0)
