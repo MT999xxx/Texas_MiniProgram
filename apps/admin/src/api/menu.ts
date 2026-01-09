@@ -18,6 +18,8 @@ export interface MenuItem {
     category: MenuCategory;
     categoryId?: string;
     imageUrl?: string;
+    halfDozenPrice?: number;
+    dozenPrice?: number;
     status: 'ON_SALE' | 'OFF_SHELF' | 'SOLD_OUT';
     createdAt: string;
     updatedAt: string;
@@ -42,6 +44,8 @@ export interface CreateItemDto {
     price: number;
     stock: number;
     imageUrl?: string;
+    halfDozenPrice?: number;
+    dozenPrice?: number;
 }
 
 export interface UpdateItemDto {
@@ -51,6 +55,8 @@ export interface UpdateItemDto {
     price?: number;
     stock?: number;
     imageUrl?: string;
+    halfDozenPrice?: number;
+    dozenPrice?: number;
     status?: string;
 }
 

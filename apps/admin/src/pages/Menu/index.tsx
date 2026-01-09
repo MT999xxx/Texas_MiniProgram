@@ -81,6 +81,8 @@ export default function Menu() {
             stock: item.stock,
             description: item.description,
             imageUrl: item.imageUrl,
+            halfDozenPrice: item.halfDozenPrice,
+            dozenPrice: item.dozenPrice,
         });
         setImageUrl(item.imageUrl);
         setItemModalVisible(true);
@@ -405,6 +407,12 @@ export default function Menu() {
                     </Form.Item>
                     <Form.Item name="stock" label="库存" rules={[{ required: true, message: '请输入库存' }]}>
                         <InputNumber min={0} style={{ width: '100%' }} />
+                    </Form.Item>
+                    <Form.Item name="halfDozenPrice" label="半打价格（12瓶）" tooltip="仅啤酒类商品需要填写">
+                        <InputNumber min={0} precision={2} style={{ width: '100%' }} prefix="¥" placeholder="可选" />
+                    </Form.Item>
+                    <Form.Item name="dozenPrice" label="一打价格（24瓶）" tooltip="仅啤酒类商品需要填写">
+                        <InputNumber min={0} precision={2} style={{ width: '100%' }} prefix="¥" placeholder="可选" />
                     </Form.Item>
                     <Form.Item name="description" label="描述">
                         <Input.TextArea placeholder="可选，简短描述" rows={2} />

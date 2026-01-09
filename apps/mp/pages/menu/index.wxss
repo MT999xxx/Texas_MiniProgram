@@ -365,3 +365,210 @@ page {
   font-size: 30rpx;
   margin: 0 20rpx;
 }
+
+/* ==== 规格选择弹窗样式 ==== */
+.spec-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: none;
+  align-items: flex-end;
+  z-index: 9999;
+}
+
+.spec-dialog.show {
+  display: flex;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.spec-content {
+  width: 100%;
+  max-height: 80vh;
+  background-color: #1a1a1a;
+  border-radius: 32rpx 32rpx 0 0;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.spec-header {
+  padding: 40rpx 40rpx 32rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1rpx solid #333;
+}
+
+.spec-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #8b0000;
+}
+
+.spec-close {
+  font-size: 56rpx;
+  color: #999;
+  line-height: 1;
+  padding: 0 16rpx;
+}
+
+.spec-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32rpx 40rpx;
+}
+
+.spec-product-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 40rpx;
+  padding: 24rpx;
+  background-color: #222;
+  border-radius: 20rpx;
+}
+
+.spec-product-image {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 16rpx;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+}
+
+.spec-product-detail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.spec-product-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.spec-product-price {
+  font-size: 28rpx;
+  color: #8b0000;
+  font-weight: 600;
+}
+
+.spec-section {
+  margin-bottom: 48rpx;
+}
+
+.spec-label {
+  display: block;
+  font-size: 28rpx;
+  color: #cc9999;
+  margin-bottom: 20rpx;
+  font-weight: 500;
+}
+
+.spec-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+}
+
+.spec-option {
+  flex: 1;
+  min-width: calc(50% - 10rpx);
+  padding: 28rpx 24rpx;
+  background-color: #222;
+  border: 2rpx solid #333;
+  border-radius: 16rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  transition: all 0.3s ease;
+}
+
+.spec-option.selected {
+  background-color: rgba(139, 0, 0, 0.15);
+  border-color: #8b0000;
+  box-shadow: 0 0 20rpx rgba(139, 0, 0, 0.3);
+}
+
+.option-label {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.spec-option.selected .option-label {
+  color: #8b0000;
+}
+
+.option-desc {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.option-price {
+  font-size: 26rpx;
+  color: #8b0000;
+  font-weight: 600;
+  margin-top: 4rpx;
+}
+
+.spec-footer {
+  padding: 32rpx 40rpx;
+  background-color: #1a1a1a;
+  border-top: 1rpx solid #333;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+}
+
+.spec-price-info {
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
+}
+
+.spec-total-label {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.spec-total-price {
+  font-size: 44rpx;
+  font-weight: bold;
+  color: #8b0000;
+  font-family: 'DIN Alternate', sans-serif;
+}
+
+.spec-confirm-btn {
+  flex: 1;
+  padding: 28rpx 0;
+  background: linear-gradient(135deg, #8b0000, #4a0e0e);
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 16rpx;
+  box-shadow: 0 8rpx 24rpx rgba(139, 0, 0, 0.4);
+  transition: all 0.3s ease;
+}
+
+.spec-confirm-btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 4rpx 12rpx rgba(139, 0, 0, 0.3);
+}

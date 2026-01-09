@@ -18,6 +18,21 @@ Page({
     tables: [], // 桌位列表
     selectedTableId: '', // 选中的桌位ID
     selectedTableName: '', // 选中的桌位名称
+    // 规格选择相关
+    showSpecDialog: false,
+    specProduct: {},
+    packageOptions: [
+      { label: '单瓶', value: 'single', quantity: 1, priceMultiplier: 1 },
+      { label: '半打', value: 'half_dozen', quantity: 12, priceMultiplier: 11 },
+      { label: '一打', value: 'dozen', quantity: 24, priceMultiplier: 22 }
+    ],
+    temperatureOptions: [
+      { label: '冰冻', value: 'cold' },
+      { label: '常温', value: 'normal' }
+    ],
+    selectedPackage: 'single',
+    selectedTemperature: 'cold',
+    specTotalPrice: 0
   },
 
   /**
@@ -175,7 +190,18 @@ Page({
    * 加入购物车
    */
   addToCart(e) {
-    const { id, name, price } = e.currentTarget.dataset;
+    const dataset = e.currentTarget.dataset;
+    const { id, name, price, imageUrl, halfDozenPrice, dozenPrice } = dataset;
+    const currentCategory = this.data.categories[this.data.currentCategory];
+
+    // 判断是否是啤酒类商品，需要规格选择
+    if (currentCategory && (currentCategory.name === '啤酒' || currentCategory.name.includes('啤酒'))) {
+      // 显示规格选择弹窗，传入完整商品信息
+      this.showSpecDialog({ id, name, price, imageUrl, halfDozenPrice, dozenPrice });
+      return;
+    }
+
+    // 普通商品直接加入购物车
     const cart = { ...this.data.cart };
 
     // 增加数量
@@ -197,6 +223,111 @@ Page({
       icon: 'success',
       duration: 1000,
     });
+  },
+
+  /**
+   * 显示规格选择弹窗
+   */
+  showSpecDialog(product) {
+    // 动态计算价格（使用后端配置的价格，如果没有则用乘数计算）
+    const singlePrice = parseFloat(product.price) || 0;
+    const halfDozenPrice = product.halfDozenPrice ? parseFloat(product.halfDozenPrice) : (singlePrice * 11);
+    const dozenPrice = product.dozenPrice ? parseFloat(product.dozenPrice) : (singlePrice * 22);
+
+    const packageOptions = [
+      { label: '单瓶', value: 'single', quantity: 1, totalPrice: singlePrice.toFixed(2) },
+      { label: '半打', value: 'half_dozen', quantity: 12, totalPrice: halfDozenPrice.toFixed(2) },
+      { label: '一打', value: 'dozen', quantity: 24, totalPrice: dozenPrice.toFixed(2) }
+    ];
+
+    this.setData({
+      showSpecDialog: true,
+      specProduct: { ...product, singlePrice, halfDozenPrice, dozenPrice },
+      packageOptions,
+      selectedPackage: 'single',
+      selectedTemperature: 'cold',
+      specTotalPrice: singlePrice.toFixed(2)
+    });
+  },
+
+  /**
+   * 隐藏规格选择弹窗
+   */
+  hideSpecDialog() {
+    this.setData({ showSpecDialog: false });
+  },
+
+  /**
+   * 选择包装规格
+   */
+  selectPackage(e) {
+    const value = e.currentTarget.dataset.value;
+    const option = this.data.packageOptions.find(item => item.value === value);
+
+    this.setData({
+      selectedPackage: value,
+      specTotalPrice: option.totalPrice
+    });
+  },
+
+  /**
+   * 选择温度
+   */
+  selectTemperature(e) {
+    const value = e.currentTarget.dataset.value;
+    this.setData({ selectedTemperature: value });
+  },
+
+  /**
+   * 确认添加规格商品
+   */
+  confirmAddSpec() {
+    const { specProduct, selectedPackage, selectedTemperature, specTotalPrice } = this.data;
+    const packageOption = this.data.packageOptions.find(item => item.value === selectedPackage);
+    const temperatureOption = this.data.temperatureOptions.find(item => item.value === selectedTemperature);
+
+    // 生成唯一的购物车key
+    const cartKey = `${specProduct.id}-${selectedPackage}-${selectedTemperature}`;
+    const cart = { ...this.data.cart };
+
+    // 组合显示名称
+    const displayName = `${specProduct.name}（${packageOption.label}-${temperatureOption.label}）`;
+
+    if (cart[cartKey]) {
+      cart[cartKey].quantity += 1;
+    } else {
+      cart[cartKey] = {
+        id: specProduct.id,
+        cartKey,
+        name: displayName,
+        basePrice: specProduct.price,
+        price: parseFloat(specTotalPrice),
+        quantity: 1,
+        specs: {
+          package: selectedPackage,
+          packageLabel: packageOption.label,
+          packageQuantity: packageOption.quantity,
+          temperature: selectedTemperature,
+          temperatureLabel: temperatureOption.label
+        }
+      };
+    }
+
+    this.updateCart(cart);
+    this.hideSpecDialog();
+
+    wx.showToast({
+      title: '已加入购物车',
+      icon: 'success',
+      duration: 1000
+    });
+  },
+
+  /**
+   * 阻止冒泡
+   */
+  stopPropagation() {
+    // 阻止事件冒泡，防止点击弹窗内容区域关闭弹窗
   },
 
   /**

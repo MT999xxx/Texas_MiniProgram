@@ -45,7 +45,7 @@
             <text class="goods-desc">{{item.description}}</text>
             <view class="price-row">
               <text class="goods-price">¥ {{item.price}}</text>
-              <view class="add-btn" bindtap="addToCart" data-id="{{item.id}}" data-name="{{item.name}}" data-price="{{item.price}}">+</view>
+              <view class="add-btn" bindtap="addToCart" data-id="{{item.id}}" data-name="{{item.name}}" data-price="{{item.price}}" data-image-url="{{item.imageUrl}}" data-half-dozen-price="{{item.halfDozenPrice}}" data-dozen-price="{{item.dozenPrice}}">+</view>
             </view>
           </view>
         </view>
@@ -93,6 +93,69 @@
           </view>
         </block>
       </scroll-view>
+    </view>
+  </view>
+
+  <!-- 规格选择弹窗 (啤酒专用) -->
+  <view class="spec-dialog {{showSpecDialog ? 'show' : ''}}" catchtap="hideSpecDialog">
+    <view class="spec-content" catchtap="stopPropagation">
+      <view class="spec-header">
+        <text class="spec-title">选择规格</text>
+        <text class="spec-close" catchtap="hideSpecDialog">×</text>
+      </view>
+      
+      <view class="spec-body">
+        <!-- 商品信息 -->
+        <view class="spec-product-info">
+          <image class="spec-product-image" src="{{specProduct.imageUrl}}" mode="aspectFill" />
+          <view class="spec-product-detail">
+            <text class="spec-product-name">{{specProduct.name}}</text>
+            <text class="spec-product-price">¥{{specProduct.price}}/瓶</text>
+          </view>
+        </view>
+
+        <!-- 包装规格选择 -->
+        <view class="spec-section">
+          <text class="spec-label">包装规格</text>
+          <view class="spec-options">
+            <view 
+              wx:for="{{packageOptions}}" 
+              wx:key="value"
+              class="spec-option {{selectedPackage === item.value ? 'selected' : ''}}"
+              bindtap="selectPackage"
+              data-value="{{item.value}}"
+            >
+              <text class="option-label">{{item.label}}</text>
+              <text class="option-desc">{{item.quantity}}瓶</text>
+              <text class="option-price" wx:if="{{item.value !== 'single'}}">¥{{item.totalPrice}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 温度选择 -->
+        <view class="spec-section">
+          <text class="spec-label">温度</text>
+          <view class="spec-options">
+            <view 
+              wx:for="{{temperatureOptions}}" 
+              wx:key="value"
+              class="spec-option {{selectedTemperature === item.value ? 'selected' : ''}}"
+              bindtap="selectTemperature"
+              data-value="{{item.value}}"
+            >
+              <text class="option-label">{{item.label}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="spec-footer">
+        <view class="spec-price-info">
+          <text class="spec-total-label">小计：</text>
+          <text class="spec-total-price">¥{{specTotalPrice}}</text>
+        </view>
+        <view class="spec-confirm-btn" bindtap="confirmAddSpec">确认添加</view>
+      </view>
     </view>
   </view>
 
