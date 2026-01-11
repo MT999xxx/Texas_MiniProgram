@@ -107,4 +107,81 @@
     </view>
   </view>
 
+  <!-- 5. 快捷操作区 -->
+  <view class="quick-actions" wx:if="{{isLogin}}">
+    <view class="action-btn deposit-btn" bindtap="showDepositDialog">
+      <text class="action-icon">📥</text>
+      <text class="action-text">存积分</text>
+    </view>
+    <view class="action-btn withdraw-btn" bindtap="showWithdrawDialog">
+      <text class="action-icon">📤</text>
+      <text class="action-text">取积分</text>
+    </view>
+    <view class="action-btn exchange-btn" bindtap="showExchangeDialog">
+      <text class="action-icon">💰</text>
+      <text class="action-text">积分换金币</text>
+    </view>
+  </view>
+
+  <!-- 6. 存积分弹窗 -->
+  <view class="modal-mask" wx:if="{{showDepositPopup}}" bindtap="hideDepositDialog">
+    <view class="modal-content" catchtap="true">
+      <view class="modal-title">存积分</view>
+      <view class="input-container">
+        <input class="custom-input" type="number" placeholder="请输入数字" 
+               placeholder-class="input-placeholder" value="{{depositAmount}}" 
+               bindinput="onDepositInput" />
+        <view class="clear-btn" bindtap="clearDepositInput" wx:if="{{depositAmount}}">X</view>
+      </view>
+      <view class="deposit-rules">
+        <text>线下积分5000以内 按照实际提取积分数1:1退回</text>
+        <text>超出部分 按照线下积分1000:1的比例兑换为免费抽奖机会</text>
+      </view>
+      <view class="modal-footer">
+        <view class="cancel-btn" bindtap="hideDepositDialog">取消</view>
+        <view class="submit-btn" bindtap="submitDeposit">提交</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 7. 取积分弹窗 -->
+  <view class="modal-mask" wx:if="{{showWithdrawPopup}}" bindtap="hideWithdrawDialog">
+    <view class="modal-content" catchtap="true">
+      <view class="modal-title">取积分</view>
+      <view class="input-container">
+        <input class="custom-input" type="number" placeholder="请输入取出的积分数量" 
+               placeholder-class="input-placeholder" value="{{withdrawAmount}}" 
+               bindinput="onWithdrawInput" />
+        <view class="clear-btn" bindtap="clearWithdrawInput" wx:if="{{withdrawAmount}}">X</view>
+      </view>
+      <view class="balance-tip">当前积分余额：{{stats.points}}</view>
+      <view class="modal-footer">
+        <view class="cancel-btn" bindtap="hideWithdrawDialog">取消</view>
+        <view class="submit-btn" bindtap="submitWithdraw">提交</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 8. 积分兑换金币弹窗 -->
+  <view class="modal-mask" wx:if="{{showExchangePopup}}" bindtap="hideExchangeDialog">
+    <view class="modal-content" catchtap="true">
+      <view class="modal-title">积分兑换金币</view>
+      <view class="exchange-rate">兑换比例：20积分 = 1金币</view>
+      <view class="input-container">
+        <input class="custom-input" type="number" placeholder="请输入要兑换的金币数量" 
+               placeholder-class="input-placeholder" value="{{exchangeCoins}}" 
+               bindinput="onExchangeInput" />
+        <view class="clear-btn" bindtap="clearExchangeInput" wx:if="{{exchangeCoins}}">X</view>
+      </view>
+      <view class="exchange-preview" wx:if="{{exchangeCoins}}">
+        需要消耗 {{exchangeCoins * 20}} 积分
+      </view>
+      <view class="balance-tip">当前积分余额：{{stats.points}}</view>
+      <view class="modal-footer">
+        <view class="cancel-btn" bindtap="hideExchangeDialog">取消</view>
+        <view class="submit-btn" bindtap="submitExchange">确认兑换</view>
+      </view>
+    </view>
+  </view>
+
 </view>

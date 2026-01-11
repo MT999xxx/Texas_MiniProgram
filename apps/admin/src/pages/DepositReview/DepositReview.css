@@ -1,0 +1,10 @@
+.deposit-review-page {
+    padding: 24px;
+}
+
+.deposit-review-page .toolbar {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

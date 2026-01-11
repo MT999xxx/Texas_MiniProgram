@@ -1,0 +1,103 @@
+/**
+ * 金币与积分 API
+ */
+const request = require('../utils/request');
+
+// 积分兑换金币汇率：20积分 = 1金币
+const POINTS_PER_COIN = 20;
+
+/**
+ * 获取余额信息
+ */
+function getBalance(memberId) {
+    return request({
+        url: `/coins/balance/${memberId}`,
+        method: 'GET'
+    });
+}
+
+/**
+ * 发起充值
+ */
+function createRecharge(memberId, amount) {
+    return request({
+        url: '/coins/recharge',
+        method: 'POST',
+        data: { memberId, amount }
+    });
+}
+
+/**
+ * 确认充值（模拟）
+ */
+function confirmRecharge(orderId) {
+    return request({
+        url: `/coins/recharge/confirm/${orderId}`,
+        method: 'POST'
+    });
+}
+
+/**
+ * 积分兑换金币
+ */
+function exchangeCoins(memberId, coins) {
+    return request({
+        url: '/coins/exchange',
+        method: 'POST',
+        data: { memberId, coins }
+    });
+}
+
+/**
+ * 提交存积分申请
+ */
+function depositPoints(memberId, points) {
+    return request({
+        url: '/coins/points/deposit',
+        method: 'POST',
+        data: { memberId, points }
+    });
+}
+
+/**
+ * 取积分
+ */
+function withdrawPoints(memberId, points) {
+    return request({
+        url: '/coins/points/withdraw',
+        method: 'POST',
+        data: { memberId, points }
+    });
+}
+
+/**
+ * 获取交易记录
+ */
+function getTransactions(memberId) {
+    return request({
+        url: `/coins/transactions/${memberId}`,
+        method: 'GET'
+    });
+}
+
+/**
+ * 获取存积分申请记录
+ */
+function getDeposits(memberId) {
+    return request({
+        url: `/coins/points/deposits/${memberId}`,
+        method: 'GET'
+    });
+}
+
+module.exports = {
+    POINTS_PER_COIN,
+    getBalance,
+    createRecharge,
+    confirmRecharge,
+    exchangeCoins,
+    depositPoints,
+    withdrawPoints,
+    getTransactions,
+    getDeposits
+};

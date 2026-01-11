@@ -1,5 +1,6 @@
 // pages/member/index.js
 const authManager = require('../../utils/auth');
+const coinsApi = require('../../api/coins');
 
 Page({
 
@@ -8,6 +9,7 @@ Page({
    */
   data: {
     isLogin: false, // 添加登录状态
+    memberId: '', // 添加会员ID
     userInfo: {
       avatar: '/images/huiyuan2.jpg', // 暂时使用通用图标
       nickname: '点击登录',
@@ -29,6 +31,7 @@ Page({
       { icon: '/images/paihangbang2.jpg', text: '我的优惠券', url: '' },
     ],
 
+    // 充值弹窗
     showRechargePopup: false,
     rechargeOptions: [
       { amount: 500, bonus: 7500, desc: '赠送7500积分' },
@@ -37,7 +40,19 @@ Page({
       { amount: 5000, bonus: 120000, desc: '赠送120000积分+10张酒券' }
     ],
     selectedAmount: 500,
-    inputAmount: ''
+    inputAmount: '',
+
+    // 存积分弹窗
+    showDepositPopup: false,
+    depositAmount: '',
+
+    // 取积分弹窗
+    showWithdrawPopup: false,
+    withdrawAmount: '',
+
+    // 积分兑换金币弹窗
+    showExchangePopup: false,
+    exchangeCoins: ''
   },
 
   /**
@@ -137,15 +152,152 @@ Page({
       });
       return;
     }
-    wx.showLoading({ title: '充值中...' });
-    setTimeout(() => {
-      wx.hideLoading();
-      wx.showToast({
-        title: '充值成功',
-        icon: 'success'
+
+    const memberId = this.data.memberId;
+    if (!memberId) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
+
+    wx.showLoading({ title: '发起支付...' });
+    coinsApi.createRecharge(memberId, Number(amount))
+      .then(res => {
+        wx.hideLoading();
+        // TODO: 实际调用微信支付
+        // 目前先模拟支付成功
+        return coinsApi.confirmRecharge(res.orderId);
+      })
+      .then(() => {
+        wx.showToast({ title: '充值成功', icon: 'success' });
+        this.hideRecharge();
+        this.loadBalance();
+      })
+      .catch(err => {
+        wx.hideLoading();
+        wx.showToast({ title: err.message || '充值失败', icon: 'none' });
       });
-      this.hideRecharge();
-    }, 1500);
+  },
+
+  // ========== 存积分 ==========
+  showDepositDialog() {
+    this.setData({ showDepositPopup: true, depositAmount: '' });
+  },
+  hideDepositDialog() {
+    this.setData({ showDepositPopup: false });
+  },
+  onDepositInput(e) {
+    this.setData({ depositAmount: e.detail.value });
+  },
+  clearDepositInput() {
+    this.setData({ depositAmount: '' });
+  },
+  submitDeposit() {
+    const points = parseInt(this.data.depositAmount);
+    if (!points || points <= 0) {
+      wx.showToast({ title: '请输入有效的积分数量', icon: 'none' });
+      return;
+    }
+    wx.showLoading({ title: '提交中...' });
+    coinsApi.depositPoints(this.data.memberId, points)
+      .then(res => {
+        wx.hideLoading();
+        wx.showToast({ title: '申请已提交，等待审核', icon: 'success' });
+        this.hideDepositDialog();
+      })
+      .catch(err => {
+        wx.hideLoading();
+        wx.showToast({ title: err.message || '提交失败', icon: 'none' });
+      });
+  },
+
+  // ========== 取积分 ==========
+  showWithdrawDialog() {
+    this.setData({ showWithdrawPopup: true, withdrawAmount: '' });
+  },
+  hideWithdrawDialog() {
+    this.setData({ showWithdrawPopup: false });
+  },
+  onWithdrawInput(e) {
+    this.setData({ withdrawAmount: e.detail.value });
+  },
+  clearWithdrawInput() {
+    this.setData({ withdrawAmount: '' });
+  },
+  submitWithdraw() {
+    const points = parseInt(this.data.withdrawAmount);
+    if (!points || points <= 0) {
+      wx.showToast({ title: '请输入有效的积分数量', icon: 'none' });
+      return;
+    }
+    if (points > this.data.stats.points) {
+      wx.showToast({ title: '积分余额不足', icon: 'none' });
+      return;
+    }
+    wx.showLoading({ title: '取积分中...' });
+    coinsApi.withdrawPoints(this.data.memberId, points)
+      .then(res => {
+        wx.hideLoading();
+        wx.showToast({ title: '取积分成功', icon: 'success' });
+        this.hideWithdrawDialog();
+        this.loadBalance();
+      })
+      .catch(err => {
+        wx.hideLoading();
+        wx.showToast({ title: err.message || '操作失败', icon: 'none' });
+      });
+  },
+
+  // ========== 积分兑换金币 ==========
+  showExchangeDialog() {
+    this.setData({ showExchangePopup: true, exchangeCoins: '' });
+  },
+  hideExchangeDialog() {
+    this.setData({ showExchangePopup: false });
+  },
+  onExchangeInput(e) {
+    this.setData({ exchangeCoins: e.detail.value });
+  },
+  clearExchangeInput() {
+    this.setData({ exchangeCoins: '' });
+  },
+  submitExchange() {
+    const coins = parseInt(this.data.exchangeCoins);
+    if (!coins || coins <= 0) {
+      wx.showToast({ title: '请输入有效的金币数量', icon: 'none' });
+      return;
+    }
+    const pointsNeeded = coins * 20;
+    if (pointsNeeded > this.data.stats.points) {
+      wx.showToast({ title: `积分不足，需要 ${pointsNeeded} 积分`, icon: 'none' });
+      return;
+    }
+    wx.showLoading({ title: '兑换中...' });
+    coinsApi.exchangeCoins(this.data.memberId, coins)
+      .then(res => {
+        wx.hideLoading();
+        wx.showToast({ title: `成功兑换 ${coins} 金币`, icon: 'success' });
+        this.hideExchangeDialog();
+        this.loadBalance();
+      })
+      .catch(err => {
+        wx.hideLoading();
+        wx.showToast({ title: err.message || '兑换失败', icon: 'none' });
+      });
+  },
+
+  /**
+   * 加载余额信息
+   */
+  loadBalance() {
+    if (!this.data.memberId) return;
+    coinsApi.getBalance(this.data.memberId)
+      .then(res => {
+        this.setData({
+          'stats.coins': res.coins || 0,
+          'stats.points': res.points || 0
+        });
+      })
+      .catch(() => { });
   },
 
   /**
@@ -233,15 +385,19 @@ Page({
         console.log('自动登录成功:', userInfo);
         this.setData({
           isLogin: true,
+          memberId: userInfo.memberId || userInfo.id || '',
           userInfo: {
             avatar: userInfo.avatar || '/images/huiyuan2.jpg',
             nickname: userInfo.nickname || userInfo.nickName || '德州爱好者', // Handle both nickName and nickname
             id: userInfo.id || ''
           }
         });
+        // 加载余额信息
+        this.loadBalance();
       } else {
         this.setData({
           isLogin: false,
+          memberId: '',
           userInfo: {
             avatar: '/images/huiyuan2.jpg',
             nickname: '点击登录',

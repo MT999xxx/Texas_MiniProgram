@@ -47,6 +47,14 @@ export class MemberEntity {
   @OneToMany(() => LoyaltyTransactionEntity, (trx) => trx.member)
   loyaltyTransactions!: LoyaltyTransactionEntity[];
 
+  @ApiProperty({ description: '金币余额' })
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  coins!: number;
+
+  @ApiProperty({ description: '抽奖次数' })
+  @Column({ type: 'int', default: 0 })
+  lotteryChances!: number;
+
   @ApiProperty({ type: String, format: 'date-time' })
   @CreateDateColumn()
   createdAt!: Date;

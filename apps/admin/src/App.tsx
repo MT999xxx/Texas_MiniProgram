@@ -6,6 +6,7 @@ import Tables from './pages/Tables';
 import Menu from './pages/Menu';
 import Members from './pages/Members';
 import Orders from './pages/Orders';
+import DepositReview from './pages/DepositReview';
 import MainLayout from './components/Layout/MainLayout';
 import AuthRoute from './components/AuthRoute';
 
@@ -43,6 +44,7 @@ function App() {
               {/* P2 - 菜单、会员、订单 */}
               <Route path="menu" element={<Menu />} />
               <Route path="members" element={<Members />} />
+              <Route path="deposit-review" element={<DepositReview />} />
               <Route path="orders" element={<Orders />} />
 
               {/* TODO: Settings */}

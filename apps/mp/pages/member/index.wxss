@@ -341,3 +341,79 @@ page {
   background-color: rgba(139, 0, 0, 0.05);
   color: #8b0000;
 }
+
+/* --- 6. 快捷操作区 --- */
+.quick-actions {
+  display: flex;
+  justify-content: space-around;
+  padding: 30rpx 0;
+  margin-bottom: 40rpx;
+}
+
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx 30rpx;
+  background: rgba(139, 0, 0, 0.1);
+  border-radius: 16rpx;
+  border: 1rpx solid #330000;
+  min-width: 160rpx;
+}
+
+.action-icon {
+  font-size: 40rpx;
+  margin-bottom: 10rpx;
+}
+
+.action-text {
+  color: #cc9966;
+  font-size: 24rpx;
+}
+
+.action-btn:active {
+  background: rgba(139, 0, 0, 0.3);
+}
+
+/* --- 7. 弹窗额外样式 --- */
+.deposit-rules {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 200, 100, 0.1);
+  padding: 20rpx;
+  border-radius: 10rpx;
+  margin: 20rpx 0;
+}
+
+.deposit-rules text {
+  color: #cc9966;
+  font-size: 24rpx;
+  line-height: 1.8;
+}
+
+.balance-tip {
+  color: #999;
+  font-size: 24rpx;
+  text-align: center;
+  margin: 20rpx 0;
+}
+
+.exchange-rate {
+  background: linear-gradient(90deg, #8b0000, #4a0e0e);
+  color: #fff;
+  text-align: center;
+  padding: 16rpx;
+  border-radius: 10rpx;
+  font-size: 28rpx;
+  margin-bottom: 20rpx;
+}
+
+.exchange-preview {
+  color: #cc9966;
+  font-size: 28rpx;
+  text-align: center;
+  padding: 16rpx;
+  background: rgba(139, 0, 0, 0.1);
+  border-radius: 10rpx;
+  margin: 20rpx 0;
+}

@@ -86,6 +86,16 @@ export default function Members() {
             ),
         },
         {
+            title: '金币',
+            dataIndex: 'coins',
+            key: 'coins',
+            render: (coins: number) => (
+                <span style={{ fontWeight: 'bold', color: '#faad14' }}>
+                    {coins ? Number(coins).toFixed(2) : '0.00'}
+                </span>
+            ),
+        },
+        {
             title: '累计消费',
             dataIndex: 'totalSpent',
             key: 'totalSpent',
