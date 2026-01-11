@@ -44,6 +44,8 @@ export class MenuService {
       status: dto.status ?? MenuItemStatus.ON_SALE,
       description: dto.description,
       imageUrl: dto.imageUrl,
+      halfDozenPrice: dto.halfDozenPrice,
+      dozenPrice: dto.dozenPrice,
     });
     return this.itemRepo.save(item);
   }
@@ -93,6 +95,8 @@ export class MenuService {
     if (dto.status !== undefined) item.status = dto.status;
     if (dto.description !== undefined) item.description = dto.description;
     if (dto.imageUrl !== undefined) item.imageUrl = dto.imageUrl;
+    if (dto.halfDozenPrice !== undefined) item.halfDozenPrice = dto.halfDozenPrice;
+    if (dto.dozenPrice !== undefined) item.dozenPrice = dto.dozenPrice;
 
     return this.itemRepo.save(item);
   }
