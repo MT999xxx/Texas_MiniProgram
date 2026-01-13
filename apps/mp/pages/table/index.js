@@ -524,5 +524,6 @@ Page({
         if (index !== 1) {
             wx.redirectTo({ url: urls[index] });
         }
-    }
+    },
+    stopBubble() { }
 });

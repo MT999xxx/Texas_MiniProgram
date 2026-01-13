@@ -4,15 +4,18 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 80rpx; /* 统一样式高度 */
-  background-color: #000000;
+  height: 110rpx; /* 稍微增加高度 */
+  background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(25rpx);
+  -webkit-backdrop-filter: blur(25rpx);
   display: flex;
   justify-content: space-around;
-  align-items: flex-start;
-  padding-top: 20rpx;
+  align-items: center;
   padding-bottom: env(safe-area-inset-bottom);
-  z-index: 999;
-  border-top: 1rpx solid #222;
+  z-index: 9999; /* 提高层级 */
+  border-top: 1rpx solid rgba(212, 175, 55, 0.1);
+  box-shadow: 0 -10rpx 40rpx rgba(0, 0, 0, 0.8);
+  pointer-events: auto; /* 确保可点击 */
 }
 
 .tab-item {
@@ -21,20 +24,36 @@
   align-items: center;
   justify-content: center;
   flex: 1;
+  height: 100%;
+  transition: opacity 0.2s ease;
+}
+
+.tab-item:active {
+  opacity: 0.6;
 }
 
 .tab-icon-img {
-  width: 150rpx;
-  height: 100rpx;
+  width: 44rpx;
+  height: 44rpx;
   margin-bottom: 8rpx;
+  opacity: 0.4;
+  filter: grayscale(1) brightness(1.5);
+}
+
+.tab-item.active .tab-icon-img {
+  opacity: 1;
+  filter: grayscale(0) brightness(1) drop-shadow(0 0 8rpx rgba(212, 175, 55, 0.4));
 }
 
 .tab-item text {
-  font-size: 22rpx;
+  font-size: 20rpx;
   color: #666;
+  font-weight: 400;
+  letter-spacing: 2rpx;
 }
 
 .tab-item.active text {
-  color: #8b0000;
+  color: #D4AF37;
+  font-weight: 600;
+  text-shadow: 0 0 10rpx rgba(212, 175, 55, 0.2);
 }
-/* 注意：图片颜色无法通过CSS直接改变，除非使用SVG或滤镜。这里仅改变文字颜色。 */

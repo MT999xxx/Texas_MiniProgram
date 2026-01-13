@@ -483,5 +483,6 @@ Page({
    */
   onShareAppMessage() {
 
-  }
+  },
+  stopBubble() { }
 })

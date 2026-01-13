@@ -1,201 +1,141 @@
-<view class="container">
+<view class="container redesign-bg">
   
-  <!-- 1. 用户信息区域 -->
-  <view class="user-info-section" bindtap="onUserInfoClick">
-    <image class="user-avatar" src="{{userInfo.avatar}}" />
+  <!-- 1. 用户信息区域 (沉浸式) -->
+  <view class="premium-user-box" bindtap="onUserInfoClick">
+    <view class="avatar-border">
+      <image class="user-avatar" src="{{userInfo.avatar}}" />
+    </view>
     <view class="user-details">
       <text class="user-nickname">{{userInfo.nickname}}</text>
-      <text class="user-id">{{userInfo.id}}</text>
-    </view>
-  </view>
-
-  <!-- 2. 会员卡片区域 -->
-  <view class="member-card">
-    <view class="card-header">
-      <view class="level-info">
-        <text class="level-tag">{{memberInfo.level}}</text>
-        <text class="level-name">{{memberInfo.levelName}}</text>
-      </view>
-    </view>
-    
-    <view class="card-body">
-      <text class="progress-text">(距离升下一级还差{{memberInfo.nextLevelDiff}}成长值)</text>
-      <view class="view-more">查看更多 ></view>
-    </view>
-
-    <!-- 数据统计栏 (嵌入卡片下方) -->
-    <view class="stats-row">
-      <view class="stat-item">
-        <text class="stat-value">{{stats.coins}}</text>
-        <text class="stat-label">金币</text>
-      </view>
-      <view class="stat-divider"></view>
-      <view class="stat-item">
-        <text class="stat-value">{{stats.points}}</text>
-        <text class="stat-label">积分</text>
-      </view>
-      <view class="stat-divider"></view>
-      <view class="stat-item">
-        <text class="stat-value">{{stats.coupons}}</text>
-        <text class="stat-label">券</text>
-      </view>
-    </view>
-
-    <!-- 充值按钮 -->
-    <button class="recharge-btn" bindtap="onRecharge">点击充值</button>
-    
-    <!-- 快捷操作按钮（在会员卡内） -->
-    <view class="quick-actions-inline" wx:if="{{isLogin}}">
-      <view class="action-item" bindtap="showDepositDialog">
-        <text class="action-icon">📥</text>
-        <text>存积分</text>
-      </view>
-      <view class="action-item" bindtap="showWithdrawDialog">
-        <text class="action-icon">📤</text>
-        <text>取积分</text>
-      </view>
-      <view class="action-item" bindtap="showExchangeDialog">
-        <text class="action-icon">💰</text>
-        <text>积分换金币</text>
+      <view class="user-id-badge">
+        <text class="id-label">UID:</text>
+        <text class="id-value">{{userInfo.id}}</text>
       </view>
     </view>
   </view>
 
-  <!-- 3. 功能菜单列表 -->
-  <view class="menu-list">
-    <block wx:for="{{menuList}}" wx:key="text">
-      <view class="menu-item" bindtap="onMenuClick" data-index="{{index}}">
-        <view class="menu-left">
-          <image class="menu-icon" src="{{item.icon}}" /> <!-- 实际应替换为对应图标 -->
-          <text class="menu-text">{{item.text}}</text>
+  <!-- 2. 会员身份与数据展示 (毛玻璃卡片) -->
+  <view class="luxury-card glass-panel gold-border shadow-lux">
+    <view class="card-top">
+      <view class="level-box">
+        <text class="level-v">V</text>
+        <text class="level-num">1</text>
+        <text class="level-title">皇家会员</text>
+      </view>
+      <view class="growth-box">
+        <text class="growth-text">距下一等级 {{memberInfo.nextLevelDiff}} 成长值</text>
+        <view class="growth-bar">
+          <view class="growth-inner" style="width: 20%"></view>
         </view>
-        <text class="menu-arrow">></text>
       </view>
-    </block>
+    </view>
+    
+    <!-- 数据统计区 -->
+    <view class="premium-stats">
+      <view class="stat-item">
+        <text class="stat-val font-bold text-gold">{{stats.coins}}</text>
+        <text class="stat-name">金币余额</text>
+      </view>
+      <view class="stat-item scale-up">
+        <text class="stat-val font-bold text-gold">{{stats.points}}</text>
+        <text class="stat-name">累计积分</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-val font-bold text-gold">{{stats.coupons}}</text>
+        <text class="stat-name">礼遇券</text>
+      </view>
+    </view>
+
+    <!-- 核心操作按钮 -->
+    <button class="btn-primary main-recharge" bindtap="onRecharge">立即充值</button>
+    
+    <!-- 快捷功能区 (线性布局) -->
+    <view class="quick-nav">
+      <view class="nav-item" bindtap="showDepositDialog">
+        <view class="icon-circle gold-border">📥</view>
+        <text>存分</text>
+      </view>
+      <view class="nav-item" bindtap="showWithdrawDialog">
+        <view class="icon-circle gold-border">📤</view>
+        <text>取分</text>
+      </view>
+      <view class="nav-item" bindtap="showExchangeDialog">
+        <view class="icon-circle gold-border">💰</view>
+        <text>兑换</text>
+      </view>
+    </view>
   </view>
 
-  <!-- 3.1 退出登录按钮 (仅登录可见) -->
-  <view class="logout-section" wx:if="{{isLogin}}">
-    <button class="logout-btn" bindtap="onLogout">退出登录</button>
+  <!-- 3. 功能菜单 (分组展示) -->
+  <view class="menu-container">
+    <view class="menu-group-title">我的服务</view>
+    <view class="premium-menu glass-panel">
+      <block wx:for="{{menuList}}" wx:key="text">
+        <view class="premium-menu-item" bindtap="onMenuClick" data-index="{{index}}">
+          <view class="menu-info">
+            <text class="menu-icon-text">{{index === 0 ? '📝' : index === 1 ? '📅' : '🎟️'}}</text>
+            <text class="menu-label">{{item.text}}</text>
+          </view>
+          <text class="menu-arrow-icon">chevron_right</text>
+        </view>
+      </block>
+    </view>
   </view>
 
-  <!-- 底部导航栏 -->
+  <!-- 登出区域 -->
+  <view class="logout-wrapper" wx:if="{{isLogin}}">
+    <button class="btn-secondary logout-btn-new" bindtap="onLogout">退出当前账户</button>
+  </view>
+
+  <!-- 底部占位 -->
+  <view style="height: 120rpx;"></view>
   <tab-bar selected="3"></tab-bar>
 
-  <!-- 4. 充值弹窗 -->
+  <!-- ================= 弹窗重构 (基于全局样式) ================= -->
+  
+  <!-- 充值弹窗 -->
   <view class="modal-mask" wx:if="{{showRechargePopup}}" bindtap="hideRecharge">
-    <view class="modal-content" catchtap="true">
-      <view class="modal-title">充值金币</view>
+    <view class="luxury-modal glass-panel gold-border" catchtap="true">
+      <view class="modal-head">充值金币</view>
       
-      <!-- 金额选项网格 -->
-      <view class="amount-grid">
-        <block wx:for="{{rechargeOptions}}" wx:key="amount">
-          <view class="amount-item {{selectedAmount === item.amount ? 'active' : ''}}" 
-                bindtap="selectAmount" 
-                data-amount="{{item.amount}}">
-            <text class="amount-value">¥{{item.amount}}</text>
-            <text class="amount-desc">{{item.desc}}</text>
-          </view>
-        </block>
+      <view class="premium-grid">
+        <view wx:for="{{rechargeOptions}}" wx:key="amount" 
+              class="grid-item {{selectedAmount === item.amount ? 'active-grid' : ''}}" 
+              bindtap="selectAmount" data-amount="{{item.amount}}">
+          <text class="grid-val">¥{{item.amount}}</text>
+          <text class="grid-sub">{{item.desc}}</text>
+        </view>
       </view>
 
-      <!-- 自定义输入框 -->
-      <view class="input-container">
-        <input class="custom-input" 
-               type="number" 
-               placeholder="请输入金额" 
-               placeholder-class="input-placeholder"
-               value="{{inputAmount}}" 
+      <view class="input-luxury container">
+        <input class="lux-input" type="number" placeholder="输入其他金额" 
+               placeholder-class="lux-placeholder" value="{{inputAmount}}" 
                bindinput="onInputAmount" />
-        <view class="clear-btn" bindtap="clearInput" wx:if="{{inputAmount}}">X</view>
+        <view class="lux-bonus">赠送 {{selectedAmount ? (selectedAmount * 15) : (inputAmount * 15 || 0)}} 积分</view>
       </view>
 
-      <!-- 赠送提示 (简单逻辑：显示选中项的赠送，如果是自定义输入则暂不显示或显示默认) -->
-      <view class="bonus-tip">
-        {{selectedAmount ? '赠送' + (selectedAmount * 15) + '积分' : (inputAmount ? '赠送' + (inputAmount * 15) + '积分' : '请选择充值金额')}}
-      </view>
-
-      <!-- 底部按钮 -->
-      <view class="modal-footer">
-        <view class="cancel-btn" bindtap="hideRecharge">取消</view>
-        <view class="submit-btn" bindtap="submitRecharge">提交</view>
+      <view class="modal-btns">
+        <view class="btn-cancel" bindtap="hideRecharge">取消</view>
+        <view class="btn-confirm" bindtap="submitRecharge">立即支付</view>
       </view>
     </view>
   </view>
 
-  <!-- 5. 快捷操作区 -->
-  <view class="quick-actions" wx:if="{{isLogin}}">
-    <view class="action-btn deposit-btn" bindtap="showDepositDialog">
-      <text class="action-icon">📥</text>
-      <text class="action-text">存积分</text>
-    </view>
-    <view class="action-btn withdraw-btn" bindtap="showWithdrawDialog">
-      <text class="action-icon">📤</text>
-      <text class="action-text">取积分</text>
-    </view>
-    <view class="action-btn exchange-btn" bindtap="showExchangeDialog">
-      <text class="action-icon">💰</text>
-      <text class="action-text">积分换金币</text>
-    </view>
-  </view>
-
-  <!-- 6. 存积分弹窗 -->
+  <!-- 存积分弹窗 -->
   <view class="modal-mask" wx:if="{{showDepositPopup}}" bindtap="hideDepositDialog">
-    <view class="modal-content" catchtap="true">
-      <view class="modal-title">存积分</view>
-      <view class="input-container">
-        <input class="custom-input" type="number" placeholder="请输入数字" 
-               placeholder-class="input-placeholder" value="{{depositAmount}}" 
-               bindinput="onDepositInput" />
-        <view class="clear-btn" bindtap="clearDepositInput" wx:if="{{depositAmount}}">X</view>
+    <view class="luxury-modal glass-panel gold-border" catchtap="stopBubble">
+      <view class="modal-head">存储积分</view>
+      <view class="input-luxury">
+        <input class="lux-input" type="number" placeholder="请输入存入数量" 
+               value="{{depositAmount}}" bindinput="onDepositInput" />
       </view>
-      <view class="deposit-rules">
-        <text>线下积分5000以内 按照实际提取积分数1:1退回</text>
-        <text>超出部分 按照线下积分1000:1的比例兑换为免费抽奖机会</text>
+      <view class="lux-rules">
+        <text>• 5000以内 1:1 退回</text>
+        <text>• 超出部分 1000:1 兑换抽奖</text>
       </view>
-      <view class="modal-footer">
-        <view class="cancel-btn" bindtap="hideDepositDialog">取消</view>
-        <view class="submit-btn" bindtap="submitDeposit">提交</view>
-      </view>
-    </view>
-  </view>
-
-  <!-- 7. 取积分弹窗 -->
-  <view class="modal-mask" wx:if="{{showWithdrawPopup}}" bindtap="hideWithdrawDialog">
-    <view class="modal-content" catchtap="true">
-      <view class="modal-title">取积分</view>
-      <view class="input-container">
-        <input class="custom-input" type="number" placeholder="请输入取出的积分数量" 
-               placeholder-class="input-placeholder" value="{{withdrawAmount}}" 
-               bindinput="onWithdrawInput" />
-        <view class="clear-btn" bindtap="clearWithdrawInput" wx:if="{{withdrawAmount}}">X</view>
-      </view>
-      <view class="balance-tip">当前积分余额：{{stats.points}}</view>
-      <view class="modal-footer">
-        <view class="cancel-btn" bindtap="hideWithdrawDialog">取消</view>
-        <view class="submit-btn" bindtap="submitWithdraw">提交</view>
-      </view>
-    </view>
-  </view>
-
-  <!-- 8. 积分兑换金币弹窗 -->
-  <view class="modal-mask" wx:if="{{showExchangePopup}}" bindtap="hideExchangeDialog">
-    <view class="modal-content" catchtap="true">
-      <view class="modal-title">积分兑换金币</view>
-      <view class="exchange-rate">兑换比例：20积分 = 1金币</view>
-      <view class="input-container">
-        <input class="custom-input" type="number" placeholder="请输入要兑换的金币数量" 
-               placeholder-class="input-placeholder" value="{{exchangeCoins}}" 
-               bindinput="onExchangeInput" />
-        <view class="clear-btn" bindtap="clearExchangeInput" wx:if="{{exchangeCoins}}">X</view>
-      </view>
-      <view class="exchange-preview" wx:if="{{exchangeCoins}}">
-        需要消耗 {{exchangeCoins * 20}} 积分
-      </view>
-      <view class="balance-tip">当前积分余额：{{stats.points}}</view>
-      <view class="modal-footer">
-        <view class="cancel-btn" bindtap="hideExchangeDialog">取消</view>
-        <view class="submit-btn" bindtap="submitExchange">确认兑换</view>
+      <view class="modal-btns">
+        <view class="btn-cancel" bindtap="hideDepositDialog">返回</view>
+        <view class="btn-confirm" bindtap="submitDeposit">确认提交</view>
       </view>
     </view>
   </view>

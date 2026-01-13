@@ -1,88 +1,77 @@
 <view class="login-container">
-  <!-- 背景 -->
+  <!-- Immersive Background -->
   <view class="bg-overlay">
     <view class="bg-pattern"></view>
   </view>
 
-  <!-- 主要内容 -->
+  <!-- Main Content -->
   <view class="main-content">
-    <!-- Logo区域 -->
+    <!-- Branding Section -->
     <view class="logo-section">
       <view class="logo">
         <text class="logo-text">AAA</text>
       </view>
-      <text class="app-name">德州扑克主题酒吧</text>
-      <text class="app-desc">三条A</text>
+      <text class="app-name">Triple A Club · Royal Poker</text>
     </view>
 
-    <!-- 登录卡片 -->
-    <view class="login-card">
+    <!-- Glassmorphism Card -->
+    <view class="login-card glass-panel gold-border shadow-lux">
       <view class="card-header">
-        <text class="welcome-title">欢迎来到德州</text>
-        <text class="welcome-subtitle">请设置您的个人资料以开启体验</text>
+        <text class="welcome-title">皇室极夜</text>
+        <text class="welcome-subtitle">开启您的尊享德州之旅</text>
       </view>
 
-      <!-- 个人信息设置 -->
+      <!-- Profile Section -->
       <view class="profile-setup">
         <view class="avatar-wrapper">
           <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
-            <image class="avatar-img" src="{{avatarUrl || '/images/huiyuan2.jpg'}}" />
-            <view class="avatar-edit-tag">
-              <text class="tag-icon">📸</text>
-            </view>
+            <image class="avatar-img" src="{{avatarUrl || '/images/huiyuan2.jpg'}}" mode="aspectFill" />
+            <view class="avatar-edit-tag">📷</view>
           </button>
-          <text class="setup-hint">点击设置头像</text>
+          <text class="setup-hint">设置您的会员头像</text>
         </view>
         
-        <view class="nickname-input-group">
+        <view class="nickname-input-group glass-panel">
           <text class="nickname-label">昵称</text>
-          <input type="text" class="nickname-input" placeholder="请输入昵称" bindinput="onInputNickname" bindchange="onInputNickname" value="{{nickname}}" placeholder-style="color: rgba(255,255,255,0.3)" maxlength="20" />
+          <input type="nickname" class="nickname-input" placeholder="输入您的名牌" 
+                 bindinput="onInputNickname" value="{{nickname}}" 
+                 placeholder-class="lux-placeholder" maxlength="20" />
         </view>
-
       </view>
 
-      <!-- 登录按钮 -->
-      <button
-        class="login-btn {{(!nickname) ? 'disabled' : ''}}"
-        bindtap="onLoginClick"
-        wx:if="{{!loading}}"
-      >
-        <view class="btn-content">
-          <text class="btn-text">确认并登录</text>
-        </view>
+      <!-- Action Button -->
+      <button class="login-btn {{(!nickname) ? 'disabled' : ''}}" 
+              bindtap="onLoginClick" wx:if="{{!loading}}">
+        <text class="btn-text">授权并开启</text>
       </button>
 
-      <!-- 加载状态 -->
-      <view class="login-btn loading" wx:if="{{loading}}">
-        <view class="btn-content">
-          <text class="loading-icon">⏳</text>
-          <text class="btn-text">登录中...</text>
-        </view>
+      <!-- Loading State -->
+      <view class="login-btn disabled" wx:if="{{loading}}">
+        <text class="btn-text">认证中...</text>
       </view>
 
-
-      <!-- 协议 -->
+      <!-- Agreements -->
       <view class="agreement">
         <checkbox-group bindchange="onAgreementChange">
           <label class="agreement-label">
-            <checkbox value="agreed" checked="{{isAgreed}}" color="#8b0000" class="agreement-checkbox" />
-            <text class="agreement-text">我已阅读并同意</text>
-            <text class="agreement-link" catchtap="showUserAgreement">《用户协议》</text>
-            <text class="agreement-text">和</text>
-            <text class="agreement-link" catchtap="showPrivacyPolicy">《隐私政策》</text>
+            <checkbox value="agreed" checked="{{isAgreed}}" class="agreement-checkbox" />
+            <view class="agreement-content">
+              <text class="agreement-text">我已阅读并同意</text>
+              <text class="agreement-link" catchtap="showUserAgreement">用户协议</text>
+              <text class="agreement-text">与</text>
+              <text class="agreement-link" catchtap="showPrivacyPolicy">隐私政策</text>
+            </view>
           </label>
         </checkbox-group>
       </view>
     </view>
 
-    <!-- 底部装饰 -->
-    <view class="footer">
-      <text class="footer-text">Powered by 三条A</text>
+    <view class="guest-tip" wx:if="{{showGuestTip}}">
+      <text class="guest-link" bindtap="continueAsGuest">匿名访客模式</text>
     </view>
-  </view>
 
-  <!-- 游客模式提示 -->
-  <view class="guest-tip" wx:if="{{showGuestTip}}">
-    <text class="guest-link" bindtap="continueAsGuest">暂不登录，以游客身份体验</text>
+    <view class="footer">
+      <text class="footer-text">© AAA CLUB · ROYAL NIGHT GOLD EDITION</text>
+    </view>
   </view>
 </view>

@@ -1,52 +1,73 @@
-<view class="container">
-  <image class="bg-image" src="{{bgUrl}}" mode="aspectFill" />
+<view class="container home-redesign">
+  <!-- 0. 沉浸式背景层 -->
+  <view class="hero-bg">
+    <image class="bg-image" src="{{bgUrl}}" mode="aspectFill" />
+    <view class="bg-vignette"></view>
+  </view>
+
+  <!-- 1. 自定义顶部导航栏 (模拟) -->
+  <view class="custom-nav glass-panel">
+    <view class="nav-content">
+      <view class="brand-small">AAA CLUB</view>
+    </view>
+  </view>
   
-  <view class="bg-overlay"></view>
-
-  <view class="header-area">
-    <view class="store-info" bindtap="showNotice">
-      <text class="store-name">公告专区 ></text>
-    </view>
-    <view class="notice-btn" bindtap="showActivity">
-      <text>活动专区</text>
-    </view>
-  </view>
-
-  <view class="center-area">
-    <text class="brand-title">AAA</text>
-    
-    <view class="welcome-box">
-      <text class="welcome-text">欢迎来到三条A</text>
-    </view>
-  </view>
-
-  <view class="bottom-panel">
-    <view class="action-item" bindtap="goToMenu">
-      <image class="action-icon" src="/images/diancan2.jpg" mode="aspectFit" />
-      <text class="action-title">点餐</text>
+  <view class="content-scroller">
+    <!-- 2. Hero 品牌区 -->
+    <view class="hero-section">
+      <view class="brand-logo-container">
+        <text class="logo-text shadow-lux">AAA</text>
+        <view class="logo-glow"></view>
+      </view>
+      <view class="welcome-premium mt-lg">
+        <text class="w-top">WELCOME TO</text>
+        <view class="w-divider"></view>
+        <text class="w-bottom text-gold">三条A·皇家扑克俱乐部</text>
+      </view>
     </view>
 
-    <view class="action-item" bindtap="goToReservation">
-      <image class="action-icon" src="/images/yuyue2.jpg" mode="aspectFit" />
-      <text class="action-title">预约</text>
+    <!-- 3. 公告/活动浮动栏 -->
+    <view class="floating-notices">
+      <view class="notice-pill glass-panel gold-border" bindtap="showNotice">
+        <text class="pill-icon">📢</text>
+        <text class="pill-text">俱乐部最新公告</text>
+      </view>
+      <view class="notice-pill glass-panel gold-border" bindtap="showActivity">
+        <text class="pill-icon">🎁</text>
+        <text class="pill-text">限定福利活动</text>
+      </view>
     </view>
+
+    <!-- 4. 核心功能卡片 (2列布局) -->
+    <view class="action-grid mt-xl">
+      <view class="lux-action-card glass-panel shadow-lux" bindtap="goToMenu">
+        <image class="action-img" src="/images/diancan2.png" mode="aspectFit" />
+        <text class="card-title">尊享点餐</text>
+        <text class="card-desc">美酒佳肴\n席间即达</text>
+        <view class="card-accent"></view>
+      </view>
+
+      <view class="lux-action-card glass-panel shadow-lux" bindtap="goToReservation">
+        <image class="action-img" src="/images/yuyue2.png" mode="aspectFit" />
+        <text class="card-title">席位预约</text>
+        <text class="card-desc">名仕汇聚\n虚位以待</text>
+        <view class="card-accent"></view>
+      </view>
+    </view>
+
+    <view style="height: 150rpx;"></view>
   </view>
 
   <tab-bar selected="0"></tab-bar>
 
-  <!-- 自定义黑金弹窗 -->
-  <view class="custom-modal" wx:if="{{modalVisible}}">
-    <view class="modal-mask" bindtap="closeModal"></view>
-    <view class="modal-content">
-      <view class="modal-header">
-        <text class="modal-title">{{modalTitle}}</text>
-      </view>
-      <scroll-view scroll-y class="modal-body">
-        <text class="modal-text">{{modalContent}}</text>
+  <!-- 5. 全局弹窗 (使用全局 app.wxss 样式) -->
+  <view class="modal-mask" wx:if="{{modalVisible}}">
+    <view class="luxury-modal-home glass-panel gold-border" catchtap="stopBubble">
+      <view class="modal-head-gold">{{modalTitle}}</view>
+      <scroll-view scroll-y class="modal-body-lux">
+        <text class="modal-text-lux">{{modalContent}}</text>
       </scroll-view>
-      <view class="modal-footer">
-        <view class="modal-btn" bindtap="closeModal">朕知道了</view>
-      </view>
+      <button class="btn-primary modal-btn-lux" bindtap="closeModal">确认阅览</button>
     </view>
   </view>
 </view>

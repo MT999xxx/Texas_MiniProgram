@@ -1,297 +1,248 @@
-/* pages/home/index.wxss */
+/* =========================================================
+   Home Page - Royal Night Gold Specialist Styles
+   ========================================================= */
+
 page {
   background-color: #000;
-  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, sans-serif;
-}
-
-.container {
-  width: 100%;
-  height: 100vh;
-  position: relative;
   overflow: hidden;
-  padding: 0 !important; /* 强制覆盖全局 padding，实现完美全屏定位 */
 }
 
-/* 背景图全屏铺满 */
-.bg-image {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+.home-redesign {
+  min-height: 100vh;
+  position: relative;
+  background-color: #000;
+  overflow-x: hidden;
+}
+
+/* 0. 背景层优化 */
+.hero-bg {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 70vh;
   z-index: 0;
-  filter: blur(10rpx); /* 10rpx 模糊度 */
-  transform: scale(1.1); /* 稍微放大以覆盖边缘模糊带来的白边 */
 }
 
-/* 遮罩层：让背景变暗，文字更亮 */
-.bg-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.45); /* 45% 黑色遮罩 */
-  z-index: 1;
+.bg-image {
+  width: 100%; height: 100%;
+  filter: brightness(0.7) blur(4rpx);
 }
 
-/* --- 1. 头部区域 --- */
-.header-area {
+.bg-vignette {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%; /* 改为 100% */
-  padding: 0 40rpx;
-  padding-top: calc(20rpx + env(safe-area-inset-top)); 
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.9) 80%, #000 100%);
+}
+
+/* 1. 自定义沉浸式导航线 */
+.custom-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 88rpx;
+  z-index: 100;
+  background: rgba(8, 8, 8, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: env(safe-area-inset-top);
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.05);
+}
+
+.brand-small {
+  font-size: 22rpx;
+  color: #D4AF37;
+  letter-spacing: 12rpx;
+  font-weight: 300;
+  opacity: 0.8;
+}
+
+/* 2. Hero 品牌区 */
+.content-scroller {
+  position: relative;
+  z-index: 10;
+  padding-top: calc(120rpx + env(safe-area-inset-top));
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+.hero-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 60rpx;
+  padding: 40rpx 0;
+}
+
+.brand-logo-container {
+  position: relative;
+}
+
+.logo-text {
+  font-size: 160rpx;
+  font-weight: 900;
+  color: #D4AF37;
+  letter-spacing: 24rpx;
+  background: linear-gradient(180deg, #D4AF37 0%, #B8860B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.5);
+}
+
+.logo-glow {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 300rpx; height: 150rpx;
+  background: rgba(212, 175, 55, 0.15);
+  filter: blur(60rpx);
+  transform: translate(-50%, -50%);
+  z-index: -1;
+}
+
+.welcome-premium {
+  text-align: center;
+  margin-top: 20rpx;
+}
+
+.w-top {
+  font-size: 20rpx;
+  color: #888;
+  letter-spacing: 16rpx;
+  margin-bottom: 15rpx;
+  display: block;
+}
+
+.w-divider {
+  width: 60rpx;
+  height: 2rpx;
+  background: linear-gradient(to right, transparent, #D4AF37, transparent);
+  margin: 10rpx auto 20rpx;
+}
+
+.w-bottom {
+  font-size: 34rpx;
+  font-weight: 300;
+  letter-spacing: 6rpx;
+  color: #D4AF37;
+  text-shadow: 0 0 10rpx rgba(212, 175, 55, 0.3);
+}
+
+/* 3. 公告/活动浮动栏 */
+.floating-notices {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+  padding: 0 50rpx;
+}
+
+.notice-pill {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 40rpx;
+  border-radius: 40rpx;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1rpx solid rgba(212, 175, 55, 0.15);
+}
+
+.pill-icon { font-size: 28rpx; margin-right: 20rpx; }
+.pill-text { font-size: 24rpx; color: #BBB; flex: 1; }
+
+/* 4. 尊享功能卡片 (2列布局) */
+.action-grid {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  z-index: 10;
-  box-sizing: border-box;
+  padding: 40rpx 40rpx;
+  gap: 30rpx;
 }
 
-.store-name {
-  color: #8b0000; /* 亮金色 */
-  font-size: 34rpx;
-  font-weight: 900;
-  text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
-}
-
-.notice-content {
-  font-size: 26rpx;
-  color: #cc9999;
+.lux-action-card {
   flex: 1;
-}
-
-.notice-btn {
-  background-color: rgba(0, 0, 0, 0.6);
-  border: 2rpx solid #8b0000;
-  padding: 10rpx 30rpx;
+  height: 320rpx; /* 改为纵向卡片 */
+  background: rgba(255, 255, 255, 0.02);
+  border: 1rpx solid rgba(255, 255, 255, 0.05);
   border-radius: 40rpx;
-}
-
-.notice-btn text {
-  color: #8b0000;
-  font-size: 24rpx;
-  font-weight: bold;
-}
-
-/* --- 2. 中间核心区域 --- */
-.center-area {
-  position: absolute;
-  top: 20%;
-  left: 0; /* 直接对齐左侧 */
-  width: 100%; /* 占满全宽 */
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* 巨大的 TUSK (明亮、粗壮) */
-.brand-title {
-  font-size: 220rpx;
-  font-weight: 900;
-  color: #8b0000;
-  letter-spacing: 8rpx;
-  line-height: 0.8;
-  margin-bottom: 10rpx;
-  font-style: italic;
-  text-shadow: 0 10rpx 20rpx rgba(0,0,0,0.6);
-  transform: skewX(-10deg);
-  text-align: center; /* 确保文字居中 */
-}
-
-/* 欢迎黑盒子 */
-.welcome-box {
-  /* 1. 宽度与下面保持一致 */
-  width: 90%; 
-  
-  background-color: #000000;
-  border-radius: 30rpx; /* 圆角稍微大一点 */
-  padding: 40rpx 50rpx; /* 增加内边距 */
-  
-  /* 布局 */
-  display: flex;
-  justify-content: center;
-  
-  box-sizing: border-box;
-  margin-top: 30rpx; /* 离TUSK近一点 */
-  margin-left: auto; /* 左右自动居中 */
-  margin-right: auto;
-  
-  box-shadow: 0 10rpx 20rpx rgba(0,0,0,0.5);
-  border: 1rpx solid #330000;
-}
-
-/* 欢迎语字体变大 */
-.welcome-text {
-  color: #cc3333;
-  font-size: 40rpx; /* 增大字体 (原28rpx) */
-  font-weight: bold; /* 加粗 */
-  letter-spacing: 20rpx; /* 字间距 */
-  text-align: center;
-
-}
-
-
-
-
-.nickname-btn text {
-  color: #8b0000;
-  font-size: 26rpx;
-  font-weight: bold;
-}
-
-/* --- 3. 底部操作面板 --- */
-.bottom-panel {
-  /* ====== 核心定位 ====== */
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%); /* 修正为 -50% 实现完美居中 */
-  z-index: 10;
-  display: flex;
-  justify-content: space-around;
-  box-sizing: border-box;
-
-  /* ====== 尺寸和位置 ====== */
-  
-  /* 1. 宽度：锁定为 90%，与上面 welcome-box 对齐 */
-  width:90%;  
-
-  /* 2. 高度 */
-  height: 580rpx; 
-
-  /* 3. 位置：悬浮 */
-  bottom: 210rpx;     
-
-  /* 4. 内边距 */
-  padding-top: 80rpx; 
-
-  /* ====== 样式 ====== */
-  background-color: #000000;
-  
-  /* 因为悬浮了，建议四个角都变圆，像一张卡片 */
-  border-radius: 50rpx; 
-  
-  /* 增加阴影，更有层次感 */
-  box-shadow: 0 10rpx 30rpx rgba(0,0,0,0.6);
-  border: 1rpx solid #330000;
-}
-
-.action-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 320rpx; /* 修复宽度溢出问题，原 500rpx 太大 */
-}
-
-/* 图标大大大 */
-.action-icon {
-  width: 300rpx; /* 显著放大 */
-  height: 300rpx;
-  margin-bottom: 50rpx;
-}
-
-.action-title {
-  color: #8b0000;
-  font-size: 40rpx;
-  font-weight: 900;
-  margin-bottom: 6rpx;
-}
-
-.stats-label {
-  font-size: 24rpx;
-  color: #cc9999;
-  margin-bottom: 8rpx;
-}
-
-.action-subtitle {
-  color: #996666;
-  font-size: 24rpx;
-  font-weight: 500;
-  text-transform: uppercase;
-}
-
-/* --- 自定义黑金弹窗样式 --- */
-.custom-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal-mask {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
-}
-
-.modal-content {
+  padding: 40rpx 30rpx;
   position: relative;
-  width: 80%;
-  max-height: 70%;
-  background-color: #1a1a1a;
-  border: 2rpx solid #8b0000;
-  border-radius: 30rpx;
+  overflow: hidden;
+  backdrop-filter: blur(15rpx);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  animation: modalFadeIn 0.3s ease-out;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
 }
 
-@keyframes modalFadeIn {
-  from { transform: scale(0.8); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+.lux-action-card:active {
+  transform: translateY(10rpx);
+  background: rgba(212, 175, 55, 0.05);
 }
 
-.modal-header {
-  padding: 40rpx 30rpx 20rpx;
+.action-img {
+  width: 100rpx;
+  height: 100rpx;
+  margin-bottom: 30rpx;
+  filter: drop-shadow(0 0 15rpx rgba(212, 175, 55, 0.3));
+}
+
+.card-title {
+  font-size: 32rpx;
+  color: #FDFDFD;
+  font-weight: 700;
+  margin-bottom: 10rpx;
+  letter-spacing: 2rpx;
+}
+
+.card-desc {
+  font-size: 18rpx;
+  color: #666;
   text-align: center;
+  line-height: 1.4;
 }
 
-.modal-title {
-  color: #8b0000;
-  font-size: 36rpx;
-  font-weight: bold;
+.card-accent {
+  position: absolute;
+  top: -20rpx;
+  right: -20rpx;
+  width: 80rpx;
+  height: 80rpx;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+}
+
+/* 弹窗升级 (首页专用) */
+.luxury-modal-home {
+  width: 620rpx;
+  padding: 60rpx 50rpx;
+  border-radius: 30rpx;
+}
+
+.modal-head-gold {
+  color: #D4AF37;
+  font-size: 40rpx;
+  text-align: center;
+  font-weight: 700;
+  margin-bottom: 40rpx;
   letter-spacing: 4rpx;
 }
 
-.modal-body {
-  padding: 20rpx 40rpx 40rpx;
-  flex: 1;
-  max-height: 400rpx;
+.modal-body-lux {
+  max-height: 500rpx;
+  margin-bottom: 50rpx;
 }
 
-.modal-text {
+.modal-text-lux {
+  color: #BBB;
   font-size: 28rpx;
-  color: #996666;
-  line-height: 1.6;
-  margin-bottom: 48rpx;
-  text-align: center;
+  line-height: 1.8;
+  display: block;
 }
 
-.modal-footer {
-  padding: 30rpx;
-  display: flex;
-  justify-content: center;
-  border-top: 1rpx solid rgba(139, 0, 0, 0.2);
+.modal-btn-lux {
+  height: 96rpx;
+  line-height: 96rpx;
+  border-radius: 48rpx;
 }
 
-.modal-btn {
-  background: linear-gradient(135deg, #8b0000, #4a0e0e);
-  color: #ffebeb;
-  font-size: 30rpx;
-  font-weight: bold;
-  padding: 20rpx 80rpx;
-  border-radius: 50rpx;
-  box-shadow: 0 4rpx 15rpx rgba(139, 0, 0, 0.3);
+/* Animations */
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-30rpx); }
+  to { opacity: 1; transform: translateY(0); }
 }

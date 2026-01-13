@@ -1,8 +1,8 @@
 <view class="container">
   
-  <!-- 1. 橙色头部区域 -->
+  <!-- 1. 沉浸式头部区域 -->
   <view class="header-section">
-    <view class="store-label">重庆店 ></view>
+    <view class="store-label">AAA CLUB · 重庆店</view>
     <view class="page-title">排行榜</view>
     <view class="date-range">{{dateRange}}</view>
 
@@ -24,25 +24,25 @@
   </view>
 
   <!-- 2. 排行榜列表区域 -->
-  <view class="ranking-list-container">
+  <view class="ranking-list-container glass-panel gold-border shadow-lux">
     <!-- Loading状态 -->
     <view class="loading-container" wx:if="{{loading}}">
-      <text class="loading-text">加载中...</text>
+      <text class="loading-text">同步数据中...</text>
     </view>
 
     <!-- 空数据提示 -->
     <view class="empty-container" wx:elif="{{isEmpty}}">
       <text class="empty-icon">📊</text>
-      <text class="empty-text">暂无排行榜数据</text>
-      <text class="empty-hint">快去赢取积分，登上榜首吧！</text>
+      <text class="empty-text">虚位以待</text>
+      <text class="empty-hint">即刻启程，赢取属于您的至高荣誉</text>
     </view>
 
     <!-- 排行榜列表 -->
     <block wx:else>
       <block wx:for="{{rankingList}}" wx:key="rank">
-        <view class="ranking-item">
+        <view class="ranking-item glass-panel">
           <!-- 排名 -->
-          <view class="rank-num rank-{{item.rank <= 3 ? item.rank : 'normal'}}">
+          <view class="rank-num">
             {{item.rank}}
           </view>
           
@@ -52,7 +52,7 @@
           <!-- 信息 -->
           <view class="rank-info">
             <text class="rank-name">{{item.name}}</text>
-            <text class="rank-score">{{item.score}}积分</text>
+            <text class="rank-score text-gold">{{item.score}} 积分</text>
           </view>
         </view>
       </block>
@@ -60,22 +60,18 @@
   </view>
 
   <!-- 3. 当前用户排名卡片 (底部固定) -->
-  <view class="user-rank-card" wx:if="{{currentUserRank}}">
-    <view class="user-rank-content">
-      <view class="user-rank-label">我的排名</view>
-      <view class="user-rank-info">
-        <image class="user-avatar" src="{{currentUserRank.avatar}}" />
-        <view class="user-details">
-          <text class="user-name">{{currentUserRank.name}}</text>
-          <text class="user-score">{{currentUserRank.score}}积分</text>
-        </view>
-        <view class="user-rank-badge">
-          <text class="rank-text">{{currentUserRank.rank}}</text>
-        </view>
+  <view class="user-rank-card glass-panel gold-border shadow-lux" wx:if="{{currentUserRank}}">
+    <view class="user-rank-info">
+      <image class="user-avatar" src="{{currentUserRank.avatar}}" />
+      <view class="user-details">
+        <text class="user-name">{{currentUserRank.name}}</text>
+        <text class="user-score">{{currentUserRank.score}} 积分</text>
       </view>
+      <text class="rank-text">No.{{currentUserRank.rank}}</text>
     </view>
   </view>
 
+  <view style="height: 150rpx;"></view>
   <!-- 底部导航栏 -->
   <tab-bar selected="2"></tab-bar>
 
