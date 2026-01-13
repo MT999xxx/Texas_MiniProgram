@@ -225,6 +225,57 @@ export class PaymentService {
     throw new BadRequestException('创建充值支付订单失败');
   }
 
+  // 创建金币充值支付（直接按金额，不需要套餐）
+  async createCoinRechargePayment(amount: number, memberId: string, openid?: string) {
+    const member = await this.memberRepo.findOne({ where: { id: memberId } });
+    if (!member) {
+      throw new NotFoundException('用户不存在');
+    }
+
+    if (amount <= 0) {
+      throw new BadRequestException('充值金额必须大于0');
+    }
+
+    // 创建支付记录
+    const payment = this.paymentRepo.create({
+      type: PaymentType.RECHARGE,
+      method: PaymentMethod.WECHAT_PAY,
+      status: PaymentStatus.PENDING,
+      amount: Math.round(amount * 100), // 元转分
+      description: `金币充值 - ${amount}元`,
+      paymentOrderNo: this.generateTradeNo('COIN'),
+      member,
+    });
+
+    const saved = await this.paymentRepo.save(payment);
+
+    // 调用微信支付
+    const wechatPayResult = await this.wechatPayService.createJsapiOrder({
+      outTradeNo: saved.paymentOrderNo,
+      description: saved.description || '金币充值',
+      amount: Number(saved.amount),
+      openid: openid || '',
+    });
+
+    if (wechatPayResult) {
+      payment.status = PaymentStatus.PROCESSING;
+      payment.thirdPartyOrderNo = wechatPayResult.prepayId;
+      await this.paymentRepo.save(payment);
+
+      return {
+        paymentId: saved.id,
+        paymentOrderNo: saved.paymentOrderNo,
+        amount: saved.amount,
+        coins: amount, // 充值多少钱就得多少金币（1:1）
+        ...wechatPayResult,
+      };
+    }
+
+    payment.status = PaymentStatus.FAILED;
+    await this.paymentRepo.save(payment);
+    throw new BadRequestException('创建金币充值支付订单失败');
+  }
+
   // ========== 支付回调处理 ==========
 
   // 处理微信支付回调（简化版）
@@ -309,6 +360,34 @@ export class PaymentService {
 
   // 处理充值支付成功
   private async handleRechargePaymentSuccess(payment: PaymentEntity) {
+    // 检查是否是金币充值（通过 paymentOrderNo 前缀判断）
+    if (payment.paymentOrderNo.startsWith('COIN_')) {
+      // 金币充值：直接增加金币余额
+      if (!payment.member) {
+        this.logger.error(`金币充值支付记录缺少会员关联: ${payment.id}`);
+        return;
+      }
+      const member = await this.memberRepo.findOne({ where: { id: payment.member.id } });
+      if (!member) {
+        this.logger.error(`金币充值找不到会员: ${payment.member.id}`);
+        return;
+      }
+
+      // 金额是分，转换为元（1元=1金币）
+      const coins = Number(payment.amount) / 100;
+      member.coins = Number(member.coins || 0) + coins;
+
+      // 赠送积分：1元=15积分
+      const bonusPoints = coins * 15;
+      member.points = Number(member.points || 0) + bonusPoints;
+
+      await this.memberRepo.save(member);
+
+      this.logger.log(`金币充值成功: 用户${member.id} 获得${coins}金币 + ${bonusPoints}积分，当前余额: ${member.coins}金币, ${member.points}积分`);
+      return;
+    }
+
+    // 套餐充值：查找充值记录
     const rechargeRecord = await this.rechargeRepo.findOne({
       where: { payment: { id: payment.id } },
       relations: ['member'],

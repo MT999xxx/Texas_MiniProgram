@@ -111,9 +111,9 @@ export class WechatPayService {
             }
 
             return { success: false, error: response.message || '创建订单失败' };
-        } catch (error) {
+        } catch (error: any) {
             this.logger.error('创建微信支付订单失败:', error);
-            return { success: false, error: error.message };
+            return { success: false, error: error?.message || '支付失败' };
         }
     }
 
@@ -154,7 +154,8 @@ export class WechatPayService {
             const authTag = ciphertext.slice(-16);
             const data = ciphertext.slice(0, -16);
 
-            const decipher = crypto.createDecipheriv('aes-256-gcm', this.apiV3Key, nonce);
+            if (!this.apiV3Key) throw new Error('API V3 Key not configured');
+            const decipher = crypto.createDecipheriv('aes-256-gcm', this.apiV3Key as string, nonce);
             decipher.setAuthTag(authTag);
             decipher.setAAD(aad);
 
@@ -171,6 +172,7 @@ export class WechatPayService {
      */
     private signWithPrivateKey(message: string): string {
         try {
+            if (!this.certKeyPath) throw new Error('Certificate key path not configured');
             const privateKey = fs.readFileSync(this.certKeyPath, 'utf8');
             const sign = crypto.createSign('RSA-SHA256');
             sign.update(message);

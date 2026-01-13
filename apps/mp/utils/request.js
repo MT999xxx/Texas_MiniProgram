@@ -9,6 +9,7 @@ const request = (options = {}) => {
     // 设置请求头
     const headers = {
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
       ...options.header,
     };
 

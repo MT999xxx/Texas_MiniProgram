@@ -56,6 +56,19 @@ export class PaymentController {
     return this.paymentService.createRechargePayment(packageId, memberId, body.openid);
   }
 
+  @Post('coin-recharge')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '创建金币充值支付' })
+  @ApiResponse({ status: 201, description: '金币充值支付创建成功' })
+  async createCoinRechargePayment(
+    @Body() body: { amount: number; openid?: string },
+    @Req() req: any,
+  ) {
+    const memberId = req.user.id;
+    return this.paymentService.createCoinRechargePayment(body.amount, memberId, body.openid);
+  }
+
   @Post('wechat-callback')
   @ApiOperation({ summary: '微信支付回调' })
   @ApiHeader({ name: 'Wechatpay-Signature', description: '微信支付签名' })

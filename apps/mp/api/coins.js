@@ -17,13 +17,15 @@ function getBalance(memberId) {
 }
 
 /**
- * 发起充值
+ * 发起金币充值
+ * @param {number} amount - 充值金额（元）
+ * @param {string} openid - 用户的微信openid
  */
-function createRecharge(memberId, amount) {
+function createRecharge(amount, openid) {
     return request({
-        url: '/coins/recharge',
+        url: '/payment/coin-recharge',
         method: 'POST',
-        data: { memberId, amount }
+        data: { amount, openid }
     });
 }
 
@@ -34,6 +36,26 @@ function confirmRecharge(orderId) {
     return request({
         url: `/coins/recharge/confirm/${orderId}`,
         method: 'POST'
+    });
+}
+
+/**
+ * 获取充值套餐列表
+ */
+function getRechargePackages() {
+    return request({
+        url: '/payment/packages',
+        method: 'GET'
+    });
+}
+
+/**
+ * 查询支付状态（同时会触发后端同步微信支付状态）
+ */
+function getPaymentStatus(paymentId) {
+    return request({
+        url: `/payment/status/${paymentId}`,
+        method: 'GET'
     });
 }
 
@@ -95,6 +117,8 @@ module.exports = {
     getBalance,
     createRecharge,
     confirmRecharge,
+    getRechargePackages,
+    getPaymentStatus,
     exchangeCoins,
     depositPoints,
     withdrawPoints,

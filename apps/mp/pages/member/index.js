@@ -153,24 +153,56 @@ Page({
       return;
     }
 
-    const memberId = this.data.memberId;
-    if (!memberId) {
+    if (!this.data.isLogin) {
       wx.showToast({ title: '请先登录', icon: 'none' });
       return;
     }
 
+    // 获取 openid（与其他支付流程保持一致）
+    const openid = wx.getStorageSync('openid');
+    if (!openid) {
+      wx.showToast({ title: '请重新登录', icon: 'none' });
+      return;
+    }
+
     wx.showLoading({ title: '发起支付...' });
-    coinsApi.createRecharge(memberId, Number(amount))
+    coinsApi.createRecharge(Number(amount), openid)
       .then(res => {
         wx.hideLoading();
-        // TODO: 实际调用微信支付
-        // 目前先模拟支付成功
-        return coinsApi.confirmRecharge(res.orderId);
-      })
-      .then(() => {
-        wx.showToast({ title: '充值成功', icon: 'success' });
-        this.hideRecharge();
-        this.loadBalance();
+        const paymentId = res.paymentId; // 保存支付ID用于后续查询
+        // 调用微信支付
+        wx.requestPayment({
+          timeStamp: res.timeStamp,
+          nonceStr: res.nonceStr,
+          package: res.package,
+          signType: res.signType || 'RSA',
+          paySign: res.paySign,
+          success: () => {
+            // 支付成功后，主动查询支付状态来触发后端处理（防止回调延迟）
+            wx.showLoading({ title: '处理中...' });
+            coinsApi.getPaymentStatus(paymentId)
+              .then(() => {
+                wx.hideLoading();
+                wx.showToast({ title: '充值成功', icon: 'success' });
+                this.hideRecharge();
+                this.loadBalance();
+              })
+              .catch(() => {
+                wx.hideLoading();
+                // 即使查询失败也显示成功（微信支付已成功）
+                wx.showToast({ title: '充值成功', icon: 'success' });
+                this.hideRecharge();
+                this.loadBalance();
+              });
+          },
+          fail: (err) => {
+            if (err.errMsg.includes('cancel')) {
+              wx.showToast({ title: '已取消支付', icon: 'none' });
+            } else {
+              wx.showToast({ title: '支付失败', icon: 'none' });
+            }
+          }
+        });
       })
       .catch(err => {
         wx.hideLoading();
