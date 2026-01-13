@@ -43,6 +43,22 @@
 
     <!-- 充值按钮 -->
     <button class="recharge-btn" bindtap="onRecharge">点击充值</button>
+    
+    <!-- 快捷操作按钮（在会员卡内） -->
+    <view class="quick-actions-inline" wx:if="{{isLogin}}">
+      <view class="action-item" bindtap="showDepositDialog">
+        <text class="action-icon">📥</text>
+        <text>存积分</text>
+      </view>
+      <view class="action-item" bindtap="showWithdrawDialog">
+        <text class="action-icon">📤</text>
+        <text>取积分</text>
+      </view>
+      <view class="action-item" bindtap="showExchangeDialog">
+        <text class="action-icon">💰</text>
+        <text>积分换金币</text>
+      </view>
+    </view>
   </view>
 
   <!-- 3. 功能菜单列表 -->
