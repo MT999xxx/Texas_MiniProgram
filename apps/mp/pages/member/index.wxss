@@ -11,8 +11,30 @@ page {
 
 .redesign-bg {
   min-height: 100vh;
-  background: radial-gradient(circle at top right, #0a0a0a 0%, #050505 100%);
+  position: relative;
+  z-index: 10;
   padding: 40rpx 30rpx;
+  overflow-x: hidden;
+}
+
+/* 0. 背景层深度优化 (同步首页) */
+.hero-bg-lux-member {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 0;
+  background: 
+    radial-gradient(circle at 100% 0%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 0% 100%, rgba(26, 21, 10, 0.5) 0%, #030304 100%);
+}
+
+.hero-bg-lux-member::before {
+  content: "";
+  position: absolute;
+  top: -50%; left: -50%; width: 200%; height: 200%;
+  background-image: radial-gradient(rgba(212, 175, 55, 0.1) 1rpx, transparent 1rpx);
+  background-size: 100rpx 100rpx;
+  opacity: 0.3;
+  animation: floatParticles 80s linear infinite;
 }
 
 /* 1. 用户信息区域 */
@@ -24,11 +46,20 @@ page {
 }
 
 .avatar-border {
-  padding: 4rpx;
+  padding: 6rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, #D4AF37, #4a0e0e);
+  background: conic-gradient(from 0deg, #D4AF37, #4a0e0e, #D4AF37);
   margin-right: 30rpx;
-  box-shadow: 0 4rpx 20rpx rgba(212, 175, 55, 0.2);
+  box-shadow: 0 0 30rpx rgba(212, 175, 55, 0.2);
+  animation: rotateGlow 4s linear infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes rotateGlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .user-avatar {
@@ -37,6 +68,7 @@ page {
   border-radius: 50%;
   border: 4rpx solid #000;
   background: #111;
+  transform: rotate(-0deg); /* 抵消外层旋转 */
 }
 
 .user-nickname {
@@ -140,9 +172,11 @@ page {
 }
 
 .stat-val {
-  font-size: 44rpx;
-  margin-bottom: 10rpx;
-  text-shadow: 0 0 20rpx rgba(212, 175, 55, 0.3);
+  font-size: 52rpx;
+  margin-bottom: 12rpx;
+  text-shadow: 0 0 30rpx rgba(212, 175, 55, 0.5);
+  font-family: 'SF Pro Display', sans-serif;
+  font-weight: 800;
 }
 
 .stat-name {
@@ -184,14 +218,53 @@ page {
 }
 
 .icon-circle {
-  width: 80rpx;
-  height: 80rpx;
+  width: 90rpx;
+  height: 90rpx;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.03);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 36rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+/* CSS 纯享小图标 */
+.css-icon-in, .css-icon-out {
+  width: 24rpx;
+  height: 24rpx;
+  border-left: 4rpx solid #D4AF37;
+  border-bottom: 4rpx solid #D4AF37;
+  position: relative;
+}
+
+.css-icon-in { transform: rotate(-45deg); top: -4rpx; }
+.css-icon-out { transform: rotate(135deg); top: 4rpx; }
+
+.css-icon-in::after, .css-icon-out::after {
+  content: "";
+  position: absolute;
+  width: 4rpx; height: 32rpx;
+  background: #D4AF37;
+  transform-origin: center;
+}
+
+.css-icon-in::after { transform: rotate(45deg) translate(-14rpx, -14rpx); }
+.css-icon-out::after { transform: rotate(45deg) translate(14rpx, 14rpx); }
+
+.css-icon-exchange {
+  width: 32rpx;
+  height: 32rpx;
+  border: 4rpx solid #D4AF37;
+  border-radius: 50%;
+  position: relative;
+}
+
+.css-icon-exchange::before {
+  content: "$";
+  color: #D4AF37;
+  font-size: 20rpx;
+  font-weight: bold;
 }
 
 /* 3. 功能菜单列表 */
@@ -201,14 +274,15 @@ page {
 
 .menu-group-title {
   font-size: 24rpx;
-  color: #444;
+  color: #555;
   margin-left: 10rpx;
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
   text-transform: uppercase;
-  letter-spacing: 2rpx;
+  letter-spacing: 4rpx;
 }
 
 .premium-menu {
+  border-radius: 24rpx;
   overflow: hidden;
 }
 
@@ -216,8 +290,13 @@ page {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 40rpx 30rpx;
-  border-bottom: 1rpx solid rgba(255, 255, 255, 0.02);
+  padding: 40rpx 36rpx;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.03);
+  transition: all 0.2s ease;
+}
+
+.premium-menu-item:active {
+  background: rgba(212, 175, 55, 0.03);
 }
 
 .premium-menu-item:last-child {
@@ -229,21 +308,27 @@ page {
   align-items: center;
 }
 
-.menu-icon-text {
-  font-size: 32rpx;
-  margin-right: 24rpx;
-  opacity: 0.8;
+.menu-icon-wrapper {
+  width: 12rpx;
+  height: 12rpx;
+  background: #D4AF37;
+  border-radius: 50%;
+  margin-right: 30rpx;
+  box-shadow: 0 0 10rpx #D4AF37;
 }
 
 .menu-label {
-  font-size: 30rpx;
-  color: #DDD;
+  font-size: 28rpx;
+  color: #CCC;
+  font-weight: 400;
 }
 
 .menu-arrow-icon {
-  font-family: 'Material Icons';
-  color: #333;
-  font-size: 24rpx;
+  width: 16rpx;
+  height: 16rpx;
+  border-right: 3rpx solid #444;
+  border-bottom: 3rpx solid #444;
+  transform: rotate(-45deg);
 }
 
 /* 登出区域 */

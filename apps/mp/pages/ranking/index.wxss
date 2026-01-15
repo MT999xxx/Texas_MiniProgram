@@ -7,109 +7,159 @@ page {
 .container {
   width: 100%;
   min-height: 100vh;
-  background-color: #080808;
+  position: relative;
+  z-index: 10;
 }
 
-/* --- 1. 头部区域 --- */
+/* 0. 沉浸式背景 (同步全站极致规范) */
+.hero-bg-lux-ranking {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 0;
+  background: 
+    radial-gradient(circle at 50% -20%, rgba(212, 175, 55, 0.15) 0%, transparent 60%),
+    radial-gradient(circle at -10% 40%, rgba(212, 175, 55, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 110% 60%, rgba(26, 21, 10, 0.8) 0%, #050505 100%);
+}
+
 .header-section {
-  padding: 60rpx 40rpx 20rpx;
+  padding: 80rpx 40rpx 40rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
-  background: radial-gradient(circle at top, #1a1a1a 0%, #080808 100%);
 }
 
 .store-label {
   position: absolute;
-  left: 40rpx;
+  left: 0; right: 0;
   top: 30rpx;
-  font-size: 22rpx;
-  color: #D4AF37;
-  letter-spacing: 4rpx;
+  text-align: center;
+  font-size: 18rpx;
+  color: #666;
+  letter-spacing: 8rpx;
   opacity: 0.8;
 }
 
 .page-title {
-  font-size: 72rpx;
-  color: #D4AF37;
+  font-size: 88rpx;
   font-weight: 900;
-  letter-spacing: 12rpx;
+  letter-spacing: 20rpx;
   margin-top: 40rpx;
-  text-shadow: 0 0 30rpx rgba(212, 175, 55, 0.2);
-}
-
-.date-range {
-  font-size: 22rpx;
-  color: #666;
-  margin-bottom: 50rpx;
-}
-
-/* Tab 栏 */
-.tab-header {
-  width: 100%;
-  display: flex;
-  justify-content: space-around;
   margin-bottom: 20rpx;
 }
 
-.tab-item {
-  font-size: 28rpx;
-  color: #666;
-  position: relative;
-  padding-bottom: 15rpx;
+.date-range {
+  font-size: 20rpx;
+  color: #444;
+  margin-bottom: 60rpx;
   letter-spacing: 2rpx;
 }
 
-.tab-item.active {
+/* Tab 栏 (极简设计) */
+.tab-header {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 60rpx;
+}
+
+.tab-item {
+  position: relative;
+  padding: 10rpx 20rpx;
+}
+
+.tab-text {
+  font-size: 26rpx;
+  color: #666;
+  letter-spacing: 2rpx;
+  transition: all 0.3s;
+}
+
+.tab-item.active .tab-text {
   color: #D4AF37;
-  font-weight: bold;
+  font-weight: 600;
 }
 
 .tab-indicator {
   position: absolute;
-  bottom: 0;
+  bottom: -4rpx;
   left: 50%;
   transform: translateX(-50%);
-  width: 30rpx;
-  height: 4rpx;
-  background-color: #D4AF37;
-  border-radius: 2rpx;
+  width: 20rpx;
+  height: 2rpx;
+  background: #D4AF37;
   box-shadow: 0 0 10rpx #D4AF37;
 }
 
 /* --- 2. 排行榜列表区域 --- */
 .ranking-list-container {
-  padding: 40rpx 30rpx;
-  margin: 20rpx;
+  padding: 20rpx 30rpx;
+}
+
+.list-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
 }
 
 .ranking-item {
   display: flex;
   align-items: center;
-  padding: 30rpx 20rpx;
-  margin-bottom: 16rpx;
-  transition: all 0.2s;
+  padding: 34rpx 40rpx;
+  position: relative;
+  overflow: hidden;
+  border-radius: 30rpx;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1rpx solid rgba(255, 255, 255, 0.03);
 }
 
-.rank-num {
-  width: 80rpx;
-  font-size: 44rpx;
-  font-weight: 800;
-  color: #333;
-  font-style: italic;
+.top-rank {
+  border: 1rpx solid rgba(212, 175, 55, 0.25);
+  background: rgba(212, 175, 55, 0.03) !important;
 }
+
+.rank-1::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.05), transparent);
+  animation: logoShimmer 3s infinite;
+}
+
+/* 排名勋章 */
+.rank-badge {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 30rpx;
+}
+
+.rank-num-text {
+  font-size: 36rpx;
+  font-weight: 800;
+  font-style: italic;
+  color: #333;
+}
+
+.rank-1 .rank-num-text { color: #F9E498; font-size: 48rpx; }
+.rank-2 .rank-num-text { color: #C0C0C0; }
+.rank-3 .rank-num-text { color: #CD7F32; }
 
 .rank-avatar {
-  width: 88rpx;
-  height: 88rpx;
+  width: 90rpx;
+  height: 90rpx;
   border-radius: 50%;
   margin-right: 30rpx;
-  border: 1rpx solid rgba(255, 255, 255, 0.05);
+  background: #111;
 }
 
 .rank-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .rank-name {
@@ -120,23 +170,67 @@ page {
 }
 
 .rank-score {
-  color: #666;
-  font-size: 24rpx;
+  color: #D4AF37;
+  font-size: 34rpx;
+  font-weight: 700;
+  font-family: 'SF Pro Text', sans-serif;
 }
 
-/* 前三名特殊处理 */
-.ranking-item:nth-child(1) .rank-num { color: #D4AF37; text-shadow: 0 0 15rpx rgba(212, 175, 55, 0.3); }
-.ranking-item:nth-child(2) .rank-num { color: #C0C0C0; }
-.ranking-item:nth-child(3) .rank-num { color: #CD7F32; }
+.score-unit {
+  font-size: 18rpx;
+  font-weight: 400;
+  color: #666;
+  margin-left: 4rpx;
+}
+
+.item-accent {
+  position: absolute;
+  right: -20rpx; top: -20rpx;
+  width: 100rpx; height: 100rpx;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+}
+
+/* 空状态 */
+.empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 100rpx 0;
+}
+
+.css-icon-shield {
+  width: 80rpx;
+  height: 100rpx;
+  background: rgba(212, 175, 55, 0.05);
+  border: 2rpx solid rgba(212, 175, 55, 0.2);
+  border-radius: 10rpx 10rpx 40rpx 40rpx;
+  margin-bottom: 40rpx;
+  position: relative;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+}
+
+.empty-hint {
+  font-size: 20rpx;
+  color: #333;
+}
 
 /* 用户排名卡片 (悬浮) */
 .user-rank-card {
   position: fixed;
-  bottom: 130rpx;
-  left: 30rpx;
-  right: 30rpx;
-  padding: 30rpx;
+  bottom: 150rpx;
+  left: 30rpx; right: 30rpx;
+  padding: 34rpx 44rpx;
   z-index: 100;
+  border-radius: 44rpx;
+  background: rgba(15, 15, 15, 0.8) !important;
+  backdrop-filter: blur(40rpx) !important;
+  border: 1rpx solid rgba(212, 175, 55, 0.3) !important;
+  box-shadow: 0 -10rpx 40rpx rgba(0,0,0,0.8);
 }
 
 .user-rank-info {
@@ -149,7 +243,6 @@ page {
   height: 80rpx;
   border-radius: 50%;
   margin-right: 24rpx;
-  border: 2rpx solid #D4AF37;
 }
 
 .user-details {
@@ -158,20 +251,31 @@ page {
 
 .user-name {
   color: #FDFDFD;
-  font-size: 30rpx;
+  font-size: 28rpx;
   font-weight: 600;
-  margin-bottom: 4rpx;
 }
 
 .user-score {
-  color: #888;
-  font-size: 24rpx;
+  color: #D4AF37;
+  font-size: 22rpx;
 }
 
 .rank-text {
+  font-size: 40rpx;
+  font-weight: 900;
   color: #D4AF37;
-  font-size: 36rpx;
-  font-weight: 800;
-  padding-left: 20rpx;
-  border-left: 1rpx solid rgba(212, 175, 55, 0.2);
+  font-style: italic;
+  padding-left: 30rpx;
+  border-left: 1rpx solid rgba(255, 255, 255, 0.05);
+}
+
+.loading-container {
+  text-align: center;
+  padding: 60rpx 0;
+}
+
+.loading-text {
+  color: #444;
+  font-size: 24rpx;
+  letter-spacing: 4rpx;
 }

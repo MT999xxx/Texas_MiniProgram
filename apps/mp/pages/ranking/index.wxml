@@ -1,62 +1,67 @@
 <view class="container">
+  <view class="hero-bg-lux-ranking"></view>
   
   <!-- 1. 沉浸式头部区域 -->
-  <view class="header-section">
-    <view class="store-label">AAA CLUB · 重庆店</view>
-    <view class="page-title">排行榜</view>
+  <view class="header-section redesign-bg">
+    <view class="store-label">AAA CLUB · CHONGQING</view>
+    <view class="page-title text-gold-gradient shimmer-effect">排行榜</view>
     <view class="date-range">{{dateRange}}</view>
 
-    <!-- Tab 栏 -->
+    <!-- Tab 栏 (极简设计) -->
     <view class="tab-header">
       <view class="tab-item {{currentTab === 0 ? 'active' : ''}}" bindtap="switchRankingTab" data-index="0">
-        半月榜
+        <text class="tab-text">半月榜</text>
         <view class="tab-indicator" wx:if="{{currentTab === 0}}"></view>
       </view>
       <view class="tab-item {{currentTab === 1 ? 'active' : ''}}" bindtap="switchRankingTab" data-index="1">
-        年榜
+        <text class="tab-text">年榜</text>
         <view class="tab-indicator" wx:if="{{currentTab === 1}}"></view>
       </view>
       <view class="tab-item {{currentTab === 2 ? 'active' : ''}}" bindtap="switchRankingTab" data-index="2">
-        冠军榜
+        <text class="tab-text">冠军榜</text>
         <view class="tab-indicator" wx:if="{{currentTab === 2}}"></view>
       </view>
     </view>
   </view>
 
   <!-- 2. 排行榜列表区域 -->
-  <view class="ranking-list-container glass-panel gold-border shadow-lux">
+  <view class="ranking-list-container">
     <!-- Loading状态 -->
     <view class="loading-container" wx:if="{{loading}}">
-      <text class="loading-text">同步数据中...</text>
+      <view class="loading-shimmer"></view>
+      <text class="loading-text">同步名仕录...</text>
     </view>
 
     <!-- 空数据提示 -->
     <view class="empty-container" wx:elif="{{isEmpty}}">
-      <text class="empty-icon">📊</text>
+      <view class="css-icon-shield"></view>
       <text class="empty-text">虚位以待</text>
       <text class="empty-hint">即刻启程，赢取属于您的至高荣誉</text>
     </view>
 
     <!-- 排行榜列表 -->
-    <block wx:else>
+    <view class="list-wrapper" wx:else>
       <block wx:for="{{rankingList}}" wx:key="rank">
-        <view class="ranking-item glass-panel">
-          <!-- 排名 -->
-          <view class="rank-num">
-            {{item.rank}}
+        <view class="ranking-item glass-panel {{index < 3 ? 'top-rank shimmer-effect' : ''}}">
+          <!-- 排名 (纯 CSS 图标/文字) -->
+          <view class="rank-badge {{'rank-' + item.rank}}">
+            <text class="rank-num-text">{{item.rank}}</text>
           </view>
           
           <!-- 头像 -->
-          <image class="rank-avatar" src="{{item.avatar}}" />
+          <image class="rank-avatar gold-border" src="{{item.avatar}}" />
           
           <!-- 信息 -->
           <view class="rank-info">
             <text class="rank-name">{{item.name}}</text>
-            <text class="rank-score text-gold">{{item.score}} 积分</text>
+            <text class="rank-score">{{item.score}} <text class="score-unit">积分</text></text>
           </view>
+
+          <!-- 装饰 -->
+          <view class="item-accent" wx:if="{{index < 3}}"></view>
         </view>
       </block>
-    </block>
+    </view>
   </view>
 
   <!-- 3. 当前用户排名卡片 (底部固定) -->

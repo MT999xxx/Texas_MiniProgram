@@ -1,33 +1,41 @@
-/* 页面容器 */
-.container {
-  min-height: 100vh;
-  background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+/* Pages/reservation-list/index.wxss */
+page {
+  background-color: #080808;
 }
 
-/* 标签页 */
+.container {
+  min-height: 100vh;
+}
+
+/* 标签页 (极简极致) */
 .tabs {
   display: flex;
-  background: rgba(30, 41, 59, 0.8);
-  backdrop-filter: blur(10rpx);
-  padding: 0 32rpx;
+  background: rgba(8, 8, 8, 0.82);
+  backdrop-filter: blur(20rpx);
+  padding: 0 40rpx;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.05);
 }
 
 .tab-item {
   flex: 1;
   text-align: center;
-  padding: 24rpx 0;
+  padding: 34rpx 0;
   position: relative;
 }
 
 .tab-text {
-  font-size: 28rpx;
-  color: #996666;
-  transition: color 0.3s;
+  font-size: 26rpx;
+  color: #444;
+  letter-spacing: 2rpx;
+  transition: all 0.3s;
 }
 
 .tab-item.active .tab-text {
-  color: #8b0000;
-  font-weight: bold;
+  color: #D4AF37;
+  font-weight: 600;
 }
 
 .tab-indicator {
@@ -35,28 +43,15 @@
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 40rpx;
-  height: 4rpx;
-  background: #8b0000;
-  border-radius: 2rpx;
+  width: 20rpx;
+  height: 2rpx;
+  background: #D4AF37;
+  box-shadow: 0 0 10rpx #D4AF37;
 }
 
 /* 列表容器 */
 .list-container {
-  padding: 32rpx;
-}
-
-/* 加载状态 */
-.loading-box {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 120rpx 0;
-}
-
-.loading-text {
-  color: #996666;
-  font-size: 28rpx;
+  padding: 30rpx;
 }
 
 /* 空状态 */
@@ -64,169 +59,153 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 120rpx 0;
+  padding: 160rpx 0;
 }
 
-.empty-icon {
-  font-size: 80rpx;
-  margin-bottom: 24rpx;
+.css-icon-calendar {
+  width: 70rpx;
+  height: 80rpx;
+  border: 4rpx solid rgba(212, 175, 55, 0.1);
+  border-radius: 12rpx;
+  margin-bottom: 40rpx;
+  position: relative;
+}
+
+.css-icon-calendar::after {
+  content: "";
+  position: absolute;
+  top: 10rpx; left: 0; right: 0;
+  height: 4rpx;
+  background: rgba(212, 175, 55, 0.1);
 }
 
 .empty-text {
-  color: #996666;
-  font-size: 28rpx;
-  margin-bottom: 48rpx;
+  color: #333;
+  font-size: 26rpx;
+  margin-bottom: 60rpx;
+  letter-spacing: 4rpx;
 }
 
 .btn-goto-reserve {
-  background: linear-gradient(135deg, #8b0000 0%, #4a0e0e 100%);
-  color: #ffffff;
-  border: none;
-  border-radius: 16rpx;
-  font-size: 28rpx;
-  font-weight: bold;
-  padding: 24rpx 48rpx;
+  background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+  color: #000;
+  border-radius: 40rpx;
+  font-size: 26rpx;
+  font-weight: 700;
+  padding: 0 60rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  box-shadow: 0 10rpx 20rpx rgba(212, 175, 55, 0.15);
 }
 
-/* 预约列表 */
+/* 预约项 */
 .reservation-list {
   display: flex;
   flex-direction: column;
-  gap: 24rpx;
+  gap: 30rpx;
 }
 
 .reservation-item {
-  background: rgba(30, 41, 59, 0.8);
-  backdrop-filter: blur(10rpx);
-  border-radius: 20rpx;
-  padding: 32rpx;
+  padding: 40rpx;
   position: relative;
-  border: 2rpx solid transparent;
-  transition: all 0.3s;
-}
-
-.reservation-item:active {
-  border-color: rgba(139, 0, 0, 0.3);
-  transform: scale(0.98);
+  overflow: hidden;
 }
 
 /* 状态标签 */
 .status-badge {
   position: absolute;
-  top: 24rpx;
-  right: 24rpx;
-  padding: 8rpx 20rpx;
-  border-radius: 20rpx;
-  font-size: 22rpx;
-  font-weight: bold;
+  top: 0;
+  right: 0;
+  padding: 10rpx 30rpx;
+  border-radius: 0 0 0 24rpx;
+  font-size: 18rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
 }
 
-.status-PENDING {
-  background: rgba(139, 0, 0, 0.2);
-  color: #8b0000;
-  border: 2rpx solid rgba(139, 0, 0, 0.3);
-}
-
-.status-CONFIRMED {
-  background: rgba(34, 197, 94, 0.2);
-  color: #22c55e;
-  border: 2rpx solid rgba(34, 197, 94, 0.3);
-}
-
-.status-CHECKED_IN {
-  background: rgba(59, 130, 246, 0.2);
-  color: #3b82f6;
-  border: 2rpx solid rgba(59, 130, 246, 0.3);
-}
-
-.status-CANCELLED {
-  background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
-  border: 2rpx solid rgba(239, 68, 68, 0.3);
-}
+.status-PENDING { background: rgba(212, 175, 55, 0.1); color: #D4AF37; }
+.status-CONFIRMED { background: rgba(34, 197, 94, 0.1); color: #22C55E; }
+.status-IN_USE { background: rgba(212, 175, 55, 0.2); color: #F9E498; }
+.status-CHECKED_IN { background: rgba(59, 130, 246, 0.1); color: #3B82F6; }
+.status-CANCELLED { background: rgba(51, 51, 51, 0.1); color: #444; }
 
 /* 预约内容 */
 .reservation-content {
-  padding-right: 160rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
 }
 
 .info-row {
   display: flex;
   align-items: center;
-  margin-bottom: 16rpx;
 }
 
-.info-row:last-child {
-  margin-bottom: 0;
-}
-
-.info-row .icon {
-  font-size: 28rpx;
-  margin-right: 12rpx;
-  width: 32rpx;
-  text-align: center;
+.info-dot {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: #222;
+  margin-right: 20rpx;
 }
 
 .info-row .label {
-  font-size: 26rpx;
-  color: #cc9999;
-  margin-right: 8rpx;
+  font-size: 22rpx;
+  color: #444;
+  margin-right: 20rpx;
+  min-width: 100rpx;
 }
 
 .info-row .value {
   font-size: 26rpx;
-  color: #ffebeb;
+  color: #BBB;
   font-weight: 500;
 }
 
-.info-row .capacity {
-  font-size: 24rpx;
-  color: #996666;
-  margin-left: 8rpx;
+.capacity-lux, .phone-lux {
+  font-size: 20rpx;
+  color: #444;
+  margin-left: 16rpx;
 }
 
-.info-row .phone {
-  font-size: 24rpx;
-  color: #996666;
-  margin-left: 12rpx;
+.note-box {
+  margin-top: 10rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid rgba(255, 255, 255, 0.02);
 }
 
 .note-text {
-  color: #cc3333 !important;
-  line-height: 1.5;
+  color: #D4AF37 !important;
+  opacity: 0.8;
 }
 
-/* 操作按钮 */
-.action-buttons {
-  margin-top: 24rpx;
+/* 底部操作区 */
+.item-footer {
+  margin-top: 34rpx;
   padding-top: 24rpx;
-  border-top: 2rpx solid rgba(255, 255, 255, 0.1);
+  border-top: 1rpx solid rgba(255, 255, 255, 0.05);
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.btn-cancel {
-  background: rgba(239, 68, 68, 0.1);
-  border: 2rpx solid rgba(239, 68, 68, 0.3);
-  color: #ef4444;
-  border-radius: 12rpx;
-  font-size: 24rpx;
-  padding: 16rpx 32rpx;
-  line-height: 1;
-}
-
-.btn-cancel:active {
-  background: rgba(239, 68, 68, 0.2);
-}
-
-/* 创建时间 */
 .created-time {
-  margin-top: 24rpx;
-  padding-top: 16rpx;
-  border-top: 2rpx solid rgba(255, 255, 255, 0.1);
+  font-size: 18rpx;
+  color: #333;
 }
 
-.time-label {
+.btn-cancel-lux {
   font-size: 22rpx;
-  color: #996666;
+  color: #555;
+  padding: 10rpx 24rpx;
+  border: 1rpx solid #222;
+  border-radius: 30rpx;
 }
+
+.btn-cancel-lux:active {
+  background: rgba(255, 255, 255, 0.02);
+  color: #888;
+}
+
+.loading-box { text-align: center; padding: 60rpx 0; }
+.loading-text { color: #222; font-size: 22rpx; letter-spacing: 4rpx; }

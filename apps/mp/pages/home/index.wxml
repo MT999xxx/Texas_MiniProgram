@@ -1,9 +1,6 @@
 <view class="container home-redesign">
-  <!-- 0. 沉浸式背景层 -->
-  <view class="hero-bg">
-    <image class="bg-image" src="{{bgUrl}}" mode="aspectFill" />
-    <view class="bg-vignette"></view>
-  </view>
+  <!-- 0. 沉浸式背景层 (纯 CSS 实现) -->
+  <view class="hero-bg-lux"></view>
 
   <!-- 1. 自定义顶部导航栏 (模拟) -->
   <view class="custom-nav glass-panel">
@@ -40,17 +37,27 @@
 
     <!-- 4. 核心功能卡片 (2列布局) -->
     <view class="action-grid mt-xl">
-      <view class="lux-action-card glass-panel shadow-lux" bindtap="goToMenu">
-        <image class="action-img" src="/images/diancan2.png" mode="aspectFit" />
+      <view class="lux-action-card glass-panel shadow-lux shimmer-effect" bindtap="goToMenu">
+        <view class="css-icon-container">
+          <view class="icon-shape-food"></view>
+        </view>
         <text class="card-title">尊享点餐</text>
-        <text class="card-desc">美酒佳肴\n席间即达</text>
+        <view class="card-desc-box">
+          <text class="card-desc">美酒佳肴</text>
+          <text class="card-desc">席间即达</text>
+        </view>
         <view class="card-accent"></view>
       </view>
 
-      <view class="lux-action-card glass-panel shadow-lux" bindtap="goToReservation">
-        <image class="action-img" src="/images/yuyue2.png" mode="aspectFit" />
+      <view class="lux-action-card glass-panel shadow-lux shimmer-effect" bindtap="goToReservation">
+        <view class="css-icon-container">
+          <view class="icon-shape-table"></view>
+        </view>
         <text class="card-title">席位预约</text>
-        <text class="card-desc">名仕汇聚\n虚位以待</text>
+        <view class="card-desc-box">
+          <text class="card-desc">名仕汇聚</text>
+          <text class="card-desc">虚位以待</text>
+        </view>
         <view class="card-accent"></view>
       </view>
     </view>

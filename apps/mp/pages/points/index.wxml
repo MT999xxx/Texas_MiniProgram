@@ -1,163 +1,142 @@
-<view class="points-container">
-  <!-- 积分概览 -->
-  <view class="points-overview">
-    <view class="overview-card">
-      <view class="total-points">
-        <text class="points-value">{{totalPoints}}</text>
-        <text class="points-label">当前积分</text>
+<view class="container redesign-bg">
+  <!-- 1. 积分宏观概览 -->
+  <view class="points-hero-box glass-panel shadow-lux">
+    <view class="hero-main">
+      <view class="points-display">
+        <text class="p-val text-gold-gradient">{{totalPoints}}</text>
+        <view class="p-label-group">
+          <text class="p-label">POINTS BALANCE</text>
+          <text class="p-sub-label">账户当前积分</text>
+        </view>
       </view>
-      <view class="points-trend">
-        <view class="trend-item">
-          <text class="trend-value">+{{monthlyEarned}}</text>
-          <text class="trend-label">本月获得</text>
-        </view>
-        <view class="trend-item">
-          <text class="trend-value used">-{{monthlyUsed}}</text>
-          <text class="trend-label">本月使用</text>
-        </view>
+    </view>
+    
+    <view class="trend-lux">
+      <view class="trend-item">
+        <text class="t-l">MONTHLY EARNED</text>
+        <text class="t-v plus">+{{monthlyEarned}}</text>
+      </view>
+      <view class="trend-divider"></view>
+      <view class="trend-item">
+        <text class="t-l">MONTHLY SPENT</text>
+        <text class="t-v minus">-{{monthlyUsed}}</text>
       </view>
     </view>
   </view>
 
-  <!-- 功能区 -->
-  <view class="function-area">
-    <view class="function-item" bindtap="showRules">
-      <view class="function-icon">📋</view>
-      <text class="function-text">积分规则</text>
+  <!-- 2. 四大尊享功能区 -->
+  <view class="function-lux-grid">
+    <view class="func-lux-item glass-panel gold-border" bindtap="showRules">
+      <view class="css-icon-doc-gold"></view>
+      <text>权益规则</text>
     </view>
-    <view class="function-item" bindtap="showExchange">
-      <view class="function-icon">🎁</view>
-      <text class="function-text">积分兑换</text>
+    <view class="func-lux-item glass-panel gold-border" bindtap="showExchange">
+      <view class="css-icon-gift-gold"></view>
+      <text>积分兑礼</text>
     </view>
-    <view class="function-item" bindtap="navigateToRanking">
-      <view class="function-icon">🏆</view>
-      <text class="function-text">排行榜</text>
+    <view class="func-lux-item glass-panel gold-border" bindtap="navigateToRanking">
+      <view class="css-icon-rank-gold"></view>
+      <text>风云榜单</text>
     </view>
   </view>
 
-  <!-- 积分明细 -->
-  <view class="points-details">
-    <view class="details-header">
-      <text class="header-title">积分明细</text>
-      <view class="filter-tabs">
+  <!-- 3. 积分流水明细 -->
+  <view class="details-lux-sec">
+    <view class="sec-header-lux">
+      <view class="sec-indicator"></view>
+      <text class="sec-title">积分流水账单</text>
+      <scroll-view class="filter-lux" scroll-x>
         <text
           wx:for="{{filterTabs}}"
           wx:key="value"
-          class="tab-item {{currentTab === item.value ? 'active' : ''}}"
+          class="f-tab {{currentTab === item.value ? 'active' : ''}}"
           bindtap="switchTab"
           data-tab="{{item.value}}"
-        >
-          {{item.label}}
-        </text>
-      </view>
+        >{{item.label}}</text>
+      </scroll-view>
     </view>
 
-    <scroll-view class="details-list" scroll-y refresher-enabled refresher-triggered="{{refreshing}}" bindrefresherrefresh="onRefresh">
-      <view wx:if="{{transactions.length === 0 && !loading}}" class="empty-state">
-        <text class="empty-icon">📝</text>
-        <text class="empty-text">暂无积分记录</text>
-      </view>
+    <view class="list-lux">
+      <scroll-view class="scroll-lux" scroll-y refresher-enabled refresher-triggered="{{refreshing}}" bindrefresherrefresh="onRefresh">
+        <view wx:if="{{transactions.length === 0 && !loading}}" class="empty-lux-box">
+          <view class="css-icon-points-empty"></view>
+          <text class="empty-text">尚无积分流动记录</text>
+        </view>
 
-      <view wx:for="{{transactions}}" wx:key="id" class="transaction-item">
-        <view class="transaction-info">
-          <view class="transaction-header">
-            <text class="transaction-title">{{item.description}}</text>
-            <text class="transaction-amount {{item.type === 'EARNED' ? 'earned' : 'used'}}">
+        <view wx:for="{{transactions}}" wx:key="id" class="trans-card glass-panel gold-border">
+          <view class="trans-l">
+            <text class="trans-name">{{item.description}}</text>
+            <text class="trans-time">{{item.formattedDate}}</text>
+          </view>
+          <view class="trans-r">
+            <text class="trans-amt {{item.type === 'EARNED' ? 'earned-v' : 'spent-v'}}">
               {{item.type === 'EARNED' ? '+' : '-'}}{{item.amount}}
             </text>
-          </view>
-          <view class="transaction-meta">
-            <text class="transaction-date">{{item.formattedDate}}</text>
-            <text class="transaction-status">{{item.statusText}}</text>
-          </view>
-        </view>
-      </view>
-
-      <view wx:if="{{hasMore && !loading}}" class="load-more" bindtap="loadMore">
-        <text>加载更多</text>
-      </view>
-
-      <view wx:if="{{loading}}" class="loading">
-        <text>加载中...</text>
-      </view>
-    </scroll-view>
-  </view>
-
-  <!-- 积分规则弹窗 -->
-  <view class="modal {{showRulesModal ? 'show' : ''}}" catchtap="hideRules">
-    <view class="modal-content" catchtap="stopPropagation">
-      <view class="modal-header">
-        <text class="modal-title">积分规则</text>
-        <text class="modal-close" bindtap="hideRules">×</text>
-      </view>
-      <scroll-view class="modal-body" scroll-y>
-        <view class="rules-section">
-          <text class="section-title">获取积分</text>
-          <view class="rule-item">
-            <text class="rule-text">• 消费满1元获得1积分</text>
-          </view>
-          <view class="rule-item">
-            <text class="rule-text">• 预约并到店签到获得50积分</text>
-          </view>
-          <view class="rule-item">
-            <text class="rule-text">• 参与活动最高可获得500积分</text>
-          </view>
-          <view class="rule-item">
-            <text class="rule-text">• 邀请好友注册获得100积分</text>
+            <view class="trans-status-tag">{{item.statusText}}</view>
           </view>
         </view>
 
-        <view class="rules-section">
-          <text class="section-title">使用积分</text>
-          <view class="rule-item">
-            <text class="rule-text">• 100积分 = 1元现金抵扣</text>
-          </view>
-          <view class="rule-item">
-            <text class="rule-text">• 积分可兑换专属礼品</text>
-          </view>
-          <view class="rule-item">
-            <text class="rule-text">• 积分可参与抽奖活动</text>
-          </view>
-        </view>
-
-        <view class="rules-section">
-          <text class="section-title">注意事项</text>
-          <view class="rule-item">
-            <text class="rule-text">• 积分有效期为1年</text>
-          </view>
-          <view class="rule-item">
-            <text class="rule-text">• 退款订单将扣除对应积分</text>
-          </view>
-          <view class="rule-item">
-            <text class="rule-text">• 最终解释权归本店所有</text>
-          </view>
+        <view wx:if="{{loading}}" class="loading-more-lux">
+          <view class="loading-pulse-gold"></view>
         </view>
       </scroll-view>
     </view>
   </view>
 
-  <!-- 积分兑换弹窗 -->
-  <view class="modal {{showExchangeModal ? 'show' : ''}}" catchtap="hideExchange">
-    <view class="modal-content" catchtap="stopPropagation">
-      <view class="modal-header">
-        <text class="modal-title">积分兑换</text>
-        <text class="modal-close" bindtap="hideExchange">×</text>
+  <!-- 4. 尊享弹窗 - 规则 -->
+  <view class="lux-modal {{showRulesModal ? 'show' : ''}}" catchtap="hideRules">
+    <view class="modal-lux-content glass-panel gold-border shadow-lux" catchtap="stopPropagation">
+      <view class="modal-lux-header">
+        <text class="modal-lux-title">CLUB POINTS RULES</text>
+        <view class="modal-lux-close" bindtap="hideRules"></view>
       </view>
-      <scroll-view class="modal-body" scroll-y>
-        <view wx:for="{{exchangeItems}}" wx:key="id" class="exchange-item">
-          <view class="exchange-info">
-            <text class="exchange-title">{{item.name}}</text>
-            <text class="exchange-desc">{{item.description}}</text>
-            <text class="exchange-points">{{item.points}}积分</text>
+      <scroll-view class="modal-lux-body" scroll-y>
+        <view class="rules-lux-group">
+          <view class="rule-lux-header">获取途径 EARN POINTS</view>
+          <view class="rule-lux-li">· 尊客店内消费，每 1 CNY 均可累积 1 积分。</view>
+          <view class="rule-lux-li">· 成功邀约贵宾签到，获赠 50 尊享积分。</view>
+          <view class="rule-lux-li">· 参与俱乐部指定赛事，赢取高额积分奖励。</view>
+        </view>
+
+        <view class="rules-lux-group">
+          <view class="rule-lux-header">权益消耗 USE POINTS</view>
+          <view class="rule-lux-li">· 每 100 积分可抵扣 1 CNY 店内消费金额。</view>
+          <view class="rule-lux-li">· 积分可于礼遇中心兑换限量俱乐部定制好礼。</view>
+        </view>
+
+        <view class="rules-lux-group">
+          <view class="rule-lux-header">服务须知 TERMS</view>
+          <view class="rule-lux-li">· 积分有效期为 365 天，到期未消耗将自动失效。</view>
+          <view class="rule-lux-li">· 最终解释权归本私人俱乐部所有。</view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- 5. 尊享弹窗 - 兑换 -->
+  <view class="lux-modal {{showExchangeModal ? 'show' : ''}}" catchtap="hideExchange">
+    <view class="modal-lux-content glass-panel gold-border shadow-lux" catchtap="stopPropagation">
+      <view class="modal-lux-header">
+        <text class="modal-lux-title">PREMIUM EXCHANGE</text>
+        <view class="modal-lux-close" bindtap="hideExchange"></view>
+      </view>
+      <scroll-view class="modal-lux-body" scroll-y>
+        <view wx:for="{{exchangeItems}}" wx:key="id" class="exchange-lux-card">
+          <view class="ex-l">
+            <text class="ex-name">{{item.name}}</text>
+            <text class="ex-desc">{{item.description}}</text>
           </view>
-          <button
-            class="exchange-btn {{totalPoints >= item.points ? '' : 'disabled'}}"
-            bindtap="exchangeItem"
-            data-id="{{item.id}}"
-            disabled="{{totalPoints < item.points}}"
-          >
-            {{totalPoints >= item.points ? '兑换' : '积分不足'}}
-          </button>
+          <view class="ex-r">
+            <text class="ex-price text-gold-gradient">{{item.points}} PTS</text>
+            <button
+              class="btn-lux-exchange {{totalPoints >= item.points ? 'shimmer-effect' : 'btn-disabled'}}"
+              bindtap="exchangeItem"
+              data-id="{{item.id}}"
+              disabled="{{totalPoints < item.points}}"
+            >
+              {{totalPoints >= item.points ? '立即兑换' : '积分余额不足'}}
+            </button>
+          </view>
         </view>
       </scroll-view>
     </view>

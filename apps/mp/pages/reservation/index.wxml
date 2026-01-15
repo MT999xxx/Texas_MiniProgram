@@ -1,25 +1,26 @@
-<view class="container">
-  <!-- 顶部标题 -->
-  <view class="page-header">
-    <view class="header-title">桌台预约</view>
-    <view class="header-subtitle">提前预约，享受专属服务</view>
+<view class="container redesign-bg">
+  <!-- 1. 沉浸式头部导航 -->
+  <view class="header-section">
+    <view class="page-title text-gold-gradient shimmer-effect">尊享预约</view>
+    <view class="header-subtitle">ROYAL RESERVATION · 名仕之选</view>
   </view>
 
-  <!-- 预约表单 -->
-  <view class="form-card">
+  <!-- 2. 预约主表单 -->
+  <view class="form-card glass-panel gold-border shadow-lux">
     <!-- 联系人信息 -->
-    <view class="section-title">
-      <text class="title-icon">👤</text>
-      <text>联系人信息</text>
+    <view class="section-header">
+      <view class="sec-icon-line"></view>
+      <text class="sec-title">联系人信息</text>
     </view>
 
     <view class="form-item">
       <view class="form-label">
         <text class="required">*</text>
-        <text>联系人</text>
+        <text>贵宾姓名</text>
       </view>
       <input
-        class="form-input"
+        class="form-input-lux"
+        placeholder-class="lux-placeholder"
         placeholder="请输入姓名"
         bindinput="onInput"
         data-field="customerName"
@@ -30,10 +31,11 @@
     <view class="form-item">
       <view class="form-label">
         <text class="required">*</text>
-        <text>手机号</text>
+        <text>联系电话</text>
       </view>
       <input
-        class="form-input"
+        class="form-input-lux"
+        placeholder-class="lux-placeholder"
         type="number"
         maxlength="11"
         placeholder="请输入手机号"
@@ -43,58 +45,59 @@
       />
     </view>
 
-    <!-- 预约信息 -->
-    <view class="section-title">
-      <text class="title-icon">📅</text>
-      <text>预约信息</text>
+    <!-- 预约详情 -->
+    <view class="section-header">
+      <view class="sec-icon-line"></view>
+      <text class="sec-title">预约详情</text>
+    </view>
+
+    <view class="form-row-lux">
+      <view class="form-item flex-1">
+        <view class="form-label">就餐人数</view>
+        <picker class="form-picker" mode="selector" range="{{partySizes}}" bindchange="onPickPartySize">
+          <view class="picker-value-lux">{{selectedPartySize || '请选择'}}</view>
+        </picker>
+      </view>
+
+      <view class="form-item flex-1">
+        <view class="form-label">
+          <text class="required">*</text>
+          <text>选择桌台</text>
+        </view>
+        <picker class="form-picker" mode="selector" range="{{tableNames}}" bindchange="onPickTable">
+          <view class="picker-value-lux">{{selectedTableName || '请选择'}}</view>
+        </picker>
+      </view>
+    </view>
+
+    <view class="form-row-lux">
+      <view class="form-item flex-1">
+        <view class="form-label">
+          <text class="required">*</text>
+          <text>预约日期</text>
+        </view>
+        <picker class="form-picker" mode="date" start="{{today}}" bindchange="onPickDate" value="{{form.reservedDate}}">
+          <view class="picker-value-lux">{{form.reservedDate || '未选择'}}</view>
+        </picker>
+      </view>
+
+      <view class="form-item flex-1">
+        <view class="form-label">
+          <text class="required">*</text>
+          <text>预约时间</text>
+        </view>
+        <picker class="form-picker" mode="time" bindchange="onPickTime" value="{{form.reservedTime}}">
+          <view class="picker-value-lux">{{form.reservedTime || '未选择'}}</view>
+        </picker>
+      </view>
     </view>
 
     <view class="form-item">
-      <view class="form-label">
-        <text>就餐人数</text>
-      </view>
-      <picker class="form-picker" mode="selector" range="{{partySizes}}" bindchange="onPickPartySize">
-        <view class="picker-value">{{selectedPartySize || '请选择人数'}}</view>
-      </picker>
-    </view>
-
-    <view class="form-item">
-      <view class="form-label">
-        <text class="required">*</text>
-        <text>选择桌台</text>
-      </view>
-      <picker class="form-picker" mode="selector" range="{{tableNames}}" bindchange="onPickTable">
-        <view class="picker-value">{{selectedTableName || '请选择桌台'}}</view>
-      </picker>
-    </view>
-
-    <view class="form-item">
-      <view class="form-label">
-        <text class="required">*</text>
-        <text>预约日期</text>
-      </view>
-      <picker class="form-picker" mode="date" start="{{today}}" bindchange="onPickDate" value="{{form.reservedDate}}">
-        <view class="picker-value">{{form.reservedDate || '请选择日期'}}</view>
-      </picker>
-    </view>
-
-    <view class="form-item">
-      <view class="form-label">
-        <text class="required">*</text>
-        <text>预约时间</text>
-      </view>
-      <picker class="form-picker" mode="time" bindchange="onPickTime" value="{{form.reservedTime}}">
-        <view class="picker-value">{{form.reservedTime || '请选择时间'}}</view>
-      </picker>
-    </view>
-
-    <view class="form-item">
-      <view class="form-label">
-        <text>特殊要求</text>
-      </view>
+      <view class="form-label">尊享要求</view>
       <textarea
-        class="form-textarea"
-        placeholder="如需靠窗、安静等特殊要求请备注"
+        class="form-textarea-lux"
+        placeholder-class="lux-placeholder"
+        placeholder="如需特殊布置或忌口，请在此记录"
         bindinput="onInput"
         data-field="note"
         value="{{form.note}}"
@@ -102,20 +105,20 @@
       />
     </view>
 
-    <!-- 提示信息 -->
-    <view class="tips-box">
-      <text class="tips-icon">💡</text>
+    <!-- 💡提示框 -->
+    <view class="tips-box glass-panel">
+      <view class="tips-dot"></view>
       <view class="tips-content">
-        <text class="tips-title">温馨提示</text>
-        <text class="tips-text">• 请提前30分钟到达，逾期15分钟系统将自动取消预约</text>
-        <text class="tips-text">• 如需修改或取消预约，请在"我的预约"中操作</text>
+        <text class="tips-title text-gold">预约需知</text>
+        <text class="tips-text">• 请准时抵达，逾期15分钟系统将为您释放桌位</text>
+        <text class="tips-text">• 临时更改请至少提前1小时联系管家</text>
       </view>
     </view>
 
-    <!-- 操作按钮 -->
+    <!-- 操作区域 -->
     <view class="button-group">
-      <button class="btn btn-secondary" bindtap="viewMyReservations">我的预约</button>
-      <button class="btn btn-primary" bindtap="submit" loading="{{loading}}">确认预约</button>
+      <view class="btn-history" bindtap="viewMyReservations">预约记录 ></view>
+      <button class="btn-submit-lux shimmer-effect" bindtap="submit" loading="{{loading}}">确认预约</button>
     </view>
   </view>
 </view>

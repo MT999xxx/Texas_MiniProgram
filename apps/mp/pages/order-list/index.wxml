@@ -1,5 +1,5 @@
-<view class="container">
-  <!-- 标签页切换 -->
+<view class="container redesign-bg">
+  <!-- 1. 顶部标签页 (极简设计) -->
   <view class="tabs">
     <view
       wx:for="{{tabs}}"
@@ -13,105 +13,80 @@
     </view>
   </view>
 
-  <!-- 订单列表 -->
+  <!-- 2. 订单列表区域 -->
   <view class="list-container">
     <view wx:if="{{loading}}" class="loading-box">
-      <text class="loading-text">加载中...</text>
+      <view class="loading-shimmer-box"></view>
+      <text class="loading-text">正在同步订单数据...</text>
     </view>
 
     <view wx:elif="{{orders.length === 0}}" class="empty-box">
-      <text class="empty-icon">📋</text>
-      <text class="empty-text">暂无订单记录</text>
-      <button class="btn-goto-menu" bindtap="gotoMenu">去点餐</button>
+      <view class="css-icon-order-empty"></view>
+      <text class="empty-text">尚无点餐记录</text>
+      <button class="btn-goto-menu shimmer-effect" bindtap="gotoMenu">浏览珍馐</button>
     </view>
 
     <view wx:else class="order-list">
       <view
         wx:for="{{orders}}"
         wx:key="id"
-        class="order-item"
+        class="order-item glass-panel gold-border shadow-lux"
         bindtap="viewDetail"
         data-id="{{item.id}}"
       >
         <!-- 订单头部 -->
         <view class="order-header">
-          <view class="order-info">
-            <text class="order-number">订单号: {{item.orderNumber}}</text>
-            <text class="order-time">{{item.createdAtText}}</text>
+          <view class="order-id-box">
+            <text class="order-label">NO.</text>
+            <text class="order-sn">{{item.orderNumber}}</text>
           </view>
           <view class="status-badge status-{{item.status}}">
             {{item.statusText}}
           </view>
         </view>
 
-        <!-- 餐厅信息 -->
-        <view wx:if="{{item.table}}" class="location-info">
-          <text class="location-icon">📍</text>
-          <text class="location-text">{{item.table.name}}</text>
-          <text wx:if="{{item.reservation}}" class="reservation-tag">预约</text>
+        <!-- 副标题 & 时间 -->
+        <view class="order-meta">
+          <text class="order-time">{{item.createdAtText}}</text>
+          <view wx:if="{{item.table}}" class="location-badge">
+            <view class="loc-dot"></view>
+            <text class="loc-name">{{item.table.name}}</text>
+          </view>
         </view>
 
-        <!-- 商品列表 -->
-        <view class="items-container">
+        <!-- 商品简述 -->
+        <view class="items-preview">
           <view
             wx:for="{{item.items}}"
             wx:for-item="product"
             wx:key="id"
-            class="item-row"
+            wx:if="{{index < 3}}"
+            class="preview-row"
           >
-            <view class="item-info">
-              <text class="item-name">{{product.menuItem.name}}</text>
-              <text class="item-desc">{{product.menuItem.description}}</text>
-            </view>
-            <view class="item-quantity">×{{product.quantity}}</view>
-            <view class="item-price">¥{{product.amount}}</view>
+            <text class="p-name">{{product.menuItem.name}}</text>
+            <text class="p-spec" wx:if="{{product.spec}}"> / {{product.spec}}</text>
+            <text class="p-count">×{{product.quantity}}</text>
+          </view>
+          <view wx:if="{{item.items.length > 3}}" class="more-items">...</view>
+        </view>
+
+        <!-- 汇总区域 -->
+        <view class="order-summary">
+          <text class="sum-count">共 {{item.totalQuantity}} 件商品</text>
+          <view class="sum-price">
+            <text class="currency">¥</text>
+            <text class="amount text-gold-gradient">{{item.totalAmount}}</text>
           </view>
         </view>
 
-        <!-- 订单总计 -->
-        <view class="order-total">
-          <view class="total-info">
-            <text class="total-label">共{{item.totalQuantity}}件商品</text>
-            <text class="total-amount">合计: ¥{{item.totalAmount}}</text>
+        <!-- 操作区 (仅在需要时显示) -->
+        <view class="action-footer" wx:if="{{item.status === 'PENDING' || item.status === 'COMPLETED'}}">
+          <view class="footer-divider"></view>
+          <view class="btn-group-lux">
+            <view wx:if="{{item.status === 'PENDING'}}" class="btn-cancel-lux" catchtap="cancelOrder" data-id="{{item.id}}">取消</view>
+            <view wx:if="{{item.status === 'PENDING'}}" class="btn-pay-lux shimmer-effect" catchtap="payOrder" data-id="{{item.id}}">立即结算</view>
+            <view wx:if="{{item.status === 'COMPLETED'}}" class="btn-reorder-lux" catchtap="reorder" data-id="{{item.id}}">再来一单</view>
           </view>
-        </view>
-
-        <!-- 操作按钮 -->
-        <view class="action-buttons" wx:if="{{item.status === 'PENDING'}}">
-          <button
-            class="btn-cancel"
-            catchtap="cancelOrder"
-            data-id="{{item.id}}"
-          >
-            取消订单
-          </button>
-          <button
-            class="btn-pay"
-            catchtap="payOrder"
-            data-id="{{item.id}}"
-          >
-            立即支付
-          </button>
-        </view>
-
-        <view class="action-buttons" wx:elif="{{item.status === 'PAID' || item.status === 'IN_PROGRESS'}}">
-          <button
-            class="btn-contact"
-            catchtap="contactService"
-            data-id="{{item.id}}"
-          >
-            联系客服
-          </button>
-        </view>
-
-        <view class="action-buttons" wx:elif="{{item.status === 'COMPLETED'}}">
-          <button
-            class="btn-reorder"
-            catchtap="reorder"
-            data-id="{{item.id}}"
-          >
-            再来一单
-          </button>
         </view>
       </view>
     </view>

@@ -1,156 +1,128 @@
-<view class="container">
+<view class="container redesign-bg">
   <view wx:if="{{loading}}" class="loading-container">
-    <text class="loading-text">加载中...</text>
+    <view class="loading-lux"></view>
+    <text class="loading-text">正在呈报订单详情...</text>
   </view>
 
   <view wx:else class="detail-container">
-    <!-- 订单状态 -->
-    <view class="status-section">
-      <view class="status-icon status-icon-{{order.status}}">
-        <text wx:if="{{order.status === 'PENDING'}}">💰</text>
-        <text wx:elif="{{order.status === 'PAID'}}">✅</text>
-        <text wx:elif="{{order.status === 'IN_PROGRESS'}}">⏳</text>
-        <text wx:elif="{{order.status === 'COMPLETED'}}">🎉</text>
-        <text wx:elif="{{order.status === 'CANCELLED'}}">❌</text>
+    <!-- 1. 沉浸式订单状态 -->
+    <view class="status-hero glass-panel shadow-lux">
+      <view class="status-orb status-orb-{{order.status}} shimmer-effect"></view>
+      <view class="status-main">
+        <text class="status-title text-gold-gradient">{{order.statusText}}</text>
+        <text class="status-desc">ORDER AT {{order.createdAtText}}</text>
       </view>
-      <view class="status-info">
-        <text class="status-text">{{order.statusText}}</text>
-        <text class="status-time">{{order.createdAtText}}</text>
-      </view>
+      <view class="order-sn-tag">#{{order.orderNumber}}</view>
     </view>
 
-    <!-- 订单信息 -->
-    <view class="info-section">
-      <view class="section-title">
-        <text class="title-icon">📋</text>
-        <text>订单信息</text>
+    <!-- 2. 商品清单 -->
+    <view class="items-section glass-panel gold-border">
+      <view class="sec-header">
+        <view class="sec-indicator"></view>
+        <text class="sec-title">商品清单</text>
       </view>
 
-      <view class="info-row">
-        <text class="info-label">订单号</text>
-        <text class="info-value">{{order.orderNumber}}</text>
-      </view>
-
-      <view class="info-row">
-        <text class="info-label">下单时间</text>
-        <text class="info-value">{{order.createdAtText}}</text>
-      </view>
-
-      <view wx:if="{{order.table}}" class="info-row">
-        <text class="info-label">用餐位置</text>
-        <view class="table-info">
-          <text class="info-value">{{order.table.name}}</text>
-          <text wx:if="{{order.reservation}}" class="reservation-tag">预约</text>
-        </view>
-      </view>
-
-      <view wx:if="{{order.member}}" class="info-row">
-        <text class="info-label">会员信息</text>
-        <text class="info-value">{{order.member.nickname || order.member.name}}</text>
-      </view>
-    </view>
-
-    <!-- 商品清单 -->
-    <view class="items-section">
-      <view class="section-title">
-        <text class="title-icon">🍽</text>
-        <text>商品清单</text>
-      </view>
-
-      <view class="items-container">
+      <view class="item-list">
         <view
           wx:for="{{order.items}}"
           wx:key="id"
-          class="item-card"
+          class="item-lux"
         >
-          <view class="item-content">
-            <view class="item-header">
-              <text class="item-name">{{item.menuItem.name}}</text>
-              <view class="item-price-info">
-                <text class="item-quantity">×{{item.quantity}}</text>
-                <text class="item-amount">¥{{item.amount}}</text>
-              </view>
+          <view class="item-main">
+            <view class="item-info">
+              <text class="name">{{item.menuItem.name}}</text>
+              <text class="spec" wx:if="{{item.spec}}">{{item.spec}}</text>
             </view>
-
-            <view wx:if="{{item.menuItem.description}}" class="item-description">
-              {{item.menuItem.description}}
-            </view>
-
-            <view wx:if="{{item.menuItem.category}}" class="item-category">
-              分类: {{item.menuItem.category.name}}
+            <view class="item-price-box">
+              <text class="qty">×{{item.quantity}}</text>
+              <text class="price text-gold">¥{{item.amount}}</text>
             </view>
           </view>
         </view>
       </view>
-    </view>
 
-    <!-- 费用明细 -->
-    <view class="cost-section">
-      <view class="section-title">
-        <text class="title-icon">💰</text>
-        <text>费用明细</text>
-      </view>
-
-      <view class="cost-container">
+      <view class="cost-summary">
         <view class="cost-row">
-          <text class="cost-label">商品小计</text>
-          <text class="cost-value">¥{{order.totalAmount}}</text>
+          <text class="l">商品小计</text>
+          <text class="v">¥{{order.totalAmount}}</text>
         </view>
-
-        <!-- 折扣信息(如果有会员折扣) -->
-        <view wx:if="{{order.discount > 0}}" class="cost-row">
-          <text class="cost-label">会员折扣</text>
-          <text class="cost-value cost-discount">-¥{{order.discount}}</text>
+        <view wx:if="{{order.discount > 0}}" class="cost-row discount">
+          <text class="l">尊享折扣</text>
+          <text class="v">-¥{{order.discount}}</text>
         </view>
-
-        <view class="cost-divider"></view>
-
-        <view class="cost-row cost-total">
-          <text class="cost-label">实付金额</text>
-          <text class="cost-value">¥{{order.finalAmount || order.totalAmount}}</text>
+        <view class="sum-divider"></view>
+        <view class="cost-row grand-total">
+          <text class="l">实付金额</text>
+          <text class="v text-gold-gradient">¥{{order.finalAmount || order.totalAmount}}</text>
         </view>
       </view>
     </view>
 
-    <!-- 订单进度 -->
-    <view wx:if="{{order.status !== 'CANCELLED'}}" class="progress-section">
-      <view class="section-title">
-        <text class="title-icon">📈</text>
-        <text>订单进度</text>
+    <!-- 3. 用餐详情 -->
+    <view class="info-section glass-panel gold-border">
+      <view class="sec-header">
+        <view class="sec-indicator"></view>
+        <text class="sec-title">用餐详情</text>
       </view>
 
-      <view class="progress-container">
+      <view class="info-grid">
+        <view class="grid-item">
+          <text class="l">用餐位置</text>
+          <text class="v">{{order.table ? order.table.name : '名仕区域'}}</text>
+        </view>
+        <view class="grid-item">
+          <text class="l">下单时间</text>
+          <text class="v">{{order.createdAtText}}</text>
+        </view>
+        <view wx:if="{{order.member}}" class="grid-item">
+          <text class="l">归属会员</text>
+          <text class="v">{{order.member.nickname || order.member.name}}</text>
+        </view>
+        <view class="grid-item">
+          <text class="l">订单编号</text>
+          <text class="v copy-v">{{order.orderNumber}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 4. 订单进度 -->
+    <view wx:if="{{order.status !== 'CANCELLED'}}" class="progress-section glass-panel">
+      <view class="sec-header">
+        <view class="sec-indicator"></view>
+        <text class="sec-title">履约流程</text>
+      </view>
+
+      <view class="lux-steps">
         <view
           wx:for="{{progressSteps}}"
           wx:key="status"
-          class="progress-step {{item.completed ? 'completed' : ''}} {{item.current ? 'current' : ''}}"
+          class="step-lux {{item.completed ? 'completed' : ''}} {{item.current ? 'current' : ''}}"
         >
-          <view class="step-indicator">
-            <view wx:if="{{item.completed}}" class="step-icon step-completed">✓</view>
-            <view wx:elif="{{item.current}}" class="step-icon step-current">●</view>
-            <view wx:else class="step-icon step-pending">○</view>
+          <view class="step-point">
+            <view class="dot"></view>
           </view>
-          <view class="step-content">
-            <text class="step-title">{{item.title}}</text>
-            <text wx:if="{{item.time}}" class="step-time">{{item.time}}</text>
+          <view class="step-body">
+            <text class="s-title">{{item.title}}</text>
+            <text wx:if="{{item.time}}" class="s-time">{{item.time}}</text>
           </view>
+          <view wx:if="{{index < progressSteps.length - 1}}" class="step-line"></view>
         </view>
       </view>
     </view>
 
-    <!-- 操作按钮 -->
-    <view class="action-section">
-      <view wx:if="{{order.status === 'PENDING'}}" class="button-group">
-        <button class="btn btn-cancel" bindtap="cancelOrder">取消订单</button>
-        <button class="btn btn-primary" bindtap="payOrder">立即支付</button>
+    <!-- 5. 底部固定操作位 -->
+    <view class="bottom-actions glass-panel">
+      <view wx:if="{{order.status === 'PENDING'}}" class="full-btn-group">
+        <view class="btn-lux btn-cancel-detail" bindtap="cancelOrder">取消订单</view>
+        <button class="btn-lux btn-pay-detail shimmer-effect" bindtap="payOrder">立即结算</button>
       </view>
 
-      <view wx:elif="{{order.status === 'PAID' || order.status === 'IN_PROGRESS'}}" class="button-group">
-        <button class="btn btn-secondary" bindtap="contactService">联系客服</button>
+      <view wx:elif="{{order.status === 'PAID' || order.status === 'IN_PROGRESS'}}" class="full-btn-group">
+        <view class="btn-lux btn-contact-detail" bindtap="contactService">联络服务管家</view>
       </view>
 
-      <view wx:elif="{{order.status === 'COMPLETED'}}" class="button-group">
-        <button class="btn btn-secondary" bindtap="reorder">再来一单</button>
+      <view wx:elif="{{order.status === 'COMPLETED'}}" class="full-btn-group">
+        <view class="btn-lux btn-reorder-detail" bindtap="reorder">重拾美味</view>
       </view>
     </view>
   </view>

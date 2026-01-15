@@ -1,8 +1,5 @@
 <view class="login-container">
-  <!-- Immersive Background -->
-  <view class="bg-overlay">
-    <view class="bg-pattern"></view>
-  </view>
+  <view class="hero-bg-lux-login"></view>
 
   <!-- Main Content -->
   <view class="main-content">

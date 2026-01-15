@@ -1,107 +1,101 @@
-<view class="recharge-container">
-  <!-- 顶部用户信息 -->
-  <view class="user-info-section">
-    <view class="user-avatar">
-      <image
-        src="{{userInfo.avatar || '/assets/default-avatar.png'}}"
-        mode="aspectFill"
-      />
-    </view>
-    <view class="user-details">
-      <text class="user-name">{{userInfo.nickname || '未登录'}}</text>
-      <view class="current-points">
-        <text class="points-label">当前积分：</text>
-        <text class="points-value">{{userInfo.points || 0}}</text>
+<view class="container">
+  <view class="hero-bg-lux-recharge"></view>
+  <!-- 1. 顶部账户概览 -->
+  <view class="account-hero glass-panel shadow-lux">
+    <view class="user-main">
+      <view class="avatar-wrapper gold-border">
+        <image class="avatar" src="{{userInfo.avatar || '/assets/default-avatar.png'}}" mode="aspectFill" />
+      </view>
+      <view class="name-box">
+        <text class="nickname">{{userInfo.nickname || '尊崇会员'}}</text>
+        <text class="membership-tag">PRIVATE CLUB MEMBER</text>
       </view>
     </view>
-    <view class="history-btn" bindtap="viewRechargeHistory">
-      <text>记录</text>
+    
+    <view class="balance-display">
+      <view class="balance-item">
+        <text class="label">当前账户积分</text>
+        <text class="value text-gold-gradient">{{userInfo.points || 0}}</text>
+      </view>
+      <view class="history-trigger" bindtap="viewRechargeHistory">
+        <view class="css-icon-history"></view>
+        <text>明细</text>
+      </view>
     </view>
   </view>
 
-  <!-- 充值套餐列表 -->
-  <view class="packages-section">
-    <view class="section-title">
-      <text>选择充值套餐</text>
+  <!-- 2. 充值套餐精选 -->
+  <view class="luxury-packages">
+    <view class="sec-title-box">
+      <view class="sec-indicator"></view>
+      <text class="sec-title">账户充值 · 权益套餐</text>
     </view>
 
-    <view wx:if="{{loading}}" class="loading">
-      <text>加载中...</text>
+    <view wx:if="{{loading}}" class="loading-lux-box">
+      <view class="loading-shimmer-box"></view>
     </view>
 
-    <scroll-view wx:else scroll-y class="packages-scroll">
-      <view
-        wx:for="{{packages}}"
+    <view wx:else class="package-grid">
+      <view 
+        wx:for="{{packages}}" 
         wx:key="id"
-        class="package-card {{item.isRecommended ? 'recommended' : ''}}"
+        class="package-lux {{item.isRecommended ? 'package-featured shimmer-effect' : 'glass-panel'}} gold-border"
         bindtap="selectPackage"
         data-id="{{item.id}}"
       >
-        <!-- 推荐标签 -->
-        <view wx:if="{{item.isRecommended}}" class="recommend-badge">
-          <text>推荐</text>
-        </view>
-
-        <!-- 套餐头部 -->
-        <view class="package-header">
-          <view class="package-info">
-            <text class="package-name">{{item.name}}</text>
-            <text class="package-desc">{{item.description}}</text>
-          </view>
-          <view class="package-price">
-            <text class="price-symbol">¥</text>
-            <text class="price-value">{{item.price}}</text>
+        <view wx:if="{{item.isRecommended}}" class="featured-ribbon">POPULAR</view>
+        
+        <view class="pack-header">
+          <text class="pack-name text-gold-gradient">{{item.name}}</text>
+          <view class="pack-price">
+            <text class="cur">¥</text>
+            <text class="amt">{{item.price}}</text>
           </view>
         </view>
 
-        <!-- 积分详情 -->
-        <view class="points-breakdown">
-          <view class="points-row">
-            <text class="points-type">基础积分</text>
-            <text class="points-amount">{{item.points}}</text>
+        <view class="pack-body">
+          <view class="benefit-row">
+            <text class="b-l">基础积分</text>
+            <text class="b-v">{{item.points}}</text>
           </view>
-          <view wx:if="{{item.bonusPoints > 0}}" class="points-row bonus">
-            <text class="points-type">奖励积分</text>
-            <text class="points-amount">+{{item.bonusPoints}}</text>
-          </view>
-          <view class="points-row total">
-            <text class="points-type">总计积分</text>
-            <text class="points-amount total-value">{{item.totalPoints}}</text>
+          <view wx:if="{{item.bonusPoints > 0}}" class="benefit-row gold-benefit">
+            <text class="b-l">限时赠送</text>
+            <text class="b-v">+{{item.bonusPoints}}</text>
           </view>
         </view>
 
-        <!-- 优惠信息 -->
-        <view wx:if="{{item.bonusPoints > 0}}" class="discount-info">
-          <text class="discount-text">额外赠送{{item.discountPercent}}%积分</text>
+        <view class="pack-footer">
+          <text class="total-label">总计到账</text>
+          <text class="total-points">{{item.totalPoints}} 积分</text>
         </view>
       </view>
-    </scroll-view>
-  </view>
-
-  <!-- 支付说明 -->
-  <view class="payment-notice">
-    <view class="notice-title">
-      <text>💡 充值说明</text>
-    </view>
-    <view class="notice-content">
-      <text>• 支持微信支付，安全便捷</text>
-      <text>• 充值后积分立即到账</text>
-      <text>• 积分永不过期，可用于游戏和消费</text>
-      <text>• 充值越多，奖励积分越多</text>
     </view>
   </view>
 
-  <!-- 底部安全提示 -->
-  <view class="security-tip">
-    <text class="security-icon">🔒</text>
-    <text class="security-text">支付安全由微信保障</text>
+  <!-- 3. 管家提示 -->
+  <view class="service-notes glass-panel">
+    <view class="notes-header">
+      <view class="notes-dot"></view>
+      <text>温馨提示 Service Notes</text>
+    </view>
+    <view class="notes-list">
+      <view class="note-item">· 充值金额将即时转化为等值积分，由微信支付提供安全保障。</view>
+      <view class="note-item">· 获赠积分属于会员专属礼遇，可用于俱乐部各项尊享体验。</view>
+      <view class="note-item">· 如有任何疑问，请点击右下角按钮联系您的私人服务管家。</view>
+    </view>
+  </view>
+
+  <!-- 4. 底部安全背书 -->
+  <view class="footer-security">
+    <view class="css-icon-shield-gold"></view>
+    <text>Encrypted & Secured by WeChat Pay</text>
   </view>
 </view>
 
-<!-- 支付中遮罩 -->
-<view wx:if="{{paymentLoading}}" class="payment-loading">
-  <view class="loading-content">
-    <view class="loading-spinner"></view>
-    <text class="loading-text">正在创建支付订单...</text>
+<!-- 支付处理层 -->
+<view wx:if="{{paymentLoading}}" class="pay-mask">
+  <view class="pay-modal glass-panel shadow-lux shimmer-effect">
+    <view class="orb-loading"></view>
+    <text class="pay-text">正在通过加密通道创建订单...</text>
   </view>
 </view>

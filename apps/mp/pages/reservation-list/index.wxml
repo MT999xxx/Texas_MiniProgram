@@ -1,5 +1,5 @@
-<view class="container">
-  <!-- 标签页切换 -->
+<view class="container redesign-bg">
+  <!-- 1. 顶部标签页 (极简设计) -->
   <view class="tabs">
     <view
       wx:for="{{tabs}}"
@@ -13,80 +13,78 @@
     </view>
   </view>
 
-  <!-- 预约列表 -->
+  <!-- 2. 预约列表区域 -->
   <view class="list-container">
     <view wx:if="{{loading}}" class="loading-box">
-      <text class="loading-text">加载中...</text>
+      <view class="loading-shimmer"></view>
+      <text class="loading-text">同步名仕录...</text>
     </view>
 
     <view wx:elif="{{reservations.length === 0}}" class="empty-box">
-      <text class="empty-icon">📝</text>
-      <text class="empty-text">暂无预约记录</text>
-      <button class="btn-goto-reserve" bindtap="gotoReserve">立即预约</button>
+      <view class="css-icon-calendar"></view>
+      <text class="empty-text">尚无名仕预约</text>
+      <button class="btn-goto-reserve shimmer-effect" bindtap="gotoReserve">即刻预定</button>
     </view>
 
     <view wx:else class="reservation-list">
       <view
         wx:for="{{reservations}}"
         wx:key="id"
-        class="reservation-item"
+        class="reservation-item glass-panel gold-border shadow-lux"
         bindtap="viewDetail"
         data-id="{{item.id}}"
       >
-        <!-- 状态标签 -->
+        <!-- 状态标签 (极简发光) -->
         <view class="status-badge status-{{item.status}}">
           {{item.statusText}}
         </view>
 
-        <!-- 预约信息 -->
+        <!-- 预约内容 -->
         <view class="reservation-content">
           <view class="info-row">
-            <text class="icon">🗓</text>
-            <text class="label">预约时间：</text>
-            <text class="value">{{item.reservedAtText}}</text>
+            <view class="info-dot"></view>
+            <text class="label">预约时间</text>
+            <text class="value text-gold-gradient">{{item.reservedAtText}}</text>
           </view>
 
           <view class="info-row">
-            <text class="icon">📍</text>
-            <text class="label">桌台：</text>
+            <view class="info-dot"></view>
+            <text class="label">尊享桌台</text>
             <text class="value">{{item.table.name}}</text>
-            <text class="capacity">({{item.table.capacity}}人座)</text>
+            <text class="capacity-lux">{{item.table.capacity}}人座</text>
           </view>
 
           <view class="info-row">
-            <text class="icon">👥</text>
-            <text class="label">就餐人数：</text>
-            <text class="value">{{item.partySize}}人</text>
+            <view class="info-dot"></view>
+            <text class="label">就餐人数</text>
+            <text class="value">{{item.partySize}} 人</text>
           </view>
 
           <view class="info-row">
-            <text class="icon">👤</text>
-            <text class="label">联系人：</text>
+            <view class="info-dot"></view>
+            <text class="label">预留贵宾</text>
             <text class="value">{{item.customerName}}</text>
-            <text class="phone">{{item.phone}}</text>
+            <text class="phone-lux">{{item.phone}}</text>
           </view>
 
-          <view wx:if="{{item.note}}" class="info-row">
-            <text class="icon">💬</text>
-            <text class="label">备注：</text>
+          <view wx:if="{{item.note}}" class="info-row note-box">
+            <text class="label">名仕备注:</text>
             <text class="value note-text">{{item.note}}</text>
           </view>
         </view>
 
-        <!-- 操作按钮 -->
-        <view class="action-buttons" wx:if="{{item.status === 'PENDING' || item.status === 'CONFIRMED'}}">
-          <button
-            class="btn-cancel"
-            catchtap="cancelReservation"
-            data-id="{{item.id}}"
-          >
-            取消预约
-          </button>
-        </view>
-
-        <!-- 预约时间 -->
-        <view class="created-time">
-          <text class="time-label">预约于 {{item.createdAtText}}</text>
+        <!-- 底部操作区 -->
+        <view class="item-footer">
+          <text class="created-time">预约于 {{item.createdAtText}}</text>
+          <view class="action-buttons" wx:if="{{item.status === 'PENDING' || item.status === 'CONFIRMED' || item.status === 'IN_USE'}}">
+            <view
+              class="btn-cancel-lux"
+              catchtap="cancelReservation"
+              data-id="{{item.id}}"
+            >
+              取消预约
+            </view>
+          </view>
         </view>
       </view>
     </view>

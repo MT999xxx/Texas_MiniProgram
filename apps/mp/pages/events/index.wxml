@@ -1,6 +1,6 @@
-<view class="events-container">
-  <!-- 顶部标签 -->
-  <view class="events-tabs">
+<view class="container redesign-bg">
+  <!-- 1. 活动金影标签 -->
+  <view class="tabs">
     <view
       wx:for="{{tabs}}"
       wx:key="value"
@@ -9,80 +9,79 @@
       data-tab="{{item.value}}"
     >
       <text class="tab-text">{{item.label}}</text>
+      <view wx:if="{{currentTab === item.value}}" class="tab-indicator"></view>
     </view>
   </view>
 
-  <!-- 活动列表 -->
-  <view class="events-list">
+  <!-- 2. 活动动态流 -->
+  <view class="events-lux-list">
     <scroll-view scroll-y refresher-enabled refresher-triggered="{{refreshing}}" bindrefresherrefresh="onRefresh">
-      <view wx:for="{{events}}" wx:key="id" class="event-card" bindtap="viewEventDetail" data-id="{{item.id}}">
-        <!-- 活动封面 -->
-        <view class="event-cover">
-          <image
-            class="cover-image"
-            src="{{item.coverImage || '/assets/event-default.jpg'}}"
-            mode="aspectFill"
-          />
-          <view class="status-badge status-{{item.status}}">
-            <text>{{item.statusText}}</text>
+      <view wx:for="{{events}}" wx:key="id" class="event-lux gold-border" bindtap="viewEventDetail" data-id="{{item.id}}">
+        <!-- 沉浸式封面 -->
+        <view class="event-hero">
+          <image class="hero-img" src="{{item.coverImage || '/assets/event-default.jpg'}}" mode="aspectFill" />
+          <view class="hero-overlay"></view>
+          
+          <view class="status-lux-badge status-{{item.status}}">
+            {{item.statusText}}
           </view>
-          <view wx:if="{{item.type}}" class="type-badge">
-            <text>{{item.type === 'TOURNAMENT' ? '比赛' : ''}}</text>
-            <text>{{item.type === 'PROMOTION' ? '促销' : ''}}</text>
-            <text>{{item.type === 'SPECIAL' ? '特殊' : ''}}</text>
-            <text>{{item.type === 'HOLIDAY' ? '节日' : ''}}</text>
+          
+          <view class="type-lux-chip" wx:if="{{item.type}}">
+            {{item.type === 'TOURNAMENT' ? 'PRO LEAGUE' : ''}}
+            {{item.type === 'PROMOTION' ? 'PRIVILEGE' : ''}}
+            {{item.type === 'SPECIAL' ? 'EXCLUSIVE' : ''}}
+            {{item.type === 'HOLIDAY' ? 'FESTIVAL' : ''}}
           </view>
         </view>
 
-        <!-- 活动信息 -->
-        <view class="event-content">
-          <view class="event-header">
-            <text class="event-name">{{item.name}}</text>
-            <view class="event-time">
-              <text class="time-text">{{item.timeText}}</text>
+        <!-- 活动核心信息 -->
+        <view class="event-body glass-panel">
+          <view class="info-primary">
+            <text class="e-name text-gold-gradient">{{item.name}}</text>
+            <view class="e-time-box">
+              <view class="css-icon-clock-gold"></view>
+              <text>{{item.timeText}}</text>
             </view>
           </view>
 
-          <view class="event-description">
-            <text>{{item.description}}</text>
-          </view>
+          <view class="e-desc">{{item.description}}</view>
 
-          <view class="event-details">
-            <view class="detail-row">
-              <text class="detail-icon">📍</text>
-              <text class="detail-text">{{item.location || '德州主题酒吧'}}</text>
+          <view class="metadata-grid">
+            <view class="meta-item">
+              <view class="css-icon-pin-gold"></view>
+              <text>{{item.location || 'VIP CLUB PRIVATE HALL'}}</text>
             </view>
 
-              <view class="detail-row" wx:if="{{item.maxParticipants > 0}}">
-              <text class="detail-icon">👥</text>
-              <text class="detail-text">{{item.currentParticipants}}/{{item.maxParticipants}}人</text>
-              <view class="participants-progress">
-                <view class="progress-bar">
-                  <view class="progress-fill" style="width: {{(item.currentParticipants / item.maxParticipants * 100) + '%'}}"></view>
+            <view class="meta-item" wx:if="{{item.maxParticipants > 0}}">
+              <view class="css-icon-users-gold"></view>
+              <text>{{item.currentParticipants}} / {{item.maxParticipants}} ENROLLED</text>
+              <view class="lux-progress-box">
+                <view class="lux-progress-track">
+                  <view class="lux-progress-fill shimmer-effect" style="width: {{(item.currentParticipants / item.maxParticipants * 100) + '%'}}"></view>
                 </view>
               </view>
             </view>
 
-            <view class="detail-row" wx:if="{{item.entryFee > 0}}">
-              <text class="detail-icon">💰</text>
-              <text class="detail-text">报名费：{{item.entryFee}}积分</text>
-            </view>
-
-            <view class="detail-row" wx:if="{{item.rewardPoints > 0}}">
-              <text class="detail-icon">🏆</text>
-              <text class="detail-text">奖励：{{item.rewardPoints}}积分</text>
-            </view>
-
-            <view class="detail-row" wx:if="{{item.minMemberLevel > 1}}">
-              <text class="detail-icon">⭐</text>
-              <text class="detail-text">需要V{{item.minMemberLevel}}及以上会员</text>
+            <view class="meta-item-row" wx:if="{{item.entryFee > 0 || item.rewardPoints > 0}}">
+              <view class="meta-sub" wx:if="{{item.entryFee > 0}}">
+                <view class="css-icon-coin-gold"></view>
+                <text>ENTRY: {{item.entryFee}} PTS</text>
+              </view>
+              <view class="meta-sub" wx:if="{{item.rewardPoints > 0}}">
+                <view class="css-icon-trophy-gold"></view>
+                <text>PRIZE: {{item.rewardPoints}} PTS</text>
+              </view>
             </view>
           </view>
 
-          <!-- 报名状态和按钮 -->
-          <view class="event-actions">
+          <view class="e-actions">
+            <view wx:if="{{item.minMemberLevel > 1}}" class="level-restriction">
+              <view class="css-icon-lock-gold"></view>
+              <text>V{{item.minMemberLevel}} LIMITED</text>
+            </view>
+            
             <button
-              class="btn-register btn-{{item.registrationStatus.type}}"
+              class="btn-lux-action status-{{item.registrationStatus.type}} {{item.registrationStatus.type === 'register-btn' ? 'shimmer-effect' : ''}}"
               wx:if="{{item.requiresRegistration}}"
               bindtap="registerEvent"
               data-id="{{item.id}}"
@@ -91,23 +90,20 @@
             >
               {{item.registrationStatus.text}}
             </button>
-
-            <view wx:else class="no-registration">
-              <text>无需报名</text>
-            </view>
+            <view wx:else class="walk-in-text">WALK-IN WELCOME</view>
           </view>
         </view>
       </view>
 
-      <!-- 空状态 -->
-      <view wx:if="{{events.length === 0 && !loading}}" class="empty-state">
-        <text class="empty-icon">🎪</text>
-        <text class="empty-text">暂无{{currentTabLabel}}活动</text>
+      <!-- 虚无状态 -->
+      <view wx:if="{{events.length === 0 && !loading}}" class="empty-lux-box">
+        <view class="css-icon-stage-empty"></view>
+        <text class="empty-text">当前尚无公告活动</text>
       </view>
 
-      <!-- 加载状态 -->
-      <view wx:if="{{loading}}" class="loading">
-        <text>加载中...</text>
+      <!-- 步进加载 -->
+      <view wx:if="{{loading}}" class="loading-lux-box">
+        <view class="loading-pulse-gold"></view>
       </view>
     </scroll-view>
   </view>

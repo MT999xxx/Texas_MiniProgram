@@ -1,4 +1,5 @@
 <view class="container redesign-bg">
+  <view class="hero-bg-lux-member"></view>
   
   <!-- 1. 用户信息区域 (沉浸式) -->
   <view class="premium-user-box" bindtap="onUserInfoClick">
@@ -52,15 +53,21 @@
     <!-- 快捷功能区 (线性布局) -->
     <view class="quick-nav">
       <view class="nav-item" bindtap="showDepositDialog">
-        <view class="icon-circle gold-border">📥</view>
+        <view class="icon-circle gold-border shimmer-effect">
+          <view class="css-icon-in"></view>
+        </view>
         <text>存分</text>
       </view>
       <view class="nav-item" bindtap="showWithdrawDialog">
-        <view class="icon-circle gold-border">📤</view>
+        <view class="icon-circle gold-border shimmer-effect">
+          <view class="css-icon-out"></view>
+        </view>
         <text>取分</text>
       </view>
       <view class="nav-item" bindtap="showExchangeDialog">
-        <view class="icon-circle gold-border">💰</view>
+        <view class="icon-circle gold-border shimmer-effect">
+          <view class="css-icon-exchange"></view>
+        </view>
         <text>兑换</text>
       </view>
     </view>
@@ -73,10 +80,10 @@
       <block wx:for="{{menuList}}" wx:key="text">
         <view class="premium-menu-item" bindtap="onMenuClick" data-index="{{index}}">
           <view class="menu-info">
-            <text class="menu-icon-text">{{index === 0 ? '📝' : index === 1 ? '📅' : '🎟️'}}</text>
+            <view class="menu-icon-wrapper"></view>
             <text class="menu-label">{{item.text}}</text>
           </view>
-          <text class="menu-arrow-icon">chevron_right</text>
+          <view class="menu-arrow-icon"></view>
         </view>
       </block>
     </view>
