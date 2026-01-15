@@ -3,65 +3,8 @@ import { Line, Pie, Bar } from '@ant-design/charts';
 import { Modal, Form, Input, App, Select } from 'antd';
 import { utils, writeFile } from 'xlsx';
 import { noticesApi, NoticeType, Notice } from '../../api/notices';
-import { statisticsApi, DashboardSummary } from '../../api/statistics';
+import { statisticsApi, DashboardSummary, RevenueTrendItem, HotMenuItem, LeaderboardItem } from '../../api/statistics';
 import './Dashboard.css';
-
-// 模拟数据
-const revenueData7d = [
-    { date: '11/28', revenue: 12800 },
-    { date: '11/29', revenue: 15600 },
-    { date: '11/30', revenue: 18200 },
-    { date: '12/01', revenue: 21500 },
-    { date: '12/02', revenue: 19800 },
-    { date: '12/03', revenue: 24300 },
-    { date: '12/04', revenue: 22100 },
-];
-
-const revenueData1m = [
-    { date: '11/05', revenue: 10500 },
-    { date: '11/10', revenue: 12800 },
-    { date: '11/15', revenue: 18600 },
-    { date: '11/20', revenue: 15400 },
-    { date: '11/25', revenue: 21200 },
-    { date: '11/30', revenue: 19800 },
-    { date: '12/04', revenue: 22100 },
-];
-
-const revenueData6m = [
-    { date: '07月', revenue: 328000 },
-    { date: '08月', revenue: 356000 },
-    { date: '09月', revenue: 412000 },
-    { date: '10月', revenue: 385000 },
-    { date: '11月', revenue: 456000 },
-    { date: '12月', revenue: 221000 },
-];
-
-const reservationData = [
-    { type: '主赛桌', value: 45 },
-    { type: '副赛桌', value: 32 },
-    { type: '练习桌', value: 23 },
-];
-
-const hotMenuData = [
-    { name: '火焰威士忌塔', sales: 128 },
-    { name: '冠军定制套餐', sales: 96 },
-    { name: '午夜能量Shot', sales: 85 },
-    { name: '皇家精酿', sales: 72 },
-    { name: '特调鸡尾酒', sales: 68 },
-];
-
-const leaderboard = [
-    { name: 'Husk·Aiden', score: 12890, tag: '周榜冠军', avatar: '🦊' },
-    { name: 'Husk·Yuri', score: 11840, tag: '热度飙升', avatar: '🐺' },
-    { name: 'Husk·Jaden', score: 11030, tag: '连胜 5 场', avatar: '🐻' },
-    { name: 'Husk·Zoe', score: 9800, tag: '上升势头', avatar: '🐱' },
-    { name: 'Husk·Leo', score: 8500, tag: '稳如泰山', avatar: '🦁' },
-    { name: 'Husk·Luna', score: 7200, tag: '新晋黑马', avatar: '🐰' },
-    { name: 'Husk·Max', score: 6500, tag: '积分高手', avatar: '🐶' },
-    { name: 'Husk·Mia', score: 5400, tag: '常驻玩家', avatar: '🐼' },
-];
-
-
 
 export default function Dashboard() {
     const { message } = App.useApp();
@@ -78,24 +21,47 @@ export default function Dashboard() {
     });
     const [revenueRange, setRevenueRange] = useState<'7d' | '1m' | '6m'>('7d');
 
+    // 真实数据 State
+    const [revenueTrendData, setRevenueTrendData] = useState<RevenueTrendItem[]>([]);
+    const [hotMenuData, setHotMenuData] = useState<HotMenuItem[]>([]);
+    const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([]);
+
     const fetchData = useCallback(async () => {
         try {
-            const [noticeRes, activityRes, statsRes] = await Promise.all([
+            const [noticeRes, activityRes, statsRes, hotMenuRes, leaderboardRes] = await Promise.all([
                 noticesApi.getLatest('ANNOUNCEMENT'),
                 noticesApi.getLatest('ACTIVITY'),
                 statisticsApi.getSummary(),
+                statisticsApi.getHotMenuItems(),
+                statisticsApi.getLeaderboard(10),
             ]);
             setLatestNotice(noticeRes.data);
             setLatestActivity(activityRes.data);
             setStats(statsRes.data);
+            setHotMenuData(hotMenuRes.data || []);
+            setLeaderboard(leaderboardRes.data || []);
         } catch (error) {
             console.error('获取动态数据失败:', error);
         }
     }, []);
 
+    // 营收趋势单独获取（范围变化时重新拉取）
+    const fetchRevenueTrend = useCallback(async () => {
+        try {
+            const res = await statisticsApi.getRevenueTrend(revenueRange);
+            setRevenueTrendData(res.data || []);
+        } catch (error) {
+            console.error('获取营收趋势失败:', error);
+        }
+    }, [revenueRange]);
+
     useEffect(() => {
         fetchData();
     }, [fetchData]);
+
+    useEffect(() => {
+        fetchRevenueTrend();
+    }, [fetchRevenueTrend]);
 
     const handleOpenNoticeModal = (type: NoticeType) => {
         setNoticeType(type);
@@ -147,7 +113,7 @@ export default function Dashboard() {
 
     // 营收趋势图配置
     const revenueConfig = {
-        data: revenueRange === '7d' ? revenueData7d : revenueRange === '1m' ? revenueData1m : revenueData6m,
+        data: revenueTrendData,
         xField: 'date',
         yField: 'revenue',
         smooth: true,

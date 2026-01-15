@@ -63,10 +63,10 @@
    - 为首页背景图添加了 `filter: blur(10rpx)` 模糊滤镜。
    - 同步添加了 `transform: scale(1.1)` 以消除模糊溢出导致的边缘问题，提升视觉质感。
 
-## [Date/Time]: [2026-01-15 14:12]
+## [Date/Time]: [2026-01-15 14:20]
 [Status]: Done
-[Changes]: 新增点餐页"桌位必选"校验功能。如果用户未选择桌位就点击"去结算"，系统将弹出提示并自动滚动到桌位选择区域。
-[Next Step]: 测试验证该功能，并考虑是否需要更醒目的 UI 提示。
+[Changes]: 后台仪表盘"营收趋势"、"热门菜品TOP5"、"积分排行榜"已全部绑定真实数据库数据。新增了后端 StatisticsService 的三个接口，并更新了 Admin Dashboard 前端组件以调用这些 API。
+[Next Step]: 重新部署后端并验证数据正确展示。
 
 ## [Date/Time]: [2026-01-15 14:10]
 [Status]: Done

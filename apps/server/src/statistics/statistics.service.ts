@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, In, Repository } from 'typeorm';
+import { Between, In, MoreThanOrEqual, Repository } from 'typeorm';
 import { ReservationEntity, ReservationStatus } from '../reservation/reservation.entity';
 import { OrderEntity, OrderStatus } from '../orders/order.entity';
+import { OrderItemEntity } from '../orders/order-item.entity';
+import { MemberEntity } from '../membership/member.entity';
 
 @Injectable()
 export class StatisticsService {
@@ -11,6 +13,10 @@ export class StatisticsService {
         private readonly reservationRepository: Repository<ReservationEntity>,
         @InjectRepository(OrderEntity)
         private readonly orderRepository: Repository<OrderEntity>,
+        @InjectRepository(OrderItemEntity)
+        private readonly orderItemRepository: Repository<OrderItemEntity>,
+        @InjectRepository(MemberEntity)
+        private readonly memberRepository: Repository<MemberEntity>,
     ) { }
 
     async getDashboardSummary() {
@@ -60,5 +66,91 @@ export class StatisticsService {
             memberVisits,
             totalRevenue,
         };
+    }
+
+    /**
+     * 获取营收趋势数据
+     * @param range 时间范围: '7d' | '1m' | '6m'
+     */
+    async getRevenueTrend(range: '7d' | '1m' | '6m') {
+        const now = new Date();
+        let startDate: Date;
+        let groupFormat: string;
+
+        if (range === '7d') {
+            startDate = new Date(now);
+            startDate.setDate(now.getDate() - 7);
+            groupFormat = 'DATE(order.createdAt)';
+        } else if (range === '1m') {
+            startDate = new Date(now);
+            startDate.setMonth(now.getMonth() - 1);
+            groupFormat = 'DATE(order.createdAt)';
+        } else {
+            startDate = new Date(now);
+            startDate.setMonth(now.getMonth() - 6);
+            groupFormat = "DATE_FORMAT(order.createdAt, '%Y-%m')";
+        }
+
+        const results = await this.orderRepository
+            .createQueryBuilder('order')
+            .select(`${groupFormat}`, 'date')
+            .addSelect('SUM(order.totalAmount)', 'revenue')
+            .where('order.createdAt >= :startDate', { startDate })
+            .andWhere('order.status IN (:...statuses)', {
+                statuses: [OrderStatus.PAID, OrderStatus.COMPLETED],
+            })
+            .groupBy(groupFormat)
+            .orderBy(groupFormat, 'ASC')
+            .getRawMany();
+
+        return results.map(r => ({
+            date: range === '6m' ? r.date : new Date(r.date).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }).replace('/', '/'),
+            revenue: parseFloat(r.revenue) || 0,
+        }));
+    }
+
+    /**
+     * 获取热门菜品 TOP5
+     */
+    async getHotMenuItems() {
+        const results = await this.orderItemRepository
+            .createQueryBuilder('item')
+            .select('item.name', 'name')
+            .addSelect('SUM(item.quantity)', 'sales')
+            .groupBy('item.name')
+            .orderBy('sales', 'DESC')
+            .limit(5)
+            .getRawMany();
+
+        return results.map(r => ({
+            name: r.name,
+            sales: parseInt(r.sales, 10) || 0,
+        }));
+    }
+
+    /**
+     * 获取积分排行榜
+     */
+    async getLeaderboard(limit: number = 10) {
+        const members = await this.memberRepository.find({
+            order: { points: 'DESC' },
+            take: limit,
+        });
+
+        return members.map(m => ({
+            id: m.id,
+            name: m.nickname || '匿名会员',
+            avatar: m.avatar || '🎭',
+            score: m.points,
+            tag: this.generateTag(m.points),
+        }));
+    }
+
+    private generateTag(points: number): string {
+        if (points >= 10000) return '至尊VIP';
+        if (points >= 5000) return '黄金玩家';
+        if (points >= 2000) return '积分高手';
+        if (points >= 1000) return '活跃玩家';
+        return '新晋会员';
     }
 }
