@@ -496,6 +496,18 @@ Page({
       return;
     }
 
+    // 桌位选择验证
+    if (!this.data.selectedTableId) {
+      wx.showToast({
+        title: '请先选择桌位',
+        icon: 'none',
+        duration: 2000
+      });
+      // 滚动到顶部，引导用户选择桌位
+      wx.pageScrollTo({ scrollTop: 0, duration: 300 });
+      return;
+    }
+
     // 隐藏购物车详情
     this.setData({ showCart: false });
 
