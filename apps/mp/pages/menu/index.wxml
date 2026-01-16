@@ -43,7 +43,19 @@
 
     <!-- 右侧商品列表 -->
     <scroll-view scroll-y class="goods-list">
-      <block wx:for="{{goodsList}}" wx:key="id">
+      <!-- Loading状态 (骨架屏) -->
+      <block wx:if="{{loading}}">
+        <view wx:for="{{[1,2,3,4]}}" wx:key="*this" class="goods-item glass-panel gold-border shadow-lux" style="border-color: rgba(212, 175, 55, 0.1);">
+          <skeleton shape="block" customStyle="width: 140rpx; height: 140rpx; border-radius: 12rpx; margin-right: 20rpx;" />
+          <view class="goods-info" style="flex: 1;">
+            <skeleton shape="line" customStyle="width: 60%; margin-bottom: 20rpx;" />
+            <skeleton shape="line" customStyle="width: 90%; margin-bottom: 20rpx; height: 24rpx;" />
+            <skeleton shape="line" customStyle="width: 30%; height: 40rpx;" />
+          </view>
+        </view>
+      </block>
+
+      <block wx:else wx:for="{{goodsList}}" wx:key="id">
         <view class="goods-item glass-panel gold-border shadow-lux">
           <image class="goods-image" src="{{item.imageUrl}}" mode="aspectFill" />
           <view class="goods-info">
@@ -61,7 +73,7 @@
           </view>
         </view>
       </block>
-      <view class="list-footer">名仕乐享 · 尽在三条A</view>
+      <view class="list-footer" wx:if="{{!loading}}">名仕乐享 · 尽在此刻</view>
     </scroll-view>
 
   </view>

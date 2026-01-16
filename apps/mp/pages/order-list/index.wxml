@@ -15,16 +15,30 @@
 
   <!-- 2. 订单列表区域 -->
   <view class="list-container">
-    <view wx:if="{{loading}}" class="loading-box">
-      <view class="loading-shimmer-box"></view>
-      <text class="loading-text">正在同步订单数据...</text>
+    <!-- Loading状态 (骨架屏) -->
+    <view class="skeleton-list" wx:if="{{loading}}">
+      <block wx:for="{{[1,2,3]}}" wx:key="*this">
+        <view class="order-item glass-panel gold-border shadow-lux" style="border: none;">
+          <view class="order-header" style="border: none; margin-bottom: 20rpx;">
+            <skeleton shape="line" customStyle="width: 30%; height: 40rpx;" />
+            <skeleton shape="line" customStyle="width: 20%; height: 40rpx;" />
+          </view>
+          <skeleton shape="line" customStyle="width: 60%; margin-bottom: 20rpx;" />
+          <skeleton shape="line" customStyle="width: 80%; margin-bottom: 20rpx;" />
+          <skeleton shape="line" customStyle="width: 40%;" />
+        </view>
+      </block>
     </view>
 
-    <view wx:elif="{{orders.length === 0}}" class="empty-box">
-      <view class="css-icon-order-empty"></view>
-      <text class="empty-text">尚无点餐记录</text>
-      <button class="btn-goto-menu shimmer-effect" bindtap="gotoMenu">浏览珍馐</button>
-    </view>
+    <!-- 空数据提示 (图形化) -->
+    <empty 
+      wx:elif="{{orders.length === 0}}"
+      type="box"
+      text="尚无点餐记录"
+      description="您还没有任何消费记录，快去浏览我们的精致珍馐吧"
+    >
+      <button class="btn-goto-menu shimmer-effect" bindtap="gotoMenu" style="margin-top: 40rpx;">浏览珍馐</button>
+    </empty>
 
     <view wx:else class="order-list">
       <view

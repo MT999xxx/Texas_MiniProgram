@@ -1,0 +1,85 @@
+<view class="container redesign-bg">
+  <view class="hero-bg-lux-member"></view>
+  
+  <!-- 顶部导航 -->
+  <view class="nav-header">
+    <view class="back-btn" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <text class="nav-title">会员权益</text>
+    <view class="nav-placeholder"></view>
+  </view>
+
+  <!-- 等级卡片轮播 -->
+  <swiper 
+    class="level-swiper" 
+    current="{{currentLevel}}" 
+    bindchange="onSwiperChange"
+    previous-margin="40rpx"
+    next-margin="40rpx"
+    circular="{{true}}"
+  >
+    <swiper-item wx:for="{{memberLevels}}" wx:key="id">
+      <view class="level-card {{item.darkText ? 'dark-text' : ''}}" style="background: {{item.bgGradient}};">
+        <!-- 背景大V盾牌 -->
+        <view class="v-shield-bg">
+          <text class="v-shield-text">V</text>
+        </view>
+        
+        <view class="card-header">
+          <view class="level-v-mark">V<text class="v-num">{{item.id}}</text></view>
+          <text class="level-name">{{item.name}}</text>
+        </view>
+
+        <view class="card-footer">
+          <view class="status-info">
+            <text class="status-tag">{{item.status}}</text>
+            <text class="progress-text" wx:if="{{item.progress}}">，{{item.progress}}</text>
+          </view>
+          <text class="rule-link">规则说明 ></text>
+        </view>
+      </view>
+    </swiper-item>
+
+  </swiper>
+
+  <!-- 等级指示器 -->
+  <view class="level-indicators">
+    <view 
+      wx:for="{{memberLevels}}" 
+      wx:key="id"
+      class="indicator {{currentLevel === index ? 'active' : ''}}"
+      style="background: {{currentLevel === index ? item.color : 'rgba(255,255,255,0.3)'}};"
+      bindtap="onIndicatorTap"
+      data-index="{{index}}"
+    ></view>
+  </view>
+
+  <!-- 当前等级福利列表 -->
+  <view class="benefits-section glass-panel gold-border">
+    <view class="section-title">
+      <text class="title-text">会员权益</text>
+    </view>
+    
+    <view class="benefits-grid">
+      <view 
+        class="benefit-item" 
+        wx:for="{{memberLevels[currentLevel].benefits}}" 
+        wx:key="text"
+      >
+        <view class="benefit-icon">{{item.icon}}</view>
+        <text class="benefit-text">{{item.text}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 立即充值按钮 -->
+  <view class="recharge-action">
+    <button class="btn-primary recharge-btn" bindtap="goRecharge">
+      立即开通 {{memberLevels[currentLevel].name}}
+    </button>
+  </view>
+
+  <!-- 底部占位 -->
+  <view style="height: 60rpx;"></view>
+</view>

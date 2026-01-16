@@ -1,4 +1,9 @@
 {
+  "usingComponents": {
+    "tab-bar": "/components/tab-bar/index",
+    "skeleton": "/components/skeleton/index",
+    "empty": "/components/empty/index"
+  },
   "pages": [
     "pages/home/index",
     "pages/table/index",
@@ -11,8 +16,11 @@
     "pages/coupons/index",
     "pages/events/index",
     "pages/member/index",
+    "pages/member-level/index",
     "pages/points/index",
-    "pages/ranking/index"
+    "pages/ranking/index",
+    "pages/recharge/index",
+    "pages/recharge-history/index"
   ],
   "window": {
     "navigationBarBackgroundColor": "#120a0a",
@@ -22,5 +30,6 @@
     "backgroundColor": "#120a0a"
   },
   "style": "v2",
-  "sitemapLocation": "sitemap.json"
+  "sitemapLocation": "sitemap.json",
+  "__usePrivacyCheck__": true
 }

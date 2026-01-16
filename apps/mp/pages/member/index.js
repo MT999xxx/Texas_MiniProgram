@@ -1,6 +1,7 @@
 // pages/member/index.js
 const authManager = require('../../utils/auth');
 const coinsApi = require('../../api/coins');
+const util = require('../../utils/util');
 
 Page({
 
@@ -17,8 +18,10 @@ Page({
     },
     memberInfo: {
       level: 'V1',
-      levelName: '普通会员',
-      nextLevelDiff: 500
+      levelNum: 1,
+      levelName: '尊荣白银',
+      nextLevelDiff: 500,
+      growthPercent: 0
     },
     stats: {
       coins: 0,
@@ -34,10 +37,10 @@ Page({
     // 充值弹窗
     showRechargePopup: false,
     rechargeOptions: [
-      { amount: 500, bonus: 7500, desc: '赠送7500积分' },
-      { amount: 1000, bonus: 20000, desc: '赠送20000积分' },
-      { amount: 3000, bonus: 72000, desc: '赠送72000积分+5张酒券' },
-      { amount: 5000, bonus: 120000, desc: '赠送120000积分+10张酒券' }
+      { amount: 500, bonus: 7500, desc: '赠送7500积分', level: 'V1尊荣白银' },
+      { amount: 1000, bonus: 20000, desc: '赠送20000积分+9.5折', level: 'V2奢华黄金' },
+      { amount: 3000, bonus: 72000, desc: '8.5折+月度礼包', level: 'V3高贵铂金' },
+      { amount: 8000, bonus: 200000, desc: '7.5折+足疗券+月度礼包', level: 'V4巅峰钻石' }
     ],
     selectedAmount: 500,
     inputAmount: '',
@@ -52,7 +55,14 @@ Page({
 
     // 积分兑换金币弹窗
     showExchangePopup: false,
-    exchangeCoins: ''
+    exchangeCoins: '',
+
+    // 邮请奖励
+    showInvitePopup: false,
+    inviteCode: '',
+    inputInviteCode: '',
+    invitedUsers: [],
+    loading: true // 初始加载状态
   },
 
   /**
@@ -88,6 +98,78 @@ Page({
         icon: 'none'
       });
     }
+  },
+
+  /**
+   * 跳转到会员等级权益页面
+   */
+  goToMemberLevel() {
+    wx.navigateTo({
+      url: '/pages/member-level/index'
+    });
+  },
+
+  // ========== 邮请奖励功能 ==========
+  /**
+   * 显示邮请奖励弹窗
+   */
+  showInvitePopup() {
+    this.setData({ showInvitePopup: true });
+  },
+
+  /**
+   * 隐藏邮请奖励弹窗
+   */
+  hideInvitePopup() {
+    this.setData({ showInvitePopup: false });
+  },
+
+  /**
+   * 复制邀请码
+   */
+  copyInviteCode() {
+    const code = this.data.inviteCode || 'e7f0014b';
+    wx.setClipboardData({
+      data: code,
+      success: () => {
+        wx.vibrateShort({ type: 'light' });
+        wx.showToast({ title: '邀请码已复制', icon: 'success' });
+      }
+    });
+  },
+
+  /**
+   * 输入邀请码
+   */
+  onInviteCodeInput(e) {
+    this.setData({ inputInviteCode: e.detail.value });
+  },
+
+  /**
+   * 提交邀请码
+   */
+  submitInviteCode() {
+    const code = this.data.inputInviteCode.trim();
+    if (!code) {
+      wx.showToast({ title: '请输入邀请码', icon: 'none' });
+      return;
+    }
+    // TODO: 调用后端API绑定邀请关系
+    wx.showLoading({ title: '提交中...' });
+    setTimeout(() => {
+      wx.hideLoading();
+      wx.vibrateShort({ type: 'medium' });
+      wx.showToast({ title: '绑定成功', icon: 'success' });
+      this.setData({ inputInviteCode: '' });
+    }, 1000);
+  },
+
+  /**
+   * 查看已邀请用户列表
+   */
+  showInvitedList() {
+    wx.showToast({ title: '功能开发中', icon: 'none' });
+    // TODO: 跳转到已邀请用户列表页面
   },
 
   /**
@@ -183,6 +265,7 @@ Page({
             coinsApi.getPaymentStatus(paymentId)
               .then(() => {
                 wx.hideLoading();
+                wx.vibrateShort({ type: 'medium' });
                 wx.showToast({ title: '充值成功', icon: 'success' });
                 this.hideRecharge();
                 this.loadBalance();
@@ -190,6 +273,7 @@ Page({
               .catch(() => {
                 wx.hideLoading();
                 // 即使查询失败也显示成功（微信支付已成功）
+                wx.vibrateShort({ type: 'medium' });
                 wx.showToast({ title: '充值成功', icon: 'success' });
                 this.hideRecharge();
                 this.loadBalance();
@@ -233,6 +317,7 @@ Page({
     coinsApi.depositPoints(this.data.memberId, points)
       .then(res => {
         wx.hideLoading();
+        wx.vibrateShort({ type: 'medium' });
         wx.showToast({ title: '申请已提交，等待审核', icon: 'success' });
         this.hideDepositDialog();
       })
@@ -269,6 +354,7 @@ Page({
     coinsApi.withdrawPoints(this.data.memberId, points)
       .then(res => {
         wx.hideLoading();
+        wx.vibrateShort({ type: 'medium' });
         wx.showToast({ title: '取积分成功', icon: 'success' });
         this.hideWithdrawDialog();
         this.loadBalance();
@@ -307,6 +393,7 @@ Page({
     coinsApi.exchangeCoins(this.data.memberId, coins)
       .then(res => {
         wx.hideLoading();
+        wx.vibrateShort({ type: 'medium' });
         wx.showToast({ title: `成功兑换 ${coins} 金币`, icon: 'success' });
         this.hideExchangeDialog();
         this.loadBalance();
@@ -324,12 +411,17 @@ Page({
     if (!this.data.memberId) return;
     coinsApi.getBalance(this.data.memberId)
       .then(res => {
+        // 使用动画显示数字
+        util.animateNumber(this, 'stats.coins', res.coins || 0);
+        util.animateNumber(this, 'stats.points', res.points || 0);
         this.setData({
-          'stats.coins': res.coins || 0,
-          'stats.points': res.points || 0
+          'stats.coupons': res.coupons || 0,
+          loading: false
         });
       })
-      .catch(() => { });
+      .catch(() => {
+        this.setData({ loading: false });
+      });
   },
 
   /**
@@ -441,6 +533,7 @@ Page({
       console.warn('自动登录过程异常:', error);
       this.setData({
         isLogin: false,
+        loading: false,
         userInfo: {
           avatar: '/images/huiyuan2.jpg',
           nickname: '点击登录',

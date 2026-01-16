@@ -343,8 +343,8 @@
 }
 
 .leaderboard li:hover {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: #1a1a1a;
+  border-color: rgba(212, 175, 55, 0.2);
 }
 
 .rank {
@@ -679,5 +679,36 @@
 @media (max-width: 900px) {
   .charts-section {
     grid-template-columns: 1fr;
+  }
+}
+
+/* 极小屏幕适配 (手机端) */
+@media (max-width: 600px) {
+  .hero-panel {
+    padding: 24px;
+  }
+
+  .hero-left h1 {
+    font-size: 28px;
+  }
+
+  .hero-meta {
+    gap: 20px;
+  }
+
+  .hero-meta div strong {
+    font-size: 20px;
+  }
+
+  .chart-card {
+    padding: 16px;
+  }
+
+  .leaderboard li {
+    padding: 12px;
+  }
+
+  .score {
+    font-size: 16px;
   }
 }

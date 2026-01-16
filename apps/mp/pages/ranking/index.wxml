@@ -26,18 +26,26 @@
 
   <!-- 2. 排行榜列表区域 -->
   <view class="ranking-list-container">
-    <!-- Loading状态 -->
-    <view class="loading-container" wx:if="{{loading}}">
-      <view class="loading-shimmer"></view>
-      <text class="loading-text">同步名仕录...</text>
+    <!-- Loading状态 (骨架屏) -->
+    <view class="skeleton-list" wx:if="{{loading}}">
+      <block wx:for="{{[1,2,3,4,5,6]}}" wx:key="*this">
+        <view class="ranking-item glass-panel" style="border: none;">
+          <skeleton shape="circle" customStyle="width: 80rpx; height: 80rpx; margin-right: 20rpx;" />
+          <view class="rank-info" style="flex: 1;">
+            <skeleton shape="line" customStyle="width: 40%; margin-bottom: 20rpx;" />
+            <skeleton shape="line" customStyle="width: 25%;" />
+          </view>
+        </view>
+      </block>
     </view>
 
-    <!-- 空数据提示 -->
-    <view class="empty-container" wx:elif="{{isEmpty}}">
-      <view class="css-icon-shield"></view>
-      <text class="empty-text">虚位以待</text>
-      <text class="empty-hint">即刻启程，赢取属于您的至高荣誉</text>
-    </view>
+    <!-- 空数据提示 (图形化) -->
+    <empty 
+      wx:if="{{!loading && leaderboard.length === 0}}"
+      type="list"
+      text="名仕榜虚位以待"
+      description="暂无积分排行数据，快去通过消费或邀请好友获得积分吧"
+    />
 
     <!-- 排行榜列表 -->
     <view class="list-wrapper" wx:else>

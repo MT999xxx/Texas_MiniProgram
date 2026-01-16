@@ -16,33 +16,48 @@
   </view>
 
   <!-- 2. 会员身份与数据展示 (毛玻璃卡片) -->
-  <view class="luxury-card glass-panel gold-border shadow-lux">
-    <view class="card-top">
+  <view class="luxury-card glass-panel gold-border shadow-lux level-theme-v{{memberInfo.levelNum || 1}}">
+    <view class="card-top" bindtap="goToMemberLevel">
       <view class="level-box">
         <text class="level-v">V</text>
-        <text class="level-num">1</text>
-        <text class="level-title">皇家会员</text>
+        <text class="level-num">{{memberInfo.levelNum || 1}}</text>
+        <text class="level-title">{{memberInfo.levelName || '尊荣白银'}}</text>
       </view>
       <view class="growth-box">
         <text class="growth-text">距下一等级 {{memberInfo.nextLevelDiff}} 成长值</text>
         <view class="growth-bar">
-          <view class="growth-inner" style="width: 20%"></view>
+          <view class="growth-inner" style="width: {{memberInfo.growthPercent || 20}}%"></view>
         </view>
       </view>
     </view>
     
-    <!-- 数据统计区 -->
+    <!-- 数据统计区 (骨架屏支持) -->
     <view class="premium-stats">
       <view class="stat-item">
-        <text class="stat-val font-bold text-gold">{{stats.coins}}</text>
+        <block wx:if="{{loading}}">
+          <skeleton shape="line" customStyle="width: 80rpx; height: 40rpx; margin: 10rpx auto;" />
+        </block>
+        <block wx:else>
+          <text class="stat-val font-bold text-gold">{{stats.coins}}</text>
+        </block>
         <text class="stat-name">金币余额</text>
       </view>
       <view class="stat-item scale-up">
-        <text class="stat-val font-bold text-gold">{{stats.points}}</text>
+        <block wx:if="{{loading}}">
+          <skeleton shape="line" customStyle="width: 100rpx; height: 50rpx; margin: 10rpx auto;" />
+        </block>
+        <block wx:else>
+          <text class="stat-val font-bold text-gold">{{stats.points}}</text>
+        </block>
         <text class="stat-name">累计积分</text>
       </view>
       <view class="stat-item">
-        <text class="stat-val font-bold text-gold">{{stats.coupons}}</text>
+        <block wx:if="{{loading}}">
+          <skeleton shape="line" customStyle="width: 60rpx; height: 40rpx; margin: 10rpx auto;" />
+        </block>
+        <block wx:else>
+          <text class="stat-val font-bold text-gold">{{stats.coupons}}</text>
+        </block>
         <text class="stat-name">礼遇券</text>
       </view>
     </view>
@@ -86,6 +101,14 @@
           <view class="menu-arrow-icon"></view>
         </view>
       </block>
+      <!-- 邀请奖励入口 -->
+      <view class="premium-menu-item" bindtap="showInvitePopup">
+        <view class="menu-info">
+          <view class="menu-icon-wrapper"></view>
+          <text class="menu-label">邀请奖励</text>
+        </view>
+        <view class="menu-arrow-icon"></view>
+      </view>
     </view>
   </view>
 
@@ -118,7 +141,7 @@
         <input class="lux-input" type="number" placeholder="输入其他金额" 
                placeholder-class="lux-placeholder" value="{{inputAmount}}" 
                bindinput="onInputAmount" />
-        <view class="lux-bonus">赠送 {{selectedAmount ? (selectedAmount * 15) : (inputAmount * 15 || 0)}} 积分</view>
+        <view class="lux-bonus">赠送 {{selectedAmount ? (selectedAmount * 10) : (inputAmount * 10 || 0)}} 积分</view>
       </view>
 
       <view class="modal-btns">
@@ -147,4 +170,81 @@
     </view>
   </view>
 
+  <!-- 取积分弹窗 -->
+  <view class="modal-mask" wx:if="{{showWithdrawPopup}}" bindtap="hideWithdrawDialog">
+    <view class="luxury-modal glass-panel gold-border" catchtap="stopBubble">
+      <view class="modal-head">取出积分</view>
+      <view class="input-luxury">
+        <input class="lux-input" type="number" placeholder="请输入取出数量" 
+               value="{{withdrawAmount}}" bindinput="onWithdrawInput" />
+      </view>
+      <view class="lux-rules">
+        <text>• 当前积分余额：{{stats.points}}</text>
+        <text>• 取出后可用于店内消费</text>
+      </view>
+      <view class="modal-btns">
+        <view class="btn-cancel" bindtap="hideWithdrawDialog">返回</view>
+        <view class="btn-confirm" bindtap="submitWithdraw">确认取出</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 积分兑换金币弹窗 -->
+  <view class="modal-mask" wx:if="{{showExchangePopup}}" bindtap="hideExchangeDialog">
+    <view class="luxury-modal glass-panel gold-border" catchtap="stopBubble">
+      <view class="modal-head">积分兑换金币</view>
+      <view class="input-luxury">
+        <input class="lux-input" type="number" placeholder="请输入要兑换的金币数量" 
+               value="{{exchangeCoins}}" bindinput="onExchangeInput" />
+      </view>
+      <view class="lux-rules">
+        <text>• 兑换比例：20积分 = 1金币</text>
+        <text>• 当前积分余额：{{stats.points}}</text>
+        <text>• 预计消耗积分：{{exchangeCoins ? exchangeCoins * 20 : 0}}</text>
+      </view>
+      <view class="modal-btns">
+        <view class="btn-cancel" bindtap="hideExchangeDialog">返回</view>
+        <view class="btn-confirm" bindtap="submitExchange">确认兑换</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 邀请奖励弹窗 -->
+  <view class="modal-mask" wx:if="{{showInvitePopup}}" bindtap="hideInvitePopup">
+    <view class="luxury-modal glass-panel gold-border invite-modal" catchtap="stopBubble">
+      <view class="modal-head">邀请好友获得奖励</view>
+      <view class="invite-desc-popup">
+        <text>带一个新用户消费，双方可获得500积分奖励</text>
+      </view>
+      
+      <!-- 我的邀请码 -->
+      <view class="invite-code-row">
+        <text class="code-label">我的邀请码</text>
+        <view class="code-value-box">
+          <text class="code-value">{{inviteCode || 'e7f0014b'}}</text>
+          <view class="copy-btn" bindtap="copyInviteCode">
+            <text class="copy-icon">📋</text>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 填写邀请码 -->
+      <view class="invite-input-row">
+        <text class="input-label">填写邀请码</text>
+        <view class="input-box">
+          <input class="invite-input" placeholder="输入邀请码" value="{{inputInviteCode}}" bindinput="onInviteCodeInput" />
+          <view class="confirm-btn" bindtap="submitInviteCode">
+            <text>确认</text>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 已邀请用户列表入口 -->
+      <view class="invited-list-entry" bindtap="showInvitedList">
+        <text class="invited-title">已邀请用户列表 ></text>
+      </view>
+    </view>
+  </view>
+
 </view>
+

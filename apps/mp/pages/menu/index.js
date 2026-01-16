@@ -217,7 +217,7 @@ Page({
     }
 
     this.updateCart(cart);
-
+    wx.vibrateShort({ type: 'light' });
     wx.showToast({
       title: '已加入购物车',
       icon: 'success',
@@ -315,7 +315,7 @@ Page({
 
     this.updateCart(cart);
     this.hideSpecDialog();
-
+    wx.vibrateShort({ type: 'light' });
     wx.showToast({
       title: '已加入购物车',
       icon: 'success',
@@ -577,6 +577,7 @@ Page({
             try {
               await PaymentUtils.createOrderPayment(order.id, {
                 successCallback: () => {
+                  wx.vibrateShort({ type: 'medium' });
                   this.clearCartAndNavigate();
                 },
                 failCallback: (err) => {

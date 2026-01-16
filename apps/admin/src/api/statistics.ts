@@ -17,6 +17,7 @@ export interface HotMenuItem {
 }
 
 export interface LeaderboardItem {
+    rank: number;
     id: string;
     name: string;
     avatar: string;

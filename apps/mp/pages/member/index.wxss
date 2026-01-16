@@ -91,12 +91,76 @@ page {
 
 .id-label { margin-right: 8rpx; }
 
-/* 2. 奢华会员卡 */
+/* 2. 会员身份与数据展示 (毛玻璃卡片) */
 .luxury-card {
+  margin: 30rpx;
   padding: 40rpx;
-  margin-bottom: 40rpx;
+  border-radius: 24rpx;
   position: relative;
   overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* 默认 V1 / 通用样式 */
+.luxury-card.level-theme-v1 {
+  background: linear-gradient(135deg, #ffffff 0%, #e6e6e6 100%);
+  color: #2c3e50;
+}
+.luxury-card.level-theme-v1 .level-v,
+.luxury-card.level-theme-v1 .level-num,
+.luxury-card.level-theme-v1 .level-title,
+.luxury-card.level-theme-v1 .growth-text,
+.luxury-card.level-theme-v1 .stat-label {
+  color: #2c3e50;
+}
+
+/* V2 黄金 */
+.luxury-card.level-theme-v2 {
+  background: linear-gradient(135deg, #e0f2e0 0%, #c4e3c4 100%);
+  color: #2e4d2e;
+}
+.luxury-card.level-theme-v2 .level-v,
+.luxury-card.level-theme-v2 .level-num,
+.luxury-card.level-theme-v2 .level-title,
+.luxury-card.level-theme-v2 .growth-text {
+  color: #2e4d2e;
+}
+
+/* V3 铂金 */
+.luxury-card.level-theme-v3 {
+  background: linear-gradient(135deg, #e0f0f2 0%, #c4dee3 100%);
+  color: #2e3a4d;
+}
+.luxury-card.level-theme-v3 .level-v,
+.luxury-card.level-theme-v3 .level-num,
+.luxury-card.level-theme-v3 .level-title,
+.luxury-card.level-theme-v3 .growth-text {
+  color: #2e3a4d;
+}
+
+/* V4 钻石 */
+.luxury-card.level-theme-v4 {
+  background: linear-gradient(135deg, #f2e0f2 0%, #e3c4e3 100%);
+  color: #4d2e4d;
+}
+.luxury-card.level-theme-v4 .level-v,
+.luxury-card.level-theme-v4 .level-num,
+.luxury-card.level-theme-v4 .level-title,
+.luxury-card.level-theme-v4 .growth-text {
+  color: #4d2e4d;
+}
+
+.luxury-card::after {
+  content: 'V';
+  position: absolute;
+  top: -40rpx;
+  right: -20rpx;
+  font-size: 240rpx;
+  font-weight: 900;
+  opacity: 0.08;
+  font-family: 'Inter', sans-serif;
+  transform: rotate(15deg);
+  pointer-events: none;
 }
 
 .card-top {
@@ -152,9 +216,16 @@ page {
 
 .growth-inner {
   height: 100%;
-  background: #D4AF37;
-  box-shadow: 0 0 10rpx #D4AF37;
-  border-radius: 3rpx;
+  background: var(--gold-500, #D4AF37);
+  border-radius: 10rpx;
+  box-shadow: 0 0 10rpx rgba(212, 175, 55, 0.5);
+}
+
+.level-theme-v1 .growth-inner,
+.level-theme-v2 .growth-inner,
+.level-theme-v3 .growth-inner,
+.level-theme-v4 .growth-inner {
+  background: #333; /* 浅色背景下用深色进度条 */
 }
 
 /* 统计数据区 */
@@ -267,6 +338,145 @@ page {
   font-weight: bold;
 }
 
+/* 4. 邀请奖励区域 */
+.invite-section {
+  margin: 30rpx;
+  padding: 30rpx;
+  border-radius: 20rpx;
+  background: rgba(30, 20, 10, 0.85);
+}
+
+.invite-header {
+  text-align: center;
+  margin-bottom: 16rpx;
+}
+
+.invite-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: var(--gold-500, #D4AF37);
+}
+
+.invite-desc {
+  text-align: center;
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 30rpx;
+  line-height: 1.5;
+}
+
+.invite-code-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.code-label,
+.input-label {
+  font-size: 28rpx;
+  color: #fff;
+}
+
+.code-value-box {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.code-value {
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.8);
+  font-family: monospace;
+}
+
+.copy-btn {
+  padding: 8rpx 16rpx;
+  background: rgba(212, 175, 55, 0.2);
+  border-radius: 8rpx;
+}
+
+.copy-icon {
+  font-size: 24rpx;
+}
+
+.invite-input-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.input-box {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.invite-input {
+  width: 240rpx;
+  height: 60rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 30rpx;
+  padding: 0 24rpx;
+  font-size: 26rpx;
+  color: #fff;
+}
+
+.confirm-btn {
+  padding: 12rpx 32rpx;
+  background: var(--gold-500, #D4AF37);
+  border-radius: 30rpx;
+  color: #1a1a1a;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.invited-list-entry {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 30rpx;
+  gap: 10rpx;
+}
+
+.invited-title {
+  font-size: 28rpx;
+  color: var(--gold-500, #D4AF37);
+}
+
+.invited-arrow {
+  font-size: 24rpx;
+  color: var(--gold-500, #D4AF37);
+}
+
+/* 邀请弹窗特定样式 */
+.invite-modal {
+  width: 90%;
+  max-width: 600rpx;
+}
+
+.invite-desc-popup {
+  text-align: center;
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 30rpx;
+  line-height: 1.5;
+}
+
+.invite-modal .invite-code-row,
+.invite-modal .invite-input-row {
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.invite-modal .invited-list-entry {
+  padding-top: 24rpx;
+  padding-bottom: 10rpx;
+}
+
 /* 3. 功能菜单列表 */
 .menu-container {
   margin-top: 50rpx;
@@ -352,8 +562,14 @@ page {
 }
 
 @keyframes slideUp {
-  from { transform: translateY(40rpx); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from { 
+    transform: translateY(100rpx) scale(0.9); 
+    opacity: 0; 
+  }
+  to { 
+    transform: translateY(0) scale(1); 
+    opacity: 1; 
+  }
 }
 
 .modal-head {

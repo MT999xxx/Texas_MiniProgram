@@ -249,13 +249,14 @@ export default function Tables() {
     // 类别文本映射
     const getCategoryText = (category: string) => {
         const map: Record<string, string> = {
-            MAIN: '主赛桌',
-            SIDE: '副赛桌',
+            MAIN: '高额桌',
+            SIDE: '低额桌',
             TRAINING: '练习桌',
             DINING: '餐饮区',
         };
         return map[category] || category;
     };
+
 
     // 状态标签颜色
     const getStatusColor = (status: string) => {
@@ -300,8 +301,9 @@ export default function Tables() {
                             value={categoryFilter}
                             onChange={setCategoryFilter}
                         >
-                            <Select.Option value="MAIN">主赛桌</Select.Option>
-                            <Select.Option value="SIDE">副赛桌</Select.Option>
+                            <Select.Option value="MAIN">高额桌</Select.Option>
+                            <Select.Option value="SIDE">低额桌</Select.Option>
+
                             <Select.Option value="TRAINING">练习桌</Select.Option>
                             <Select.Option value="DINING">餐饮区</Select.Option>
                         </Select>
@@ -412,8 +414,9 @@ export default function Tables() {
                         rules={[{ required: true, message: '请选择类别' }]}
                     >
                         <Select placeholder="选择类别">
-                            <Select.Option value="MAIN">主赛桌</Select.Option>
-                            <Select.Option value="SIDE">副赛桌</Select.Option>
+                            <Select.Option value="MAIN">高额桌</Select.Option>
+                            <Select.Option value="SIDE">低额桌</Select.Option>
+
                             <Select.Option value="TRAINING">练习桌</Select.Option>
                             <Select.Option value="DINING">餐饮区</Select.Option>
                         </Select>

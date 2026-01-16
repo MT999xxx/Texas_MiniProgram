@@ -15,16 +15,27 @@
 
   <!-- 2. 预约列表区域 -->
   <view class="list-container">
-    <view wx:if="{{loading}}" class="loading-box">
-      <view class="loading-shimmer"></view>
-      <text class="loading-text">同步名仕录...</text>
+    <!-- Loading状态 (骨架屏) -->
+    <view class="skeleton-list" wx:if="{{loading}}">
+      <block wx:for="{{[1,2,3]}}" wx:key="*this">
+        <view class="reservation-item glass-panel gold-border shadow-lux" style="border: none;">
+          <skeleton shape="line" customStyle="width: 40%; margin-bottom: 30rpx; height: 40rpx;" />
+          <skeleton shape="line" customStyle="width: 80%; margin-bottom: 20rpx;" />
+          <skeleton shape="line" customStyle="width: 60%; margin-bottom: 20rpx;" />
+          <skeleton shape="line" customStyle="width: 70%;" />
+        </view>
+      </block>
     </view>
 
-    <view wx:elif="{{reservations.length === 0}}" class="empty-box">
-      <view class="css-icon-calendar"></view>
-      <text class="empty-text">尚无名仕预约</text>
-      <button class="btn-goto-reserve shimmer-effect" bindtap="gotoReserve">即刻预定</button>
-    </view>
+    <!-- 空数据提示 (图形化) -->
+    <empty 
+      wx:elif="{{reservations.length === 0}}"
+      type="box"
+      text="尚无名仕预约"
+      description="您还没有任何预约记录，点击下方按钮即刻开启专享体验"
+    >
+      <button class="btn-goto-reserve shimmer-effect" bindtap="gotoReserve" style="margin-top: 40rpx;">即刻预定</button>
+    </empty>
 
     <view wx:else class="reservation-list">
       <view

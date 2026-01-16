@@ -1,0 +1,4 @@
+<view 
+  class="skeleton-item shape-{{shape}} {{animate ? 'animate' : ''}}" 
+  style="{{customStyle}}"
+></view>

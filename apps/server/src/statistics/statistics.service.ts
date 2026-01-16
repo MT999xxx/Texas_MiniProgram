@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, In, MoreThanOrEqual, Repository } from 'typeorm';
+import { Between, Repository, Not, In, MoreThanOrEqual } from 'typeorm';
 import { ReservationEntity, ReservationStatus } from '../reservation/reservation.entity';
 import { OrderEntity, OrderStatus } from '../orders/order.entity';
 import { OrderItemEntity } from '../orders/order-item.entity';
@@ -93,7 +93,7 @@ export class StatisticsService {
 
         const results = await this.orderRepository
             .createQueryBuilder('order')
-            .select(`${groupFormat}`, 'date')
+            .select(`${groupFormat} `, 'date')
             .addSelect('SUM(order.totalAmount)', 'revenue')
             .where('order.createdAt >= :startDate', { startDate })
             .andWhere('order.status IN (:...statuses)', {
@@ -132,19 +132,27 @@ export class StatisticsService {
      * 获取积分排行榜
      */
     async getLeaderboard(limit: number = 10) {
-        const members = await this.memberRepository.find({
-            order: { points: 'DESC' },
-            take: limit,
-        });
+        try {
+            const members = await this.memberRepository.find({
+                where: { points: Not(0) }, // 过滤掉0积分的用户
+                order: { points: 'DESC' },
+                take: limit,
+            });
 
-        return members.map(m => ({
-            id: m.id,
-            name: m.nickname || '匿名会员',
-            avatar: m.avatar || '🎭',
-            score: m.points,
-            tag: this.generateTag(m.points),
-        }));
+            return members.map((m, index) => ({
+                rank: index + 1,
+                id: m.id,
+                name: m.nickname || '匿名会员',
+                avatar: m.avatar || '🎭',
+                score: m.points,
+                tag: this.generateTag(m.points),
+            }));
+        } catch (error) {
+            console.error('获取排行榜失败:', error);
+            return [];
+        }
     }
+
 
     private generateTag(points: number): string {
         if (points >= 10000) return '至尊VIP';

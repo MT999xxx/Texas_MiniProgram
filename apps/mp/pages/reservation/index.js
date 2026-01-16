@@ -205,6 +205,7 @@ Page({
             data.depositAmount,
             {
               successCallback: () => {
+                wx.vibrateShort({ type: 'medium' });
                 wx.showToast({ title: '支付成功', icon: 'success' });
                 setTimeout(() => {
                   wx.navigateTo({
@@ -242,6 +243,7 @@ Page({
         }
       } else {
         // 不需要支付
+        wx.vibrateShort({ type: 'medium' });
         wx.showToast({ title: '预约成功', icon: 'success' });
         setTimeout(() => {
           wx.navigateTo({

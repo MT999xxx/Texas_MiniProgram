@@ -141,6 +141,17 @@ export default function Dashboard() {
             items: [
                 { name: '营收', channel: 'y', valueFormatter: (v: any) => `¥${v.toLocaleString()}` }
             ],
+            showMarkers: true,
+            shared: true,
+        },
+        slider: {
+            x: {
+                values: [0, 1], // 默认展示范围
+            },
+        },
+        interaction: {
+            tooltip: true,
+            brushXFilter: true, // 开启 X 轴刷选缩放
         },
     };
 
@@ -259,20 +270,28 @@ export default function Dashboard() {
                     <button className="btn link" onClick={handleExport}>导出榜单</button>
                 </div>
                 <div className="leaderboard-scroll">
-                    <ul className="leaderboard">
-                        {leaderboard.map((player, index) => (
-                            <li key={player.name}>
-                                <div className="rank">{index + 1}</div>
-                                <div className="avatar">{player.avatar}</div>
-                                <div className="info">
-                                    <strong>{player.name}</strong>
-                                    <span>{player.tag}</span>
-                                </div>
-                                <div className="score">{player.score.toLocaleString()}</div>
-                            </li>
-                        ))}
-                    </ul>
+                    {leaderboard.length === 0 ? (
+                        <div className="leaderboard-empty">
+                            <p>暂无排行数据</p>
+                            <small>有积分的会员将显示在此处</small>
+                        </div>
+                    ) : (
+                        <ul className="leaderboard">
+                            {leaderboard.map((player) => (
+                                <li key={player.id || player.name}>
+                                    <div className="rank">{player.rank}</div>
+                                    <div className="avatar">{player.avatar}</div>
+                                    <div className="info">
+                                        <strong>{player.name}</strong>
+                                        <span>{player.tag}</span>
+                                    </div>
+                                    <div className="score">{player.score.toLocaleString()}</div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
+
             </section>
 
 

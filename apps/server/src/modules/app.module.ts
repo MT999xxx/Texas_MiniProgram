@@ -15,6 +15,7 @@ import { UploadModule } from '../upload/upload.module';
 import { NoticesModule } from '../notices/notices.module';
 import { StatisticsModule } from '../statistics/statistics.module';
 import { CoinsModule } from '../coins/coins.module';
+import { InviteModule } from '../invite/invite.module';
 import { databaseConfig } from '../config/database.config';
 
 @Module({
@@ -35,6 +36,7 @@ import { databaseConfig } from '../config/database.config';
     NoticesModule,
     StatisticsModule,
     CoinsModule,
+    InviteModule,
   ],
 })
 export class AppModule { }
