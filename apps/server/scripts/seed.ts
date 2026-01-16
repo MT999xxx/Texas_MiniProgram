@@ -39,12 +39,12 @@ async function seed() {
   console.log('🎲 创建桌位...');
   await queryRunner.query(`
     INSERT INTO tables (id, name, category, capacity, status, is_active, created_at, updated_at) VALUES
-    (UUID(), '主赛桌A1', 'MAIN', 10, 'AVAILABLE', 1, NOW(), NOW()),
-    (UUID(), '主赛桌A2', 'MAIN', 10, 'AVAILABLE', 1, NOW(), NOW()),
-    (UUID(), '主赛桌B1', 'MAIN', 9, 'RESERVED', 1, NOW(), NOW()),
-    (UUID(), '副赛桌C1', 'SIDE', 6, 'AVAILABLE', 1, NOW(), NOW()),
-    (UUID(), '副赛桌C2', 'SIDE', 6, 'IN_USE', 1, NOW(), NOW()),
-    (UUID(), '副赛桌D1', 'SIDE', 8, 'AVAILABLE', 1, NOW(), NOW()),
+    (UUID(), '高额桌A1', 'MAIN', 10, 'AVAILABLE', 1, NOW(), NOW()),
+    (UUID(), '高额桌A2', 'MAIN', 10, 'AVAILABLE', 1, NOW(), NOW()),
+    (UUID(), '高额桌B1', 'MAIN', 9, 'RESERVED', 1, NOW(), NOW()),
+    (UUID(), '低额桌C1', 'SIDE', 6, 'AVAILABLE', 1, NOW(), NOW()),
+    (UUID(), '低额桌C2', 'SIDE', 6, 'IN_USE', 1, NOW(), NOW()),
+    (UUID(), '低额桌D1', 'SIDE', 8, 'AVAILABLE', 1, NOW(), NOW()),
     (UUID(), '餐饮区E1', 'DINING', 4, 'AVAILABLE', 1, NOW(), NOW()),
     (UUID(), '餐饮区E2', 'DINING', 4, 'AVAILABLE', 1, NOW(), NOW())
   `);

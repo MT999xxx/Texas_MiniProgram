@@ -55,7 +55,7 @@
         </view>
       </block>
 
-      <block wx:else wx:for="{{goodsList}}" wx:key="id">
+      <block wx:if="{{!loading}}" wx:for="{{goodsList}}" wx:key="id">
         <view class="goods-item glass-panel gold-border shadow-lux">
           <image class="goods-image" src="{{item.imageUrl}}" mode="aspectFill" />
           <view class="goods-info">

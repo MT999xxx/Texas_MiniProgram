@@ -1,10 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { MemberEntity } from '../membership/member.entity';
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 /**
  * 邀请关系实体
  * 记录邀请人与被邀请人之间的关系，以及奖励发放状态
+ * 注意：不使用外键约束，只存储 ID，避免 TypeORM 同步冲突
  */
 @Entity('invites')
 export class InviteEntity {
@@ -35,16 +35,6 @@ export class InviteEntity {
     @ApiProperty({ description: '被邀请人是否已消费' })
     @Column({ type: 'boolean', default: false })
     inviteeConsumed!: boolean;
-
-    @ApiPropertyOptional({ description: '邀请人' })
-    @ManyToOne(() => MemberEntity, { nullable: true })
-    @JoinColumn({ name: 'inviterId', referencedColumnName: 'userId' })
-    inviter?: MemberEntity;
-
-    @ApiPropertyOptional({ description: '被邀请人' })
-    @ManyToOne(() => MemberEntity, { nullable: true })
-    @JoinColumn({ name: 'inviteeId', referencedColumnName: 'userId' })
-    invitee?: MemberEntity;
 
     @ApiProperty({ type: String, format: 'date-time' })
     @CreateDateColumn()

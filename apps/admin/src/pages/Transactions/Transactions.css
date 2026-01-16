@@ -1,0 +1,60 @@
+.transactions-page .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.transactions-page .stats-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.transactions-page .stat-card {
+    flex: 1;
+    padding: 16px 20px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05));
+    border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.transactions-page .stat-card .label {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.65);
+    margin-bottom: 8px;
+}
+
+.transactions-page .stat-card .value {
+    font-size: 24px;
+    font-weight: 600;
+    color: #d4af37;
+}
+
+.transactions-page .type-tag {
+    font-weight: 500;
+}
+
+.transactions-page .type-RECHARGE {
+    background-color: rgba(82, 196, 26, 0.1);
+    border-color: #52c41a;
+    color: #52c41a;
+}
+
+.transactions-page .type-EXCHANGE {
+    background-color: rgba(24, 144, 255, 0.1);
+    border-color: #1890ff;
+    color: #1890ff;
+}
+
+.transactions-page .type-WITHDRAW {
+    background-color: rgba(250, 173, 20, 0.1);
+    border-color: #faad14;
+    color: #faad14;
+}
+
+.transactions-page .type-CONSUME {
+    background-color: rgba(255, 77, 79, 0.1);
+    border-color: #ff4d4f;
+    color: #ff4d4f;
+}

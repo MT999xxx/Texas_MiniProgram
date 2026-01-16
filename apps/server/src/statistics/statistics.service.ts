@@ -115,15 +115,16 @@ export class StatisticsService {
     async getHotMenuItems() {
         const results = await this.orderItemRepository
             .createQueryBuilder('item')
-            .select('item.name', 'name')
+            .leftJoin('item.menuItem', 'menuItem')
+            .select('menuItem.name', 'name')
             .addSelect('SUM(item.quantity)', 'sales')
-            .groupBy('item.name')
+            .groupBy('menuItem.name')
             .orderBy('sales', 'DESC')
             .limit(5)
             .getRawMany();
 
         return results.map(r => ({
-            name: r.name,
+            name: r.name || '未知菜品',
             sales: parseInt(r.sales, 10) || 0,
         }));
     }

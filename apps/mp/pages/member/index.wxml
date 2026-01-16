@@ -160,8 +160,8 @@
                value="{{depositAmount}}" bindinput="onDepositInput" />
       </view>
       <view class="lux-rules">
-        <text>• 5000以内 1:1 退回</text>
-        <text>• 超出部分 1000:1 兑换抽奖</text>
+        <text>• 赢得积分1:10存入账户</text>
+        <text>• 充值积分1:1存入账户</text>
       </view>
       <view class="modal-btns">
         <view class="btn-cancel" bindtap="hideDepositDialog">返回</view>
@@ -198,9 +198,9 @@
                value="{{exchangeCoins}}" bindinput="onExchangeInput" />
       </view>
       <view class="lux-rules">
-        <text>• 兑换比例：20积分 = 1金币</text>
+        <text>• 兑换比例：200积分 = 1金币</text>
         <text>• 当前积分余额：{{stats.points}}</text>
-        <text>• 预计消耗积分：{{exchangeCoins ? exchangeCoins * 20 : 0}}</text>
+        <text>• 预计消耗积分：{{exchangeCoins ? exchangeCoins * 200 : 0}}</text>
       </view>
       <view class="modal-btns">
         <view class="btn-cancel" bindtap="hideExchangeDialog">返回</view>

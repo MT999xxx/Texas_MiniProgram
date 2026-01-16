@@ -195,7 +195,18 @@ export class CoinsService {
             throw new BadRequestException(`积分不足，当前只有 ${member.points} 积分`);
         }
 
-        // 直接扣减积分
+        // 创建取积分记录
+        const transaction = this.transactionRepo.create({
+            memberId,
+            type: CoinTransactionType.WITHDRAW,
+            amount: 0,
+            pointsUsed: dto.points,
+            status: CoinTransactionStatus.SUCCESS,
+            remark: `取出${dto.points}积分`,
+        });
+        await this.transactionRepo.save(transaction);
+
+        // 扣减积分
         member.points -= dto.points;
         await this.memberRepo.save(member);
 
@@ -263,6 +274,19 @@ export class CoinsService {
         return this.transactionRepo.find({
             where: { memberId },
             order: { createdAt: 'DESC' },
+        });
+    }
+
+    /**
+     * 获取所有交易记录（管理员）
+     */
+    async getAllTransactions(type?: string) {
+        const where = type ? { type: type as any } : {};
+        return this.transactionRepo.find({
+            where,
+            relations: ['member'],
+            order: { createdAt: 'DESC' },
+            take: 500, // 限制数量避免性能问题
         });
     }
 

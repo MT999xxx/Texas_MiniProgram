@@ -45,7 +45,7 @@ export class InviteController {
         // 格式化返回数据
         const list = invites.map(invite => ({
             inviteeId: invite.inviteeId,
-            inviteeNickname: invite.invitee?.nickname || '用户',
+            inviteeNickname: '好友', // 不再关联查询，显示默认值
             consumed: invite.inviteeConsumed,
             rewarded: invite.inviterRewarded,
             createdAt: invite.createdAt,

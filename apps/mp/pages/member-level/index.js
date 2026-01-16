@@ -16,12 +16,7 @@ Page({
                 darkText: true,
                 bgGradient: 'linear-gradient(135deg, #ffffff 0%, #e6e6e6 100%)',
                 benefits: [
-                    { icon: '💰', text: '签到积分' },
-                    { icon: '🍿', text: '月度小吃券' },
-                    { icon: '🍷', text: '专属酒杯' },
-                    { icon: '🤖', text: 'AI挑战' },
-                    { icon: '🎁', text: '3000积分' },
-                    { icon: '🎟️', text: '更多奖励...' }
+                    { icon: '🎁', text: '赠送7500积分' }
                 ]
             },
             {
@@ -34,12 +29,8 @@ Page({
                 darkText: true,
                 bgGradient: 'linear-gradient(135deg, #e0f2e0 0%, #c4e3c4 100%)',
                 benefits: [
-                    { icon: '💰', text: '签到积分' },
-                    { icon: '🍿', text: '月度小吃券' },
-                    { icon: '🍷', text: '专属酒杯' },
-                    { icon: '🤖', text: 'AI挑战' },
-                    { icon: '🎁', text: '20000积分' },
-                    { icon: '🎟️', text: '更多奖励...' }
+                    { icon: '🎁', text: '赠送20000积分' },
+                    { icon: '🏷️', text: '享受9.5折优惠' }
                 ]
             },
             {
@@ -52,12 +43,10 @@ Page({
                 darkText: true,
                 bgGradient: 'linear-gradient(135deg, #e0f0f2 0%, #c4dee3 100%)',
                 benefits: [
-                    { icon: '💰', text: '签到积分' },
-                    { icon: '🍿', text: '月度小吃券' },
-                    { icon: '🍷', text: '专属酒杯' },
-                    { icon: '🤖', text: 'AI挑战' },
-                    { icon: '🍺', text: '免费啤酒' },
-                    { icon: '🎁', text: '更多奖励...' }
+                    { icon: '🏷️', text: '享受8.5折优惠' },
+                    { icon: '🍺', text: '每月免费2瓶啤酒' },
+                    { icon: '🍿', text: '每月免费1份小吃' },
+                    { icon: '🎁', text: '每月1个盲盒' }
                 ]
             },
             {
@@ -70,13 +59,11 @@ Page({
                 darkText: true,
                 bgGradient: 'linear-gradient(135deg, #f2e0f2 0%, #e3c4e3 100%)',
                 benefits: [
-                    { icon: '💰', text: '签到积分' },
-                    { icon: '🍿', text: '月度小吃券' },
-                    { icon: '🍷', text: '专属酒杯' },
-                    { icon: '🤖', text: 'AI挑战' },
-                    { icon: '💆', text: '足疗券' },
-                    { icon: '🍸', text: '免费调酒' },
-                    { icon: '🎟️', text: '更多奖励...' }
+                    { icon: '🏷️', text: '享受7.5折优惠' },
+                    { icon: '💆', text: '足疗券1张' },
+                    { icon: '🍸', text: '每月免费1杯调酒' },
+                    { icon: '🍿', text: '每月免费1份小吃' },
+                    { icon: '🎁', text: '每月1个盲盒' }
                 ]
             }
         ]

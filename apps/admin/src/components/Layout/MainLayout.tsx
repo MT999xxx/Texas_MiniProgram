@@ -13,6 +13,7 @@ import {
     LogoutOutlined,
     UserOutlined,
     AuditOutlined,
+    SwapOutlined,
 } from '@ant-design/icons';
 import NotificationCenter from '../NotificationCenter';
 import './MainLayout.css';
@@ -59,6 +60,11 @@ export default function MainLayout() {
             key: '/deposit-review',
             icon: <AuditOutlined />,
             label: '积分审核',
+        },
+        {
+            key: '/transactions',
+            icon: <SwapOutlined />,
+            label: '交易记录',
         },
         {
             key: '/orders',

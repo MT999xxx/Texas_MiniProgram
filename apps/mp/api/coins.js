@@ -3,8 +3,8 @@
  */
 const request = require('../utils/request');
 
-// 积分兑换金币汇率：20积分 = 1金币
-const POINTS_PER_COIN = 20;
+// 积分兑换金币汇率：200积分 = 1金币
+const POINTS_PER_COIN = 200;
 
 /**
  * 获取余额信息

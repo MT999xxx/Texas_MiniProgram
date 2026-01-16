@@ -42,6 +42,12 @@ export class CoinsController {
         return this.coinsService.getTransactions(memberId);
     }
 
+    @Get('transactions')
+    @ApiOperation({ summary: '获取所有交易记录（管理员）' })
+    getAllTransactions(@Query('type') type?: string) {
+        return this.coinsService.getAllTransactions(type);
+    }
+
     // ===== 存取积分 =====
 
     @Post('points/deposit')
