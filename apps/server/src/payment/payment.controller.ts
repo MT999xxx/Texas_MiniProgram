@@ -111,6 +111,13 @@ export class PaymentController {
     return this.paymentService.getRechargePackages();
   }
 
+  @Get('order-by-trade-no/:tradeNo')
+  @ApiOperation({ summary: '通过支付订单号查询订单（微信订单中心用）' })
+  @ApiResponse({ status: 200, description: '订单查询成功' })
+  async getOrderByTradeNo(@Param('tradeNo') tradeNo: string) {
+    return this.paymentService.getOrderByTradeNo(tradeNo);
+  }
+
   @Get('history')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

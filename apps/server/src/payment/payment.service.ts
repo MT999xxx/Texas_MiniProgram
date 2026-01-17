@@ -505,4 +505,24 @@ export class PaymentService {
 
     return payment;
   }
+
+  // 通过支付订单号查询订单ID（用于微信订单中心跳转）
+  async getOrderByTradeNo(tradeNo: string) {
+    const payment = await this.paymentRepo.findOne({
+      where: { paymentOrderNo: tradeNo },
+      relations: ['order'],
+    });
+
+    if (!payment) {
+      throw new NotFoundException('支付记录不存在');
+    }
+
+    return {
+      paymentId: payment.id,
+      orderId: payment.order?.id || null,
+      reservationId: payment.reservationId || null,
+      type: payment.type,
+      status: payment.status,
+    };
+  }
 }

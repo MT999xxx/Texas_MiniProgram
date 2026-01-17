@@ -10,7 +10,16 @@ Page({
   },
 
   onLoad(options) {
-    const { id } = options;
+    // 支持两种参数：id（订单ID）或 order_no（支付订单号，用于微信订单中心跳转）
+    const { id, order_no } = options;
+
+    if (order_no) {
+      // 微信订单中心跳转，使用支付订单号查询
+      this.setData({ paymentOrderNo: order_no });
+      this.loadOrderByPaymentNo(order_no);
+      return;
+    }
+
     if (!id) {
       wx.showToast({
         title: '订单ID无效',
@@ -70,6 +79,39 @@ Page({
 
       wx.showToast({
         title: '加载失败',
+        icon: 'none'
+      });
+
+      setTimeout(() => {
+        wx.navigateBack();
+      }, 1500);
+    }
+  },
+
+  // 通过支付订单号加载订单详情（用于微信订单中心跳转）
+  async loadOrderByPaymentNo(paymentOrderNo) {
+    this.setData({ loading: true });
+
+    try {
+      // 先通过支付订单号查询订单ID
+      const paymentInfo = await request({
+        url: `/payment/order-by-trade-no/${paymentOrderNo}`,
+        method: 'GET'
+      });
+
+      if (paymentInfo && paymentInfo.orderId) {
+        this.setData({ orderId: paymentInfo.orderId });
+        await this.loadOrderDetail();
+      } else {
+        throw new Error('订单不存在');
+      }
+
+    } catch (error) {
+      console.error('通过支付订单号加载失败:', error);
+      this.setData({ loading: false });
+
+      wx.showToast({
+        title: '订单不存在',
         icon: 'none'
       });
 
