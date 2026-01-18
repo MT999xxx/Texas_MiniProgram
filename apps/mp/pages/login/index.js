@@ -60,16 +60,20 @@ Page({
     let avatarUrl = '';
 
     // 如果用户选择了头像且是临时文件，先上传到服务器获取永久URL
-    if (this.data.avatarUrl && this.data.avatarUrl.startsWith('http://tmp')) {
+    // 微信临时文件路径以 wxfile:// 或 http://tmp 开头
+    const tempPath = this.data.avatarUrl;
+    const isTempFile = tempPath && (tempPath.startsWith('wxfile://') || tempPath.startsWith('http://tmp'));
+
+    if (isTempFile) {
       try {
-        console.log('正在上传头像...');
-        const uploadResult = await uploadFile(this.data.avatarUrl, '/uploads/avatar');
+        console.log('正在上传头像...', tempPath);
+        const uploadResult = await uploadFile(tempPath, '/uploads/avatar');
         avatarUrl = uploadResult.url;
         console.log('头像上传成功:', avatarUrl);
       } catch (err) {
         console.error('头像上传失败:', err);
-        // 上传失败不阻止登录，使用空头像
-        avatarUrl = '';
+        // 上传失败不阻止登录，使用默认头像
+        avatarUrl = '/images/huiyuan2.jpg';
       }
     } else if (this.data.avatarUrl) {
       // 已经是有效URL或本地默认图片
