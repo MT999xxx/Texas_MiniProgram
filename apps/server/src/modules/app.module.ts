@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ScheduleModule } from '@nestjs/schedule';
+// 暂时禁用 ScheduleModule - Node 18 不支持全局 crypto
+// import { ScheduleModule } from '@nestjs/schedule';
 import { ReservationModule } from '../reservation/reservation.module';
 import { TableModule } from '../tables/table.module';
 import { MenuModule } from '../menu/menu.module';
@@ -22,7 +23,7 @@ import { databaseConfig } from '../config/database.config';
 @Module({
   imports: [
     TypeOrmModule.forRoot(databaseConfig),
-    ScheduleModule.forRoot(),
+    // ScheduleModule.forRoot(), // 暂时禁用 - 需要 Node 20+
     RedisModule,
     AuthModule,
     ReservationModule,

@@ -47,4 +47,12 @@ export class OrdersController {
   updateStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto) {
     return this.ordersService.updateStatus(id, dto);
   }
+
+  @Post(':id/pay-with-coins')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: '金币支付成功' })
+  @ApiBadRequestResponse({ description: '订单不存在、状态非法或金币余额不足' })
+  payWithCoins(@Param('id') id: string, @Body('memberId') memberId: string) {
+    return this.ordersService.payWithCoins(id, memberId);
+  }
 }

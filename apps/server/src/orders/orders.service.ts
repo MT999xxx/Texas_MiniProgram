@@ -15,6 +15,8 @@ import { LoyaltyService } from '../loyalty/loyalty.service';
 import { CouponsService } from '../coupons/coupons.service';
 import { UserCouponEntity, UserCouponStatus } from '../coupons/user-coupon.entity';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { MemberEntity } from '../membership/member.entity';
+import { CoinTransactionEntity, CoinTransactionType, CoinTransactionStatus } from '../coins/coin-transaction.entity';
 
 @Injectable()
 export class OrdersService {
@@ -31,6 +33,10 @@ export class OrdersService {
     private readonly tableRepo: Repository<TableEntity>,
     @InjectRepository(UserCouponEntity)
     private readonly userCouponRepo: Repository<UserCouponEntity>,
+    @InjectRepository(MemberEntity)
+    private readonly memberRepo: Repository<MemberEntity>,
+    @InjectRepository(CoinTransactionEntity)
+    private readonly coinTransactionRepo: Repository<CoinTransactionEntity>,
     private readonly redisService: RedisService,
     private readonly tableService: TableService,
     private readonly reservationService: ReservationService,
@@ -305,5 +311,55 @@ export class OrdersService {
     }
 
     return order;
+  }
+
+  // 使用金币支付订单
+  async payWithCoins(orderId: string, memberId: string): Promise<OrderEntity> {
+    const order = await this.findById(orderId);
+
+    // 验证订单状态
+    if (order.status !== OrderStatus.PENDING) {
+      throw new BadRequestException('订单状态不允许支付');
+    }
+
+    // 获取会员信息
+    const member = await this.memberRepo.findOne({ where: { id: memberId } });
+    if (!member) {
+      throw new NotFoundException('会员不存在');
+    }
+
+    const orderAmount = Number(order.totalAmount);
+    const memberCoins = Number(member.coins || 0);
+
+    // 验证金币余额
+    if (memberCoins < orderAmount) {
+      throw new BadRequestException(`金币余额不足，需要${orderAmount}金币，当前余额${memberCoins}金币`);
+    }
+
+    // 扣除金币
+    member.coins = memberCoins - orderAmount;
+    await this.memberRepo.save(member);
+
+    // 记录金币消费交易
+    const transaction = this.coinTransactionRepo.create({
+      memberId,
+      type: CoinTransactionType.CONSUME,
+      amount: -orderAmount,
+      status: CoinTransactionStatus.SUCCESS,
+      remark: `订单支付: ${order.orderNumber}`,
+    });
+    await this.coinTransactionRepo.save(transaction);
+
+    // 标记订单为已支付
+    order.status = OrderStatus.PAID;
+    const saved = await this.orderRepo.save(order);
+    await this.redisService.getClient().set(`order:${saved.id}:status`, saved.status);
+
+    // 如果有会员，奖励积分
+    if (order.member) {
+      await this.loyaltyService.awardPointsForOrder(saved);
+    }
+
+    return saved;
   }
 }

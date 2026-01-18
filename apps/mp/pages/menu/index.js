@@ -563,17 +563,30 @@ Page({
         note: '',
       });
 
+      // 获取会员金币余额
+      let coinBalance = 0;
+      try {
+        const balanceInfo = await menuApi.getMemberBalance(memberId);
+        coinBalance = Number(balanceInfo?.coins || 0);
+      } catch (e) {
+        console.log('获取金币余额失败:', e);
+      }
+
       this.setData({ loading: false });
 
-      // 询问是否立即支付
-      wx.showModal({
-        title: '下单成功',
-        content: `订单金额：￥${this.data.cartAmount.toFixed(2)}\n是否立即支付？`,
-        confirmText: '立即支付',
-        cancelText: '稍后支付',
+      // 弹出支付方式选择
+      const orderAmount = this.data.cartAmount;
+      const canPayWithCoins = coinBalance >= orderAmount;
+
+      wx.showActionSheet({
+        itemList: [
+          `微信支付 ¥${orderAmount.toFixed(2)}`,
+          `金币支付 ${orderAmount.toFixed(2)}金币 (余额: ${coinBalance.toFixed(2)})`,
+          '稍后支付'
+        ],
         success: async (res) => {
-          if (res.confirm) {
-            // 调用真实支付
+          if (res.tapIndex === 0) {
+            // 微信支付
             try {
               await PaymentUtils.createOrderPayment(order.id, {
                 successCallback: () => {
@@ -587,15 +600,42 @@ Page({
                 },
               });
             } catch (error) {
-              console.error('支付失败:', error);
-              // 即使支付失败，订单已创建，可以稍后支付
+              console.error('微信支付失败:', error);
               this.clearCartAndNavigate();
             }
+          } else if (res.tapIndex === 1) {
+            // 金币支付
+            if (!canPayWithCoins) {
+              wx.showModal({
+                title: '金币余额不足',
+                content: `当前余额${coinBalance.toFixed(2)}金币，需要${orderAmount.toFixed(2)}金币。`,
+                confirmText: '去充值',
+                cancelText: '取消',
+                success: (modalRes) => {
+                  if (modalRes.confirm) {
+                    wx.navigateTo({ url: '/pages/recharge/index' });
+                  }
+                }
+              });
+              return;
+            }
+
+            // 执行金币支付
+            try {
+              wx.showLoading({ title: '支付中...' });
+              await menuApi.payWithCoins(order.id, memberId);
+              wx.hideLoading();
+              wx.showToast({ title: '金币支付成功', icon: 'success' });
+              this.clearCartAndNavigate();
+            } catch (error) {
+              wx.hideLoading();
+              wx.showToast({ title: error.message || '金币支付失败', icon: 'none' });
+            }
           } else {
-            // 稍后支付，跳转到订单列表
+            // 稍后支付
             this.clearCartAndNavigate();
           }
-        },
+        }
       });
     } catch (error) {
       this.setData({ loading: false });

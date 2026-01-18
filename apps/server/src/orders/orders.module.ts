@@ -8,6 +8,8 @@ import { MenuItemEntity } from '../menu/menu-item.entity';
 import { ReservationEntity } from '../reservation/reservation.entity';
 import { TableEntity } from '../tables/table.entity';
 import { UserCouponEntity } from '../coupons/user-coupon.entity';
+import { MemberEntity } from '../membership/member.entity';
+import { CoinTransactionEntity } from '../coins/coin-transaction.entity';
 import { TableModule } from '../tables/table.module';
 import { ReservationModule } from '../reservation/reservation.module';
 import { MembershipModule } from '../membership/membership.module';
@@ -23,7 +25,9 @@ import { CouponsModule } from '../coupons/coupons.module';
       MenuItemEntity,
       ReservationEntity,
       TableEntity,
-      UserCouponEntity
+      UserCouponEntity,
+      MemberEntity,
+      CoinTransactionEntity
     ]),
     TableModule,
     ReservationModule,
@@ -36,4 +40,4 @@ import { CouponsModule } from '../coupons/coupons.module';
   controllers: [OrdersController],
   exports: [OrdersService],
 })
-export class OrdersModule {}
+export class OrdersModule { }
