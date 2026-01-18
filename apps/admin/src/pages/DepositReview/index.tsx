@@ -44,7 +44,6 @@ export default function DepositReview() {
                         <p>会员：{deposit.member?.nickname || deposit.memberId}</p>
                         <p>申请积分：{deposit.points}</p>
                         <p>实际存入积分：{deposit.actualPoints}</p>
-                        <p>兑换抽奖次数：{deposit.lotteryChances}</p>
                     </div>
                 ),
                 okText: '通过',
@@ -109,14 +108,6 @@ export default function DepositReview() {
             key: 'actualPoints',
             render: (points: number) => (
                 <span style={{ color: '#52c41a' }}>{points || 0}</span>
-            ),
-        },
-        {
-            title: '抽奖次数',
-            dataIndex: 'lotteryChances',
-            key: 'lotteryChances',
-            render: (chances: number) => (
-                <span style={{ color: '#faad14' }}>{chances || 0}</span>
             ),
         },
         {

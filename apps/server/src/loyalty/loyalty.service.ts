@@ -42,30 +42,13 @@ export class LoyaltyService {
       const numLimit = typeof limit === 'string' ? parseInt(limit, 10) : limit;
       const safeLimit = isNaN(numLimit) ? 50 : numLimit;
 
-      let startDate: Date | undefined;
-
-      if (type === 'weekly') {
-        // 获取本周开始时间
-        const now = new Date();
-        const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() - now.getDay()); // 周日开始
-        weekStart.setHours(0, 0, 0, 0);
-        startDate = weekStart;
-      }
-
-      let query = this.memberRepo
+      // 简化查询：直接按积分排序，不依赖transaction记录
+      // 对于weekly和event类型，目前也使用总积分排序
+      // 后续可以根据实际业务需求调整
+      const members = await this.memberRepo
         .createQueryBuilder('member')
         .leftJoinAndSelect('member.level', 'level')
-        .leftJoin('member.loyaltyTransactions', 'transactions');
-
-      if (type === 'weekly' && startDate) {
-        query = query.where('transactions.createdAt >= :startDate', { startDate });
-      } else if (type === 'event') {
-        // 活动榜可以根据具体需求筛选特定活动的积分
-        query = query.where('transactions.remark LIKE :eventRemark', { eventRemark: '%活动%' });
-      }
-
-      const members = await query
+        .where('member.points > 0')
         .orderBy('member.points', 'DESC')
         .limit(safeLimit)
         .getMany();
@@ -79,9 +62,7 @@ export class LoyaltyService {
         points: member.points,
         levelName: member.level?.name || 'V1 普通会员',
         levelNumber: member.level?.threshold || 0
-      }))
-        .filter(member => member.points > 0) // 过滤掉0积分的用户
-        .sort((a, b) => b.points - a.points); // 重新按积分排序
+      }));
 
       return rankings;
     } catch (error) {

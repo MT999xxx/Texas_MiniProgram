@@ -1,0 +1,117 @@
+<view class="container">
+  <view class="title">用户服务协议</view>
+  <view class="update-time">更新时间：2025年1月1日</view>
+
+  <view class="section">
+    <view class="section-title">一、协议的接受与修改</view>
+    <view class="section-content">
+      欢迎使用"三条A德州扑克俱乐部"小程序（以下简称"本小程序"）。本协议是您与三条A德州扑克俱乐部（以下简称"我们"）之间关于您使用本小程序服务所订立的协议。
+
+      在使用本小程序提供的点餐、预约、会员服务之前，请您务必审慎阅读、充分理解本协议各条款内容，特别是免除或者限制责任的条款。
+
+      当您通过网络页面点击确认或以其他方式选择接受本协议，即表示您已充分阅读、理解并接受本协议的全部内容，本协议即产生法律效力。
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">二、服务内容</view>
+    <view class="section-content">
+      本小程序为您提供以下服务：
+
+      <text class="highlight">1. 会员服务：</text>会员注册、会员等级、积分累计与兑换、会员权益等。
+
+      <text class="highlight">2. 预约服务：</text>在线预约桌位、查看预约记录、取消预约等。
+
+      <text class="highlight">3. 点餐服务：</text>浏览菜单、在线点餐、订单查询、订单支付等。
+
+      <text class="highlight">4. 充值服务：</text>会员充值、金币购买、充值记录查询等。
+
+      <text class="highlight">5. 其他服务：</text>优惠活动、公告通知等增值服务。
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">三、用户账号</view>
+    <view class="section-content">
+      1. 您需要使用微信账号登录本小程序，登录后即可使用相关服务。
+
+      2. 您应妥善保管账号信息，因您个人原因导致账号信息泄露所引起的损失，由您自行承担。
+
+      3. 您的账号仅限本人使用，不得转让、出借或与他人共享。
+
+      4. 如发现任何未经授权使用您账号的情况，请立即通知我们。
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">四、用户行为规范</view>
+    <view class="section-content">
+      您在使用本小程序服务时，应遵守以下规范：
+
+      1. 遵守中华人民共和国相关法律法规。
+
+      2. 不得利用本小程序从事任何违法违规活动。
+
+      3. 不得发布任何违法、有害、威胁、辱骂、骚扰、诽谤、低俗或其他令人反感的内容。
+
+      4. 不得干扰或破坏本小程序的正常运行。
+
+      5. 不得进行任何可能损害我们或其他用户权益的行为。
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">五、知识产权</view>
+    <view class="section-content">
+      1. 本小程序的所有内容，包括但不限于文字、图片、软件、音视频等，均受中华人民共和国著作权法的保护。
+
+      2. 未经我们书面许可，任何单位和个人不得以任何形式复制、传播、展示本小程序的任何内容。
+
+      3. 尊重知识产权是您应尽的义务，如有违反，您应承担相应的法律责任。
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">六、免责声明</view>
+    <view class="section-content">
+      1. 因网络状况、通讯线路等任何技术原因导致服务中断或不能满足用户要求的，我们不承担任何责任。
+
+      2. 因不可抗力或其他我们无法控制的原因导致服务中断的，我们不承担任何责任，但会尽合理努力减少损失。
+
+      3. 您理解并同意，本小程序提供的服务可能因系统维护、升级等原因暂时中断。
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">七、协议的变更</view>
+    <view class="section-content">
+      我们保留在必要时修改本协议的权利。协议修改后，我们将通过适当方式通知您。如您继续使用本小程序服务，即表示您接受修改后的协议。
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">八、法律适用与争议解决</view>
+    <view class="section-content">
+      1. 本协议的订立、执行和解释及争议的解决均应适用中华人民共和国法律。
+
+      2. 如双方就本协议内容或其执行发生任何争议，双方应友好协商解决；协商不成时，任何一方均可向我们所在地有管辖权的人民法院提起诉讼。
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">九、联系我们</view>
+    <view class="section-content">
+      如您对本协议有任何疑问或建议，请通过以下方式联系我们：
+
+      <text class="highlight">俱乐部名称：</text>三条A德州扑克俱乐部
+
+      <text class="highlight">客服电话：</text>请到门店咨询
+
+      <text class="highlight">营业地址：</text>请关注公众号获取
+    </view>
+  </view>
+
+  <view class="footer">
+    <view class="footer-text">© 2025 三条A德州扑克俱乐部 版权所有</view>
+  </view>
+</view>

@@ -67,6 +67,18 @@ export class MembershipService {
     return this.memberRepo.save(member);
   }
 
+  async adjustCoins(memberId: string, delta: number) {
+    const member = await this.memberRepo.findOne({ where: { id: memberId } });
+    if (!member) {
+      throw new NotFoundException('Member not found');
+    }
+    member.coins = Number(member.coins || 0) + delta;
+    if (member.coins < 0) {
+      throw new NotFoundException('金币余额不足');
+    }
+    return this.memberRepo.save(member);
+  }
+
   findMemberById(id: string) {
     return this.memberRepo.findOne({ where: { id }, relations: ['level'] });
   }

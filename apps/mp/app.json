@@ -20,7 +20,9 @@
     "pages/points/index",
     "pages/ranking/index",
     "pages/recharge/index",
-    "pages/recharge-history/index"
+    "pages/recharge-history/index",
+    "pages/agreement/index",
+    "pages/privacy/index"
   ],
   "window": {
     "navigationBarBackgroundColor": "#120a0a",

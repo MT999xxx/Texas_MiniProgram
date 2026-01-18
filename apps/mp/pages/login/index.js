@@ -147,21 +147,15 @@ Page({
 
   // 查看用户协议
   showUserAgreement() {
-    wx.showModal({
-      title: '用户服务协议',
-      content: '欢迎使用三条A小程序。本协议是您与三条A之间关于您使用本小程序服务所订立的协议。您在使用本小程序提供的点餐、预约及会员服务时，请务必审慎阅读、充分理解各条款内容。',
-      showCancel: false,
-      confirmText: '我知道了'
+    wx.navigateTo({
+      url: '/pages/agreement/index'
     });
   },
 
   // 查看隐私政策
   showPrivacyPolicy() {
-    wx.showModal({
-      title: '隐私政策',
-      content: '我们非常重视您的个人信息保护。为了向您提供点餐、桌面预约和会员权益服务，我们会收集您的头像、昵称、手机号及订单信息。我们承诺将严格按照法律法规及隐私保护指引的要求保护您的个人信息。',
-      showCancel: false,
-      confirmText: '我知道了'
+    wx.navigateTo({
+      url: '/pages/privacy/index'
     });
   },
 

@@ -9,9 +9,6 @@ import { WechatPayService } from './wechat-pay.service';
 
 // 积分兑换金币的汇率：20积分 = 1金币
 const POINTS_PER_COIN = 20;
-// 存积分的阈值：5000以内1:1，超出部分1000:1抽奖
-const DEPOSIT_THRESHOLD = 5000;
-const POINTS_PER_LOTTERY = 1000;
 
 @Injectable()
 export class CoinsService {
@@ -147,7 +144,7 @@ export class CoinsService {
     }
 
     /**
-     * 提交存积分申请
+     * 提交存积分申请（存多少就是多少，1:1）
      */
     async createDepositRequest(memberId: string, dto: DepositPointsDto) {
         const member = await this.memberRepo.findOne({ where: { id: memberId } });
@@ -155,19 +152,14 @@ export class CoinsService {
             throw new NotFoundException('会员不存在');
         }
 
-        // 计算实际存入积分和抽奖次数
-        let actualPoints = Math.min(dto.points, DEPOSIT_THRESHOLD);
-        let lotteryChances = 0;
-        if (dto.points > DEPOSIT_THRESHOLD) {
-            const excessPoints = dto.points - DEPOSIT_THRESHOLD;
-            lotteryChances = Math.floor(excessPoints / POINTS_PER_LOTTERY);
-        }
+        // 简化逻辑：存多少就是多少
+        const actualPoints = dto.points;
 
         const deposit = this.depositRepo.create({
             memberId,
             points: dto.points,
             actualPoints,
-            lotteryChances,
+            lotteryChances: 0,
             status: PointDepositStatus.PENDING,
         });
 
@@ -177,7 +169,6 @@ export class CoinsService {
             id: saved.id,
             points: dto.points,
             actualPoints,
-            lotteryChances,
             message: '存积分申请已提交，请等待审核',
         };
     }
@@ -253,11 +244,10 @@ export class CoinsService {
 
         await this.depositRepo.save(deposit);
 
-        // 如果审核通过，增加会员积分和抽奖次数
+        // 如果审核通过，增加会员积分
         if (dto.status === 'APPROVED') {
             const member = deposit.member;
             member.points += deposit.actualPoints || 0;
-            member.lotteryChances += deposit.lotteryChances || 0;
             await this.memberRepo.save(member);
         }
 

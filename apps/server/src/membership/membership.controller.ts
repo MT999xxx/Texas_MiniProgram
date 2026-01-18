@@ -8,7 +8,7 @@ import { AdjustPointsDto } from './dto/adjust-points.dto';
 @ApiTags('Membership')
 @Controller('membership')
 export class MembershipController {
-  constructor(private readonly membershipService: MembershipService) {}
+  constructor(private readonly membershipService: MembershipService) { }
 
   @Post('levels')
   @ApiCreatedResponse({ description: '创建会员等级成功' })
@@ -90,5 +90,13 @@ export class MembershipController {
   @ApiBadRequestResponse({ description: '会员不存在' })
   adjustPoints(@Param('id') id: string, @Body() dto: AdjustPointsDto) {
     return this.membershipService.adjustPoints(id, dto.delta);
+  }
+
+  @Patch('members/:id/coins')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: '金币调整成功' })
+  @ApiBadRequestResponse({ description: '会员不存在或余额不足' })
+  adjustCoins(@Param('id') id: string, @Body() dto: AdjustPointsDto) {
+    return this.membershipService.adjustCoins(id, dto.delta);
   }
 }

@@ -55,6 +55,36 @@ export default function Members() {
         });
     };
 
+    const handleAdjustCoins = (member: Member, isAdd: boolean) => {
+        let delta = 0;
+        modal.confirm({
+            title: isAdd ? '增加金币' : '扣除金币',
+            content: (
+                <div>
+                    <p>会员：{member.nickname}</p>
+                    <p>当前金币：{member.coins ? Number(member.coins).toFixed(2) : '0.00'}</p>
+                    <p>{isAdd ? '增加' : '扣除'}：
+                        <InputNumber
+                            min={0}
+                            precision={2}
+                            defaultValue={0}
+                            onChange={(value) => delta = value || 0}
+                        />
+                    </p>
+                </div>
+            ),
+            onOk: async () => {
+                try {
+                    await memberApi.adjustCoins(member.id, isAdd ? delta : -delta);
+                    message.success('金币调整成功');
+                    loadMembers();
+                } catch (error) {
+                    message.error('操作失败');
+                }
+            },
+        });
+    };
+
     const columns: ColumnsType<Member> = [
         {
             title: '昵称',
@@ -110,15 +140,16 @@ export default function Members() {
         {
             title: '操作',
             key: 'action',
+            width: 320,
             render: (record: Member) => (
-                <Space>
+                <Space wrap>
                     <Button
                         size="small"
                         type="primary"
                         icon={<PlusOutlined />}
                         onClick={() => handleAdjustPoints(record, true)}
                     >
-                        增加积分
+                        积分+
                     </Button>
                     <Button
                         size="small"
@@ -126,7 +157,23 @@ export default function Members() {
                         icon={<MinusOutlined />}
                         onClick={() => handleAdjustPoints(record, false)}
                     >
-                        扣除积分
+                        积分-
+                    </Button>
+                    <Button
+                        size="small"
+                        style={{ background: '#faad14', borderColor: '#faad14', color: '#fff' }}
+                        icon={<PlusOutlined />}
+                        onClick={() => handleAdjustCoins(record, true)}
+                    >
+                        金币+
+                    </Button>
+                    <Button
+                        size="small"
+                        style={{ background: '#ff7a45', borderColor: '#ff7a45', color: '#fff' }}
+                        icon={<MinusOutlined />}
+                        onClick={() => handleAdjustCoins(record, false)}
+                    >
+                        金币-
                     </Button>
                 </Space>
             ),
