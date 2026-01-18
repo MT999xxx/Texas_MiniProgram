@@ -135,10 +135,19 @@ const authManager = {
 
         return true;
       } catch (error) {
-        // token无效，清除登录信息
-        console.log('Token验证失败或已过期');
-        this.clearAuth();
-        return false;
+        // 区分认证错误和网络错误
+        const statusCode = error.statusCode || error.status;
+
+        if (statusCode === 401 || statusCode === 403) {
+          // token明确无效，清除登录信息
+          console.log('Token已过期或无效，需要重新登录');
+          this.clearAuth();
+          return false;
+        }
+
+        // 网络错误或其他错误，保持登录状态（使用本地缓存的用户信息）
+        console.log('网络错误，使用缓存的登录信息继续');
+        return true;
       }
     }
     return false;

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Table, Card, Button, Space, Tag, InputNumber, App } from 'antd';
-import { ReloadOutlined, PlusOutlined, MinusOutlined } from '@ant-design/icons';
+import { Table, Card, Button, Space, Tag, InputNumber, App, Avatar, Select } from 'antd';
+import { ReloadOutlined, PlusOutlined, MinusOutlined, UserOutlined, EditOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { memberApi, Member } from '../../api/members';
 import './Members.css';
@@ -12,6 +12,7 @@ export default function Members() {
 
     useEffect(() => {
         loadMembers();
+        loadLevels();
     }, []);
 
     const loadMembers = async () => {
@@ -23,6 +24,22 @@ export default function Members() {
             message.error('加载会员列表失败');
         } finally {
             setLoading(false);
+        }
+    };
+
+    interface Level {
+        code: string;
+        name: string;
+        threshold: number;
+    }
+    const [levels, setLevels] = useState<Level[]>([]);
+
+    const loadLevels = async () => {
+        try {
+            const data = await memberApi.listLevels();
+            setLevels(data);
+        } catch (error) {
+            console.error('加载等级列表失败');
         }
     };
 
@@ -85,6 +102,43 @@ export default function Members() {
         });
     };
 
+    const handleChangeLevel = (member: Member) => {
+        let selectedLevel: string | null = member.levelCode || null;
+        modal.confirm({
+            title: '修改会员等级',
+            content: (
+                <div>
+                    <p>会员：{member.nickname}</p>
+                    <p>当前等级：{member.level?.name || '无'}</p>
+                    <p>选择新等级：
+                        <Select
+                            style={{ width: 150 }}
+                            defaultValue={member.levelCode || undefined}
+                            allowClear
+                            placeholder="选择等级"
+                            onChange={(value) => selectedLevel = value || null}
+                        >
+                            {levels.map(level => (
+                                <Select.Option key={level.code} value={level.code}>
+                                    {level.name}
+                                </Select.Option>
+                            ))}
+                        </Select>
+                    </p>
+                </div>
+            ),
+            onOk: async () => {
+                try {
+                    await memberApi.updateLevel(member.id, selectedLevel);
+                    message.success('等级修改成功');
+                    loadMembers();
+                } catch (error) {
+                    message.error('操作失败');
+                }
+            },
+        });
+    };
+
     const columns: ColumnsType<Member> = [
         {
             title: '昵称',
@@ -92,16 +146,29 @@ export default function Members() {
             key: 'nickname',
         },
         {
-            title: '联系方式',
-            dataIndex: 'phone',
-            key: 'phone',
+            title: '头像',
+            dataIndex: 'avatar',
+            key: 'avatar',
+            width: 70,
+            render: (avatar: string) => (
+                <Avatar
+                    size={40}
+                    src={avatar && avatar.startsWith('https://') ? avatar : undefined}
+                    icon={<UserOutlined />}
+                    style={{ border: '2px solid #d4a84b' }}
+                />
+            ),
         },
         {
             title: '会员等级',
             key: 'level',
             render: (record: Member) => (
-                <Tag color="blue">
-                    {record.level?.name || '-'}
+                <Tag
+                    color="blue"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => handleChangeLevel(record)}
+                >
+                    {record.level?.name || '-'} <EditOutlined />
                 </Tag>
             ),
         },

@@ -3,15 +3,17 @@ import client from './client';
 export interface Member {
     id: string;
     nickname: string;
+    avatar?: string;
     phone: string;
     points: number;
     coins: number;
     lotteryChances: number;
     totalSpent: number;
-    level: {
-        id: string;
+    levelCode?: string;
+    level?: {
+        code: string;
         name: string;
-        level: number;
+        threshold: number;
     };
     createdAt: string;
     updatedAt: string;
@@ -60,6 +62,11 @@ export const memberApi = {
 
     async adjustCoins(id: string, delta: number) {
         const response = await client.patch(`/membership/members/${id}/coins`, { delta });
+        return response.data;
+    },
+
+    async updateLevel(id: string, levelCode: string | null) {
+        const response = await client.patch(`/membership/members/${id}/level`, { levelCode });
         return response.data;
     },
 };

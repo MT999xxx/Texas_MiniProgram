@@ -47,14 +47,18 @@ const request = (options = {}) => {
             });
           }
 
-          reject(new Error('未授权'));
+          const error = new Error('未授权');
+          error.statusCode = res.statusCode;
+          reject(error);
         } else {
           console.error(`[API Error] ${res.statusCode} ${options.url}`, res.data);
           const msg = res.data?.message || '请求失败';
           if (!options.silent) {
             wx.showToast({ title: msg, icon: 'none' });
           }
-          reject(new Error(msg));
+          const error = new Error(msg);
+          error.statusCode = res.statusCode;
+          reject(error);
         }
       },
       fail: (err) => {

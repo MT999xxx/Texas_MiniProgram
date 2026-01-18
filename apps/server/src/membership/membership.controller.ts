@@ -4,6 +4,7 @@ import { MembershipService } from './membership.service';
 import { CreateLevelDto } from './dto/create-level.dto';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { AdjustPointsDto } from './dto/adjust-points.dto';
+import { UpdateLevelDto } from './dto/update-level.dto';
 
 @ApiTags('Membership')
 @Controller('membership')
@@ -98,5 +99,13 @@ export class MembershipController {
   @ApiBadRequestResponse({ description: '会员不存在或余额不足' })
   adjustCoins(@Param('id') id: string, @Body() dto: AdjustPointsDto) {
     return this.membershipService.adjustCoins(id, dto.delta);
+  }
+
+  @Patch('members/:id/level')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: '会员等级修改成功' })
+  @ApiBadRequestResponse({ description: '会员或等级不存在' })
+  updateMemberLevel(@Param('id') id: string, @Body() dto: UpdateLevelDto) {
+    return this.membershipService.updateMemberLevel(id, dto.levelCode ?? null);
   }
 }

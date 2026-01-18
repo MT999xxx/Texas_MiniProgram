@@ -82,4 +82,25 @@ export class MembershipService {
   findMemberById(id: string) {
     return this.memberRepo.findOne({ where: { id }, relations: ['level'] });
   }
+
+  async updateMemberLevel(memberId: string, levelCode: string | null) {
+    const member = await this.memberRepo.findOne({ where: { id: memberId } });
+    if (!member) {
+      throw new NotFoundException('Member not found');
+    }
+
+    if (levelCode) {
+      const level = await this.levelRepo.findOne({ where: { code: levelCode } });
+      if (!level) {
+        throw new NotFoundException('Level not found');
+      }
+      member.levelCode = levelCode;
+      member.level = level;
+    } else {
+      member.levelCode = null as unknown as string;
+      member.level = undefined as unknown as MembershipLevelEntity;
+    }
+
+    return this.memberRepo.save(member);
+  }
 }
