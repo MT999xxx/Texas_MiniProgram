@@ -240,6 +240,7 @@ export default function Menu() {
             title: '价格',
             dataIndex: 'price',
             key: 'price',
+            sorter: (a: MenuItem, b: MenuItem) => Number(a.price) - Number(b.price),
             render: (price: number | string) => (
                 <span style={{ color: 'var(--color-gold-primary)', fontWeight: 'bold', fontFamily: 'DIN Alternate' }}>
                     ¥{Number(price).toFixed(2)}

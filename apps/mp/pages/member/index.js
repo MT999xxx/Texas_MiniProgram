@@ -429,7 +429,7 @@ Page({
   },
 
   /**
-   * 加载余额信息
+   * 加载余额和等级信息
    */
   loadBalance() {
     if (!this.data.memberId) return;
@@ -438,8 +438,15 @@ Page({
         // 使用动画显示数字
         util.animateNumber(this, 'stats.coins', res.coins || 0);
         util.animateNumber(this, 'stats.points', res.points || 0);
+
+        // 解析等级编码获取等级数字 (V1 -> 1, V4 -> 4)
+        const levelCode = res.levelCode || 'V1';
+        const levelNum = parseInt(levelCode.replace('V', '')) || 1;
+
         this.setData({
           'stats.coupons': res.coupons || 0,
+          'memberInfo.levelNum': levelNum,
+          'memberInfo.levelName': res.levelName || '尊荣白银',
           loading: false
         });
       })

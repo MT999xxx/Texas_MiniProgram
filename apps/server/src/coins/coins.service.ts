@@ -23,10 +23,13 @@ export class CoinsService {
     ) { }
 
     /**
-     * 获取会员信息（包含金币余额）
+     * 获取会员信息（包含金币余额和等级信息）
      */
     async getMemberBalance(memberId: string) {
-        const member = await this.memberRepo.findOne({ where: { id: memberId } });
+        const member = await this.memberRepo.findOne({
+            where: { id: memberId },
+            relations: ['level']
+        });
         if (!member) {
             throw new NotFoundException('会员不存在');
         }
@@ -34,6 +37,8 @@ export class CoinsService {
             coins: member.coins,
             points: member.points,
             lotteryChances: member.lotteryChances,
+            levelCode: member.levelCode || 'V1',
+            levelName: member.level?.name || '尊荣白银',
         };
     }
 
