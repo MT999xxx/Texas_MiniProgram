@@ -4,7 +4,7 @@
   <!-- 1. 用户信息区域 (沉浸式) -->
   <view class="premium-user-box" bindtap="onUserInfoClick">
     <view class="avatar-border">
-      <image class="user-avatar" src="{{userInfo.avatar}}" />
+      <image class="user-avatar" src="{{userInfo.avatar}}" binderror="onAvatarError" />
     </view>
     <view class="user-details">
       <text class="user-nickname">{{userInfo.nickname}}</text>

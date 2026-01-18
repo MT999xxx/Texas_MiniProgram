@@ -75,10 +75,26 @@ Page({
     onAvatarError(e) {
         const { seatindex, tabletype } = e.currentTarget.dataset;
         const seatArray = tabletype === 'main' ? 'seats' : 'subSeats';
+        const currentAvatar = this.data[seatArray][seatindex]?.avatar;
+        console.error(`⚠️ 座位${parseInt(seatindex) + 1} 头像加载失败: ${currentAvatar}`);
         const key = `${seatArray}[${seatindex}].avatar`;
         this.setData({
             [key]: '/images/huiyuan2.jpg'
         });
+    },
+
+    /**
+     * 检查头像URL是否有效（排除临时路径和无效URL）
+     */
+    isValidAvatarUrl(url) {
+        if (!url) return false;
+        // 临时文件路径无效
+        if (url.startsWith('http://tmp')) return false;
+        if (url.startsWith('wxfile://')) return false;
+        // 本地图片或 HTTPS URL 有效
+        if (url.startsWith('/images/')) return true;
+        if (url.startsWith('https://')) return true;
+        return false;
     },
 
     /**
@@ -179,11 +195,18 @@ Page({
                 if (!seatNumber || seatNumber < 1 || seatNumber > 9) return;
 
                 const seatIndex = seatNumber - 1;
+                // 验证头像URL，排除无效的临时路径
+                const rawAvatar = reservation.member?.avatar || reservation.avatar;
+                const validAvatar = this.isValidAvatarUrl(rawAvatar) ? rawAvatar : '/images/huiyuan2.jpg';
+
+                // Debug log
+                console.log(`座位${seatNumber} 头像: raw=${rawAvatar}, valid=${validAvatar}`);
+
                 const seatData = {
                     id: seatNumber,
                     status: 'reserved',
                     name: reservation.member?.nickname || reservation.customerName || '已预约',
-                    avatar: reservation.member?.avatar || reservation.avatar || '/images/huiyuan2.jpg',
+                    avatar: validAvatar,
                     seatNum: seatNumber,
                     userId: reservation.member?.id || reservation.memberId,
                     reservationId: reservation.id

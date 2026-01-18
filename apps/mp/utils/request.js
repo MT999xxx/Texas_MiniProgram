@@ -87,6 +87,47 @@ request.post = api.post;
 request.put = api.put;
 request.delete = api.delete;
 
+/**
+ * 上传文件到服务器
+ * @param {string} filePath - 本地文件临时路径
+ * @param {string} url - 上传接口路径
+ * @param {string} name - 文件字段名，默认 'file'
+ */
+const uploadFile = (filePath, url = '/uploads/avatar', name = 'file') => {
+  return new Promise((resolve, reject) => {
+    const app = getApp();
+    const apiBase = (app?.globalData?.apiBase || 'http://localhost:3000').replace(/\/$/, '');
+    const token = wx.getStorageSync('token');
+
+    wx.uploadFile({
+      url: `${apiBase}${url}`,
+      filePath: filePath,
+      name: name,
+      header: {
+        'Authorization': token ? `Bearer ${token}` : '',
+      },
+      success: (res) => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          try {
+            const data = JSON.parse(res.data);
+            resolve(data);
+          } catch (e) {
+            reject(new Error('解析响应失败'));
+          }
+        } else {
+          reject(new Error(`上传失败: ${res.statusCode}`));
+        }
+      },
+      fail: (err) => {
+        console.error('上传文件失败:', err);
+        reject(err);
+      },
+    });
+  });
+};
+
 module.exports = request;
 module.exports.api = api;
+module.exports.uploadFile = uploadFile;
 module.exports.default = request;
+

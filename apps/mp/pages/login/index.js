@@ -1,4 +1,5 @@
 const authManager = require('../../utils/auth');
+const { uploadFile } = require('../../utils/request');
 
 Page({
   data: {
@@ -56,10 +57,29 @@ Page({
     // 显示加载状态
     this.setData({ loading: true });
 
+    let avatarUrl = '';
+
+    // 如果用户选择了头像且是临时文件，先上传到服务器获取永久URL
+    if (this.data.avatarUrl && this.data.avatarUrl.startsWith('http://tmp')) {
+      try {
+        console.log('正在上传头像...');
+        const uploadResult = await uploadFile(this.data.avatarUrl, '/uploads/avatar');
+        avatarUrl = uploadResult.url;
+        console.log('头像上传成功:', avatarUrl);
+      } catch (err) {
+        console.error('头像上传失败:', err);
+        // 上传失败不阻止登录，使用空头像
+        avatarUrl = '';
+      }
+    } else if (this.data.avatarUrl) {
+      // 已经是有效URL或本地默认图片
+      avatarUrl = this.data.avatarUrl;
+    }
+
     // 使用用户输入的信息登录
     const userInfo = {
       nickName: this.data.nickname,
-      avatarUrl: this.data.avatarUrl || '/images/huiyuan2.jpg'
+      avatarUrl: avatarUrl || ''
     };
 
     this.handleLogin(userInfo);

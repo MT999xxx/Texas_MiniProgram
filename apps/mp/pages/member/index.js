@@ -78,6 +78,30 @@ Page({
   },
 
   /**
+   * 头像加载失败时使用默认头像
+   */
+  onAvatarError() {
+    console.log('头像加载失败，使用默认头像');
+    this.setData({
+      'userInfo.avatar': '/images/huiyuan2.jpg'
+    });
+  },
+
+  /**
+   * 检查头像URL是否有效（排除临时路径和无效URL）
+   */
+  isValidAvatarUrl(url) {
+    if (!url) return false;
+    // 临时文件路径无效
+    if (url.startsWith('http://tmp')) return false;
+    if (url.startsWith('wxfile://')) return false;
+    // 本地图片或 HTTPS URL 有效
+    if (url.startsWith('/images/')) return true;
+    if (url.startsWith('https://')) return true;
+    return false;
+  },
+
+  /**
    * 菜单项点击
    */
   onMenuClick(e) {
@@ -507,11 +531,13 @@ Page({
         // Update globalData in app.js if needed, though this is a page context
         // getApp().globalData.userInfo = userInfo; // Example if app.js needs it
         console.log('自动登录成功:', userInfo);
+        // 验证头像URL，无效则使用默认头像
+        const validAvatar = this.isValidAvatarUrl(userInfo.avatar) ? userInfo.avatar : '/images/huiyuan2.jpg';
         this.setData({
           isLogin: true,
           memberId: userInfo.memberId || userInfo.id || '',
           userInfo: {
-            avatar: userInfo.avatar || '/images/huiyuan2.jpg',
+            avatar: validAvatar,
             nickname: userInfo.nickname || userInfo.nickName || '德州爱好者', // Handle both nickName and nickname
             id: userInfo.id || ''
           }
