@@ -217,4 +217,25 @@ export class ReservationService {
 
     return saved;
   }
+
+  /**
+   * 取消所有过期预约（reservedAt在今天之前的PENDING/CONFIRMED预约）
+   * 用于每日凌晨自动清理或管理员手动触发
+   */
+  async cancelExpiredReservations(): Promise<{ count: number }> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const result = await this.repo
+      .createQueryBuilder()
+      .update(ReservationEntity)
+      .set({ status: ReservationStatus.CANCELLED })
+      .where('reservedAt < :today', { today })
+      .andWhere('status IN (:...statuses)', {
+        statuses: [ReservationStatus.PENDING, ReservationStatus.CONFIRMED],
+      })
+      .execute();
+
+    return { count: result.affected || 0 };
+  }
 }

@@ -66,4 +66,10 @@ export const tableApi = {
   async delete(id: string): Promise<void> {
     await client.delete(`/tables/${id}`);
   },
+
+  // 重置所有桌位（清除预约状态）
+  async resetAll(): Promise<{ message: string; tablesReset: number; reservationsCancelled: number }> {
+    const response = await client.post('/tables/reset-all');
+    return response.data;
+  },
 };

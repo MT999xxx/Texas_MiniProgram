@@ -5,11 +5,15 @@ import { CreateTableDto } from './dto/create-table.dto';
 import { TableCategory, TableStatus } from './table.entity';
 import { UpdateTableStatusDto } from './dto/update-table-status.dto';
 import { UpdateTableDto } from './dto/update-table.dto';
+import { ReservationService } from '../reservation/reservation.service';
 
 @ApiTags('Tables')
 @Controller('tables')
 export class TableController {
-  constructor(private readonly tableService: TableService) { }
+  constructor(
+    private readonly tableService: TableService,
+    private readonly reservationService: ReservationService,
+  ) { }
 
   @Post()
   @ApiCreatedResponse({ description: '创建桌位成功' })
@@ -56,5 +60,18 @@ export class TableController {
   @ApiBadRequestResponse({ description: '桌位不存在' })
   async delete(@Param('id') id: string): Promise<void> {
     await this.tableService.delete(id);
+  }
+
+  @Post('reset-all')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: '重置所有桌位成功' })
+  async resetAll() {
+    const reservationResult = await this.reservationService.cancelExpiredReservations();
+    const tableResult = await this.tableService.resetAllTables();
+    return {
+      message: '桌位重置成功',
+      tablesReset: tableResult.count,
+      reservationsCancelled: reservationResult.count,
+    };
   }
 }

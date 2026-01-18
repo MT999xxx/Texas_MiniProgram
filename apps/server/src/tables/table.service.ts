@@ -62,4 +62,20 @@ export class TableService {
     }
     await this.repo.remove(table);
   }
+
+  /**
+   * 重置所有桌位状态为可用
+   * 用于每日凌晨自动重置或管理员手动触发
+   */
+  async resetAllTables(): Promise<{ count: number }> {
+    const result = await this.repo.update(
+      { status: TableStatus.RESERVED },
+      { status: TableStatus.AVAILABLE }
+    );
+    const inUseResult = await this.repo.update(
+      { status: TableStatus.IN_USE },
+      { status: TableStatus.AVAILABLE }
+    );
+    return { count: (result.affected || 0) + (inUseResult.affected || 0) };
+  }
 }

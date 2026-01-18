@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, Row, Col, Tag, Button, Select, Space, Modal, Form, Input, InputNumber, App, Drawer, Tabs, List, Badge, Empty, Spin } from 'antd';
-import { ReloadOutlined, PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined, ShoppingCartOutlined, MinusOutlined } from '@ant-design/icons';
+import { ReloadOutlined, PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined, ShoppingCartOutlined, MinusOutlined, ClearOutlined } from '@ant-design/icons';
 import { tableApi, Table } from '../../api/tables';
 import { menuApi, MenuCategory, MenuItem } from '../../api/menu';
 import { orderApi } from '../../api/orders';
@@ -34,6 +34,7 @@ export default function Tables() {
     const [activeCategory, setActiveCategory] = useState<string>('');
     const [cart, setCart] = useState<Map<string, CartItem>>(new Map());
     const [submitting, setSubmitting] = useState(false);
+    const [resetting, setResetting] = useState(false);
 
     // 加载桌位列表
     const loadTables = async () => {
@@ -80,6 +81,31 @@ export default function Tables() {
         setEditingTable(null);
         form.resetFields();
         setModalVisible(true);
+    };
+
+    // 重置所有桌位
+    const handleResetAll = () => {
+        modal.confirm({
+            title: '确认重置所有桌位',
+            icon: <ExclamationCircleOutlined />,
+            content: '此操作将把所有桌位状态重置为「空闲」，并取消所有过期预约。确定继续？',
+            okText: '确认重置',
+            okType: 'danger',
+            cancelText: '取消',
+            onOk: async () => {
+                setResetting(true);
+                try {
+                    const result = await tableApi.resetAll();
+                    message.success(`重置完成：${result.tablesReset} 个桌位已释放，${result.reservationsCancelled} 条预约已取消`);
+                    loadTables();
+                } catch (error) {
+                    console.error('重置桌位失败:', error);
+                    message.error('重置桌位失败');
+                } finally {
+                    setResetting(false);
+                }
+            },
+        });
     };
 
     // 打开编辑弹窗
@@ -284,6 +310,14 @@ export default function Tables() {
                 <Space>
                     <Button icon={<ReloadOutlined />} onClick={loadTables}>
                         刷新
+                    </Button>
+                    <Button
+                        icon={<ClearOutlined />}
+                        onClick={handleResetAll}
+                        loading={resetting}
+                        danger
+                    >
+                        重置桌位
                     </Button>
                     <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
                         新建桌位
