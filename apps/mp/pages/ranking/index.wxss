@@ -23,7 +23,7 @@ page {
 }
 
 .header-section {
-  padding: 80rpx 40rpx 40rpx;
+  padding: 20rpx 40rpx 10rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -42,17 +42,17 @@ page {
 }
 
 .page-title {
-  font-size: 88rpx;
+  font-size: 52rpx;
   font-weight: 900;
-  letter-spacing: 20rpx;
-  margin-top: 40rpx;
-  margin-bottom: 20rpx;
+  letter-spacing: 12rpx;
+  margin-top: 15rpx;
+  margin-bottom: 5rpx;
 }
 
 .date-range {
-  font-size: 20rpx;
+  font-size: 18rpx;
   color: #444;
-  margin-bottom: 60rpx;
+  margin-bottom: 15rpx;
   letter-spacing: 2rpx;
 }
 
@@ -61,7 +61,7 @@ page {
   width: 100%;
   display: flex;
   justify-content: center;
-  gap: 60rpx;
+  gap: 40rpx;
 }
 
 .tab-item {
@@ -94,7 +94,7 @@ page {
 
 /* --- 2. 排行榜列表区域 --- */
 .ranking-list-container {
-  padding: 20rpx 30rpx;
+  padding: 10rpx 30rpx;
 }
 
 .list-wrapper {
