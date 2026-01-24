@@ -548,5 +548,26 @@ Page({
             wx.redirectTo({ url: urls[index] });
         }
     },
-    stopBubble() { }
+    stopBubble() { },
+
+    /**
+     * 用户点击右上角分享给朋友
+     */
+    onShareAppMessage() {
+        return {
+            title: '三条A·皇家扑克俱乐部 - 实时桌况',
+            path: '/pages/table/index',
+            imageUrl: '/images/share-cover.jpg'
+        };
+    },
+
+    /**
+     * 用户点击右上角分享到朋友圈
+     */
+    onShareTimeline() {
+        return {
+            title: '三条A·皇家扑克俱乐部 - 实时桌况',
+            imageUrl: '/images/share-cover.jpg'
+        };
+    }
 });

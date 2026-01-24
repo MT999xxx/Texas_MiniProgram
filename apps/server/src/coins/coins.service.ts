@@ -1,14 +1,15 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThanOrEqual } from 'typeorm';
 import { CoinTransactionEntity, CoinTransactionType, CoinTransactionStatus } from './coin-transaction.entity';
 import { PointDepositEntity, PointDepositStatus } from './point-deposit.entity';
+import { CheckInEntity } from './check-in.entity';
 import { MemberEntity } from '../membership/member.entity';
 import { RechargeCoinsDto, ExchangeCoinsDto, DepositPointsDto, WithdrawPointsDto, ReviewDepositDto } from './dto/coins.dto';
 import { WechatPayService } from './wechat-pay.service';
 
-// 积分兑换金币的汇率：20积分 = 1金币
-const POINTS_PER_COIN = 20;
+// 积分兑换金币的汇率：200积分 = 1金币
+const POINTS_PER_COIN = 200;
 
 @Injectable()
 export class CoinsService {
@@ -17,6 +18,8 @@ export class CoinsService {
         private readonly transactionRepo: Repository<CoinTransactionEntity>,
         @InjectRepository(PointDepositEntity)
         private readonly depositRepo: Repository<PointDepositEntity>,
+        @InjectRepository(CheckInEntity)
+        private readonly checkInRepo: Repository<CheckInEntity>,
         @InjectRepository(MemberEntity)
         private readonly memberRepo: Repository<MemberEntity>,
         private readonly wechatPayService: WechatPayService,
@@ -293,5 +296,99 @@ export class CoinsService {
             where: { memberId },
             order: { createdAt: 'DESC' },
         });
+    }
+
+    // ========== 签到功能 ==========
+
+    /**
+     * 签到积分规则：220 + (连续天数-1) * 110
+     * 第1天220分，第7天880分，之后循环
+     */
+    private calculateCheckInPoints(consecutiveDays: number): number {
+        const day = ((consecutiveDays - 1) % 7) + 1; // 7天一个周期
+        return 220 + (day - 1) * 110;
+    }
+
+    /**
+     * 获取签到状态
+     */
+    async getCheckInStatus(memberId: string) {
+        const today = new Date().toISOString().split('T')[0];
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+        // 查询今日是否已签到
+        const todayRecord = await this.checkInRepo.findOne({
+            where: { memberId, checkInDate: today },
+        });
+
+        // 查询昨日签到记录（用于判断连续天数）
+        const yesterdayRecord = await this.checkInRepo.findOne({
+            where: { memberId, checkInDate: yesterday },
+        });
+
+        const consecutiveDays = yesterdayRecord ? yesterdayRecord.consecutiveDays : 0;
+        const nextDay = todayRecord ? consecutiveDays : consecutiveDays + 1;
+
+        return {
+            checkedInToday: !!todayRecord,
+            consecutiveDays: todayRecord ? todayRecord.consecutiveDays : nextDay,
+            todayPoints: todayRecord?.pointsEarned || this.calculateCheckInPoints(nextDay),
+            rewards: Array.from({ length: 7 }, (_, i) => ({
+                day: i + 1,
+                points: this.calculateCheckInPoints(i + 1),
+                isToday: (nextDay - 1) % 7 === i,
+                isClaimed: todayRecord && (todayRecord.consecutiveDays - 1) % 7 >= i,
+            })),
+        };
+    }
+
+    /**
+     * 执行签到
+     */
+    async performCheckIn(memberId: string) {
+        const member = await this.memberRepo.findOne({ where: { id: memberId } });
+        if (!member) {
+            throw new NotFoundException('会员不存在');
+        }
+
+        const today = new Date().toISOString().split('T')[0];
+
+        // 检查今日是否已签到
+        const existing = await this.checkInRepo.findOne({
+            where: { memberId, checkInDate: today },
+        });
+        if (existing) {
+            throw new BadRequestException('今日已签到');
+        }
+
+        // 查询昨日签到记录
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+        const yesterdayRecord = await this.checkInRepo.findOne({
+            where: { memberId, checkInDate: yesterday },
+        });
+
+        // 计算连续天数（断签则重置为1）
+        const consecutiveDays = yesterdayRecord ? yesterdayRecord.consecutiveDays + 1 : 1;
+        const pointsEarned = this.calculateCheckInPoints(consecutiveDays);
+
+        // 创建签到记录
+        const checkIn = this.checkInRepo.create({
+            memberId,
+            checkInDate: today,
+            consecutiveDays,
+            pointsEarned,
+        });
+        await this.checkInRepo.save(checkIn);
+
+        // 增加积分
+        member.points += pointsEarned;
+        await this.memberRepo.save(member);
+
+        return {
+            success: true,
+            pointsEarned,
+            consecutiveDays,
+            totalPoints: member.points,
+        };
     }
 }

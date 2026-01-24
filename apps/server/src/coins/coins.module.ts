@@ -5,6 +5,7 @@ import { CoinsService } from './coins.service';
 import { WechatPayService } from './wechat-pay.service';
 import { CoinTransactionEntity } from './coin-transaction.entity';
 import { PointDepositEntity } from './point-deposit.entity';
+import { CheckInEntity } from './check-in.entity';
 import { MemberEntity } from '../membership/member.entity';
 
 @Module({
@@ -12,6 +13,7 @@ import { MemberEntity } from '../membership/member.entity';
         TypeOrmModule.forFeature([
             CoinTransactionEntity,
             PointDepositEntity,
+            CheckInEntity,
             MemberEntity,
         ]),
     ],
@@ -20,3 +22,4 @@ import { MemberEntity } from '../membership/member.entity';
     exports: [CoinsService, WechatPayService],
 })
 export class CoinsModule { }
+

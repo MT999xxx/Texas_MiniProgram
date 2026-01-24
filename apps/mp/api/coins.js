@@ -112,6 +112,26 @@ function getDeposits(memberId) {
     });
 }
 
+/**
+ * 获取签到状态
+ */
+function getCheckInStatus(memberId) {
+    return request({
+        url: `/coins/check-in/status/${memberId}`,
+        method: 'GET'
+    });
+}
+
+/**
+ * 执行签到
+ */
+function performCheckIn(memberId) {
+    return request({
+        url: `/coins/check-in/${memberId}`,
+        method: 'POST'
+    });
+}
+
 module.exports = {
     POINTS_PER_COIN,
     getBalance,
@@ -123,5 +143,7 @@ module.exports = {
     depositPoints,
     withdrawPoints,
     getTransactions,
-    getDeposits
+    getDeposits,
+    getCheckInStatus,
+    performCheckIn
 };

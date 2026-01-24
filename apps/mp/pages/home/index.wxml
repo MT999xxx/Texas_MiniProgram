@@ -77,4 +77,33 @@
       <button class="btn-primary modal-btn-lux" bindtap="closeModal">确认阅览</button>
     </view>
   </view>
+
+  <!-- 6. 签到弹窗 -->
+  <view class="modal-mask" wx:if="{{showCheckInPopup}}" catchtap="closeCheckInPopup">
+    <view class="checkin-modal glass-panel" catchtap="stopBubble">
+      <view class="checkin-close" bindtap="closeCheckInPopup">×</view>
+      
+      <view class="checkin-header">
+        <text class="checkin-icon">💰</text>
+        <text class="checkin-title">签到得积分！</text>
+      </view>
+      
+      <!-- 7天奖励网格 -->
+      <view class="checkin-grid">
+        <view class="checkin-day {{index < (checkInStatus.consecutiveDays % 7) || (checkInStatus.checkedInToday && index === ((checkInStatus.consecutiveDays - 1) % 7)) ? 'claimed' : ''}} {{!checkInStatus.checkedInToday && index === (checkInStatus.consecutiveDays % 7) ? 'today' : ''}}"
+              wx:for="{{[220, 330, 440, 550, 660, 770, 880]}}"
+              wx:key="index">
+          <view class="day-star {{index < (checkInStatus.consecutiveDays % 7) || (checkInStatus.checkedInToday && index === ((checkInStatus.consecutiveDays - 1) % 7)) ? 'active' : ''}}">★</view>
+          <text class="day-points">{{item}}积分</text>
+          <text class="day-label">第{{index + 1}}天</text>
+        </view>
+      </view>
+      
+      <button class="checkin-btn {{checkInStatus.checkedInToday ? 'disabled' : ''}}" 
+              bindtap="doCheckIn"
+              disabled="{{checkInStatus.checkedInToday}}">
+        {{checkInStatus.checkedInToday ? '今日已签到' : '签到'}}
+      </button>
+    </view>
+  </view>
 </view>

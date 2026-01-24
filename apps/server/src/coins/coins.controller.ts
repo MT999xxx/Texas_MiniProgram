@@ -84,4 +84,18 @@ export class CoinsController {
         const reviewerId = req.user?.id || 'admin';
         return this.coinsService.reviewDeposit(id, dto, reviewerId);
     }
+
+    // ===== 每日签到 =====
+
+    @Get('check-in/status/:memberId')
+    @ApiOperation({ summary: '获取签到状态' })
+    getCheckInStatus(@Param('memberId') memberId: string) {
+        return this.coinsService.getCheckInStatus(memberId);
+    }
+
+    @Post('check-in/:memberId')
+    @ApiOperation({ summary: '执行签到' })
+    performCheckIn(@Param('memberId') memberId: string) {
+        return this.coinsService.performCheckIn(memberId);
+    }
 }
