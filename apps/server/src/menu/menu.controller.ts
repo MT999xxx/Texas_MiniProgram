@@ -35,8 +35,13 @@ export class MenuController {
 
   @Get('items')
   @ApiOkResponse({ description: '菜品列表' })
-  listItems(@Query('categoryId') categoryId?: string) {
-    return this.menuService.listMenuItems(categoryId);
+  listItems(
+    @Query('categoryId') categoryId?: string,
+    @Query('includeOffSale') includeOffSale?: string,
+  ) {
+    // 管理后台传 includeOffSale=true 可查看所有商品（包括下架）
+    const showAll = includeOffSale === 'true';
+    return this.menuService.listMenuItems(categoryId, showAll);
   }
 
   @Patch('items/:id/stock')

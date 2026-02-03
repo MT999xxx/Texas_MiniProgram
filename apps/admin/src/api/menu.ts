@@ -83,7 +83,10 @@ export const menuApi = {
 
     // ========== 菜品管理 ==========
     async listItems(categoryId?: string): Promise<MenuItem[]> {
-        const response = await client.get('/menu/items', { params: { categoryId } });
+        // 管理后台需要查看所有商品，包括下架的
+        const response = await client.get('/menu/items', {
+            params: { categoryId, includeOffSale: 'true' }
+        });
         return response.data;
     },
 

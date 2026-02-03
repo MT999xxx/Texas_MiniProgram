@@ -50,10 +50,21 @@ export class MenuService {
     return this.itemRepo.save(item);
   }
 
-  listMenuItems(categoryId?: string) {
+  listMenuItems(categoryId?: string, includeOffSale: boolean = false) {
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(categoryId || '');
+
+    // 构建查询条件
+    const where: any = {};
+    if (isUuid) {
+      where.category = { id: categoryId };
+    }
+    // 默认不包含下架商品，除非明确请求
+    if (!includeOffSale) {
+      where.status = MenuItemStatus.ON_SALE;
+    }
+
     return this.itemRepo.find({
-      where: isUuid ? { category: { id: categoryId } } : {},
+      where,
       relations: ['category'],
       order: { createdAt: 'DESC' },
     });
