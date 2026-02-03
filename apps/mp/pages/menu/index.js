@@ -543,11 +543,12 @@ Page({
     this.setData({ loading: true });
 
     try {
-      // 组装订单商品
+      // 组装订单商品（包含规格类型以便后端正确计算价格）
       const items = Object.values(this.data.cart).map(item => ({
         menuItemId: item.id,
         quantity: item.quantity,
         price: item.price,
+        specType: item.specs?.package || 'single', // 传递规格类型：single/half_dozen/dozen
       }));
 
       // 获取当前用户信息

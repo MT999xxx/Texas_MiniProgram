@@ -116,7 +116,16 @@ export class OrdersService {
       if (menuItem.stock === 0) {
         menuItem.status = 'SOLD_OUT' as any;
       }
-      const amount = Number(menuItem.price) * itemDto.quantity;
+
+      // 根据规格类型选择正确的单价
+      let unitPrice = Number(menuItem.price);
+      if (itemDto.specType === 'half_dozen' && menuItem.halfDozenPrice) {
+        unitPrice = Number(menuItem.halfDozenPrice);
+      } else if (itemDto.specType === 'dozen' && menuItem.dozenPrice) {
+        unitPrice = Number(menuItem.dozenPrice);
+      }
+
+      const amount = unitPrice * itemDto.quantity;
       originalAmount += amount;
       items.push(
         this.orderItemRepo.create({

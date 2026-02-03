@@ -1,3 +1,12 @@
+### [2026-02-03 18:50] - 半打/一打价格计算修复
+- [x] **问题**：购买半打（6瓶）或一打（12瓶）商品时，后端仍按单瓶价格×数量计算，而非使用配置的整打优惠价。
+- [x] **根因**：后端 `OrdersService.create` 始终用 `menuItem.price * quantity` 计算，未读取 `halfDozenPrice` / `dozenPrice` 字段。
+- [x] **修复**：
+  - 后端 DTO (`create-order-item.dto.ts`) 新增 `SpecType` 枚举和 `specType` 可选字段。
+  - 后端服务 (`orders.service.ts`) 根据 `specType` 选择正确的单价：single 用 `price`，half_dozen 用 `halfDozenPrice`，dozen 用 `dozenPrice`。
+  - 前端 (`menu/index.js`) 提交订单时传递 `specType: item.specs?.package || 'single'`。
+- [x] **兼容性**：老订单（无 `specType`）仍按单瓶价格计算，保持向后兼容。
+
 ### [2026-01-18 18:25] - 点餐金币支付功能
 - [x] **后端API**：新增 `POST /orders/:id/pay-with-coins` 端点，扣除用户金币并标记订单已支付。
 - [x] **前端UI**：结算时弹出支付方式选择（微信支付/金币支付/稍后支付），显示金币余额。
