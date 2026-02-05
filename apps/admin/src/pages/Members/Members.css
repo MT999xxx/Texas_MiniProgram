@@ -27,6 +27,29 @@
     background: rgba(255, 255, 255, 0.02);
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+/* Search input styling */
+.toolbar .ant-input-search {
+    flex-shrink: 0;
+}
+
+.toolbar .ant-input-search .ant-input {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.toolbar .ant-input-search .ant-input::placeholder {
+    color: var(--text-muted);
+}
+
+.toolbar .ant-input-search .ant-btn {
+    background: var(--color-gold-primary);
+    border-color: var(--color-gold-primary);
 }
 
 /* Member Level Tags */

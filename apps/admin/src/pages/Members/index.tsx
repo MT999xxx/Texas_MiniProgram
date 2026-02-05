@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Table, Card, Button, Space, Tag, InputNumber, App, Avatar, Select } from 'antd';
-import { ReloadOutlined, PlusOutlined, MinusOutlined, UserOutlined, EditOutlined } from '@ant-design/icons';
+import { useState, useEffect, useMemo } from 'react';
+import { Table, Card, Button, Space, Tag, InputNumber, App, Avatar, Select, Input } from 'antd';
+import { ReloadOutlined, PlusOutlined, MinusOutlined, UserOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { memberApi, Member } from '../../api/members';
 import './Members.css';
@@ -9,6 +9,7 @@ export default function Members() {
     const { message, modal } = App.useApp();
     const [loading, setLoading] = useState(false);
     const [members, setMembers] = useState<Member[]>([]);
+    const [searchText, setSearchText] = useState('');
 
     useEffect(() => {
         loadMembers();
@@ -42,6 +43,16 @@ export default function Members() {
             console.error('加载等级列表失败');
         }
     };
+
+    // 根据搜索关键词过滤会员列表
+    const filteredMembers = useMemo(() => {
+        if (!searchText.trim()) return members;
+        const keyword = searchText.toLowerCase().trim();
+        return members.filter(m =>
+            m.nickname?.toLowerCase().includes(keyword) ||
+            m.phone?.includes(keyword)
+        );
+    }, [members, searchText]);
 
     const handleAdjustPoints = (member: Member, isAdd: boolean) => {
         let delta = 0;
@@ -254,11 +265,20 @@ export default function Members() {
                     <Button icon={<ReloadOutlined />} onClick={loadMembers}>
                         刷新
                     </Button>
+                    <Input.Search
+                        placeholder="搜索会员昵称或手机号"
+                        allowClear
+                        enterButton={<SearchOutlined />}
+                        style={{ width: 280 }}
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
+                        onSearch={(value) => setSearchText(value)}
+                    />
                 </div>
 
                 <Table
                     loading={loading}
-                    dataSource={members}
+                    dataSource={filteredMembers}
                     columns={columns}
                     rowKey="id"
                     pagination={{
