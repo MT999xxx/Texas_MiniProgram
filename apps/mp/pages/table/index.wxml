@@ -119,12 +119,7 @@
     <view class="luxury-modal glass-panel gold-border" catchtap="stopBubble">
       <view class="modal-head">预约规则与礼仪</view>
       <scroll-view scroll-y class="rules-list">
-        <view class="rule-item">1. 下午场 15:00 开局，16:30 前到场赠送 2000 积分。</view>
-        <view class="rule-item">2. 晚场 20:00 开局，位置保留至 20:30。</view>
-        <view class="rule-item">3. 牌桌满员或超时可申请候补排队。</view>
-        <view class="rule-item">4. 严禁任何形式的场下码分行为。</view>
-        <view class="rule-item">5. 请保持绅士风度，严禁言语干扰其他玩家。</view>
-        <view class="rule-item">6. 弃牌请保持沉默，遵守德州礼仪。</view>
+        <view class="rule-item" wx:for="{{etiquetteRules}}" wx:key="index">{{index + 1}}. {{item}}</view>
       </scroll-view>
       <button class="btn-confirm mt-lg" bindtap="hideRules">已知晓</button>
     </view>

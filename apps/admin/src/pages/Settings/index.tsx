@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { Card, Form, Input, Button, message, Tabs, TimePicker, InputNumber, Switch, Space, Divider } from 'antd';
-import { SaveOutlined, ShopOutlined, ClockCircleOutlined, GiftOutlined, BellOutlined } from '@ant-design/icons';
+import { useState, useEffect } from 'react';
+import { Card, Form, Input, Button, message, Tabs, TimePicker, InputNumber, Switch, Space, Divider, List } from 'antd';
+import { SaveOutlined, ShopOutlined, ClockCircleOutlined, GiftOutlined, FileTextOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { settingsApi } from '../../api/settings';
 import './Settings.css';
 
 export default function Settings() {
@@ -9,6 +10,55 @@ export default function Settings() {
     const [rulesForm] = Form.useForm();
     const [pointsForm] = Form.useForm();
     const [loading, setLoading] = useState(false);
+    const [rulesLoading, setRulesLoading] = useState(false);
+    const [etiquetteRules, setEtiquetteRules] = useState<string[]>([]);
+
+    // 加载礼仪规则
+    useEffect(() => {
+        loadEtiquetteRules();
+    }, []);
+
+    const loadEtiquetteRules = async () => {
+        try {
+            setRulesLoading(true);
+            const rules = await settingsApi.getReservationRules();
+            setEtiquetteRules(rules);
+        } catch (error) {
+            message.error('加载礼仪规则失败');
+        } finally {
+            setRulesLoading(false);
+        }
+    };
+
+    // 保存礼仪规则
+    const handleSaveEtiquette = async () => {
+        try {
+            setRulesLoading(true);
+            await settingsApi.updateReservationRules(etiquetteRules);
+            message.success('礼仪规则保存成功');
+        } catch (error) {
+            message.error('保存失败');
+        } finally {
+            setRulesLoading(false);
+        }
+    };
+
+    // 添加新规则
+    const handleAddRule = () => {
+        setEtiquetteRules([...etiquetteRules, '']);
+    };
+
+    // 删除规则
+    const handleDeleteRule = (index: number) => {
+        setEtiquetteRules(etiquetteRules.filter((_, i) => i !== index));
+    };
+
+    // 更新规则内容
+    const handleUpdateRule = (index: number, value: string) => {
+        const newRules = [...etiquetteRules];
+        newRules[index] = value;
+        setEtiquetteRules(newRules);
+    };
 
     // 保存店铺信息
     const handleSaveStore = async () => {
@@ -228,6 +278,50 @@ export default function Settings() {
                                         </Button>
                                     </Form.Item>
                                 </Form>
+                            ),
+                        },
+                        {
+                            key: 'etiquette',
+                            label: (
+                                <span><FileTextOutlined /> 牌桌礼仪</span>
+                            ),
+                            children: (
+                                <div style={{ maxWidth: 600 }}>
+                                    <p style={{ marginBottom: 16, color: 'var(--text-muted)' }}>
+                                        这些规则会显示在小程序的"桌面"页面弹窗中，帮助玩家了解预约和游戏礼仪。
+                                    </p>
+                                    <List
+                                        loading={rulesLoading}
+                                        dataSource={etiquetteRules}
+                                        renderItem={(rule, index) => (
+                                            <List.Item
+                                                actions={[
+                                                    <Button
+                                                        type="text"
+                                                        danger
+                                                        icon={<DeleteOutlined />}
+                                                        onClick={() => handleDeleteRule(index)}
+                                                    />
+                                                ]}
+                                            >
+                                                <Input
+                                                    value={rule}
+                                                    onChange={(e) => handleUpdateRule(index, e.target.value)}
+                                                    placeholder={`规则 ${index + 1}`}
+                                                    style={{ marginRight: 8 }}
+                                                />
+                                            </List.Item>
+                                        )}
+                                    />
+                                    <Space style={{ marginTop: 16 }}>
+                                        <Button icon={<PlusOutlined />} onClick={handleAddRule}>
+                                            添加规则
+                                        </Button>
+                                        <Button type="primary" icon={<SaveOutlined />} loading={rulesLoading} onClick={handleSaveEtiquette}>
+                                            保存牌桌礼仪
+                                        </Button>
+                                    </Space>
+                                </div>
                             ),
                         },
                     ]}

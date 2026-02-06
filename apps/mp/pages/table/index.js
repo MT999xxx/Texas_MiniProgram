@@ -36,13 +36,23 @@ Page({
         waitingList: [],
         showRulesPopup: false, // 控制规则弹窗显示
         currentUser: null, // 当前登录用户信息
-        loading: false
+        loading: false,
+        // 预约规则礼仪（从后端加载）
+        etiquetteRules: [
+            '下午场 15:00 开局，16:30 前到场赠送 2000 积分。',
+            '晚场 20:00 开局，位置保留至 20:30。',
+            '牌桌满员或超时可申请候补排队。',
+            '严禁任何形式的场下码分行为。',
+            '请保持绅士风度，严禁言语干扰其他玩家。',
+            '弃牌请保持沉默，遵守德州礼仪。'
+        ]
     },
 
     onLoad: function (options) {
         // 获取当前用户信息
         this.updateUserInfo();
         this.loadTableData();
+        this.loadEtiquetteRules();
     },
 
     onShow: function () {
@@ -66,6 +76,25 @@ Page({
         const userInfo = wx.getStorageSync('userInfo');
         if (userInfo) {
             this.setData({ currentUser: userInfo });
+        }
+    },
+
+    /**
+     * 从后端加载牌桌礼仪规则
+     */
+    async loadEtiquetteRules() {
+        try {
+            const { request } = require('../../utils/request');
+            const res = await request({
+                url: '/settings/reservation-rules',
+                method: 'GET'
+            });
+            if (res && res.rules && Array.isArray(res.rules)) {
+                this.setData({ etiquetteRules: res.rules });
+            }
+        } catch (err) {
+            // 加载失败时保持默认规则，静默处理
+            console.warn('加载牌桌礼仪规则失败，使用默认规则', err);
         }
     },
 
