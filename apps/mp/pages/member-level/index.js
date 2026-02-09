@@ -16,7 +16,7 @@ Page({
                 darkText: true,
                 bgGradient: 'linear-gradient(135deg, #ffffff 0%, #e6e6e6 100%)',
                 benefits: [
-                    { icon: '🎁', text: '赠送7500积分' }
+                    { icon: '🎁', text: '赠送1000积分' }
                 ]
             },
             {
@@ -29,8 +29,7 @@ Page({
                 darkText: true,
                 bgGradient: 'linear-gradient(135deg, #e0f2e0 0%, #c4e3c4 100%)',
                 benefits: [
-                    { icon: '🎁', text: '赠送20000积分' },
-                    { icon: '🏷️', text: '享受9.5折优惠' }
+                    { icon: '🎁', text: '赠送7500积分' }
                 ]
             },
             {
@@ -43,10 +42,10 @@ Page({
                 darkText: true,
                 bgGradient: 'linear-gradient(135deg, #e0f0f2 0%, #c4dee3 100%)',
                 benefits: [
-                    { icon: '🏷️', text: '享受8.5折优惠' },
+                    { icon: '🏷️', text: '享受9.5折优惠' },
                     { icon: '🍺', text: '每月免费2瓶啤酒' },
                     { icon: '🍿', text: '每月免费1份小吃' },
-                    { icon: '🎁', text: '每月1个盲盒' }
+                    { icon: '🎁', text: '赠送20000积分' }
                 ]
             },
             {
@@ -59,11 +58,29 @@ Page({
                 darkText: true,
                 bgGradient: 'linear-gradient(135deg, #f2e0f2 0%, #e3c4e3 100%)',
                 benefits: [
-                    { icon: '🏷️', text: '享受7.5折优惠' },
+                    { icon: '🏷️', text: '享受8.5折优惠' },
                     { icon: '💆', text: '足疗券1张' },
                     { icon: '🍸', text: '每月免费1杯调酒' },
                     { icon: '🍿', text: '每月免费1份小吃' },
-                    { icon: '🎁', text: '每月1个盲盒' }
+                    { icon: '🎁', text: '赠送56000积分' }
+                ]
+            },
+            {
+                id: 5,
+                name: '星耀黑金',
+                requirement: '充值20000元',
+                status: '未解锁',
+                progress: '成长值还需 12000',
+                color: '#1a1a1a',
+                darkText: false,
+                bgGradient: 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
+                benefits: [
+                    { icon: '🏷️', text: '享受7.5折优惠' },
+                    { icon: '🎁', text: '赠送120000积分' },
+                    { icon: '💆', text: '足疗券1张' },
+                    { icon: '🍸', text: '每月免费1杯调酒' },
+                    { icon: '🍿', text: '每月免费1份小吃' },
+                    { icon: '💎', text: '尊享VIP黑金勋章' }
                 ]
             }
         ]

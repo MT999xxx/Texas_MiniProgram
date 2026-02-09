@@ -37,10 +37,11 @@ Page({
     // 充值弹窗
     showRechargePopup: false,
     rechargeOptions: [
-      { amount: 500, bonus: 7500, desc: '赠送7500积分', level: 'V1尊荣白银' },
-      { amount: 1000, bonus: 20000, desc: '赠送20000积分+9.5折', level: 'V2奢华黄金' },
-      { amount: 3000, bonus: 72000, desc: '8.5折+月度礼包', level: 'V3高贵铂金' },
-      { amount: 8000, bonus: 200000, desc: '7.5折+足疗券+月度礼包', level: 'V4巅峰钻石' }
+      { amount: 500, bonus: 1000, desc: '赠送1000积分', level: 'V1尊荣白银' },
+      { amount: 1000, bonus: 7500, desc: '赠送7500积分', level: 'V2奢华黄金' },
+      { amount: 3000, bonus: 20000, desc: '赠送20000积分+9.5折', level: 'V3高贵铂金' },
+      { amount: 8000, bonus: 56000, desc: '8.5折+赠送56000积分', level: 'V4巅峰钻石' },
+      { amount: 20000, bonus: 120000, desc: '7.5折+赠送12万积分', level: 'V5星耀黑金' }
     ],
     selectedAmount: 500,
     inputAmount: '',
