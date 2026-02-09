@@ -200,7 +200,7 @@ pnpm migration:run
 ```bash
 # 确保迁移已运行
 pnpm migration:run
-
+pm2 restart texas-api
 # 重新运行种子脚本
 pnpm seed
 ```

@@ -8,6 +8,7 @@ import Members from './pages/Members';
 import Orders from './pages/Orders';
 import DepositReview from './pages/DepositReview';
 import Transactions from './pages/Transactions';
+import Settings from './pages/Settings';
 import MainLayout from './components/Layout/MainLayout';
 import AuthRoute from './components/AuthRoute';
 
@@ -49,8 +50,8 @@ function App() {
               <Route path="transactions" element={<Transactions />} />
               <Route path="orders" element={<Orders />} />
 
-              {/* TODO: Settings */}
-              <Route path="settings" element={<div style={{ padding: 24, background: '#fff' }}>系统设置页面（待开发）</div>} />
+              {/* 系统设置 */}
+              <Route path="settings" element={<Settings />} />
             </Route>
 
             {/* 404 */}

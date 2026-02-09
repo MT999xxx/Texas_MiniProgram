@@ -84,10 +84,11 @@ Page({
      */
     async loadEtiquetteRules() {
         try {
-            const { request } = require('../../utils/request');
+            const request = require('../../utils/request');
             const res = await request({
                 url: '/settings/reservation-rules',
-                method: 'GET'
+                method: 'GET',
+                silent: true  // 静默请求，不显示错误toast
             });
             if (res && res.rules && Array.isArray(res.rules)) {
                 this.setData({ etiquetteRules: res.rules });
