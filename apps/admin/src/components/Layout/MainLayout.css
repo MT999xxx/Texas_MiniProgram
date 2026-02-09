@@ -92,8 +92,51 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-    .site-content-wrapper {
-        margin: 16px 8px;
-        padding: 16px;
+    .site-header {
+        padding: 0 12px;
     }
+
+    .site-content-wrapper {
+        margin: 12px 0;
+        padding: 12px;
+        width: 100vw;
+        box-sizing: border-box;
+    }
+
+    .mobile-menu-btn {
+        color: var(--color-gold-primary) !important;
+        font-size: 20px;
+        height: 40px;
+        width: 40px;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+/* Drawer Styling */
+.mobile-drawer .ant-drawer-content {
+    background-color: var(--bg-secondary) !important;
+}
+
+.mobile-drawer .ant-drawer-header {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.mobile-drawer .ant-drawer-title {
+    color: var(--color-gold-primary) !important;
+}
+
+.mobile-drawer .ant-menu {
+    background: transparent !important;
+    border: none;
+}
+
+.mobile-drawer .ant-menu-item {
+    color: var(--text-secondary) !important;
+}
+
+.mobile-drawer .ant-menu-item-selected {
+    background-color: rgba(212, 175, 55, 0.1) !important;
+    color: var(--color-gold-primary) !important;
 }

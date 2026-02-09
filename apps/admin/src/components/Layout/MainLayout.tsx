@@ -14,7 +14,10 @@ import {
     UserOutlined,
     AuditOutlined,
     SwapOutlined,
+    MenuOutlined,
 } from '@ant-design/icons';
+import { Drawer, Button } from 'antd';
+import { useMediaQuery } from 'react-responsive';
 import NotificationCenter from '../NotificationCenter';
 import './MainLayout.css';
 
@@ -22,8 +25,12 @@ const { Header, Sider, Content } = Layout;
 
 export default function MainLayout() {
     const [collapsed, setCollapsed] = useState(false);
+    const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
+
+    // 响应式判断
+    const isMobile = useMediaQuery({ maxWidth: 768 });
 
     // 获取当前用户信息
     const userStr = localStorage.getItem('admin_user');
@@ -102,32 +109,62 @@ export default function MainLayout() {
 
     return (
         <Layout className="main-layout">
-            <Sider
-                collapsible
-                collapsed={collapsed}
-                onCollapse={setCollapsed}
-                width={240}
-                className="site-sider"
-            >
-                <div className="logo-container">
-                    <div className="logo-text">
-                        {collapsed ? 'A' : '三条A 管理后台'}
+            {!isMobile && (
+                <Sider
+                    collapsible
+                    collapsed={collapsed}
+                    onCollapse={setCollapsed}
+                    width={240}
+                    className="site-sider"
+                >
+                    <div className="logo-container">
+                        <div className="logo-text">
+                            {collapsed ? 'A' : '三条A 管理后台'}
+                        </div>
                     </div>
-                </div>
+                    <Menu
+                        theme="dark"
+                        mode="inline"
+                        selectedKeys={[location.pathname]}
+                        items={menuItems}
+                        onClick={handleMenuClick}
+                        className="site-menu"
+                    />
+                </Sider>
+            )}
+
+            {/* 移动端抽屉菜单 */}
+            <Drawer
+                title="三条A 管理后台"
+                placement="left"
+                onClose={() => setMobileMenuVisible(false)}
+                open={mobileMenuVisible}
+                styles={{ body: { padding: 0 } }}
+                width={250}
+                className="mobile-drawer"
+            >
                 <Menu
-                    theme="dark"
                     mode="inline"
                     selectedKeys={[location.pathname]}
                     items={menuItems}
-                    onClick={handleMenuClick}
-                    className="site-menu"
+                    onClick={(info) => {
+                        handleMenuClick(info);
+                        setMobileMenuVisible(false);
+                    }}
                 />
-            </Sider>
+            </Drawer>
 
             <Layout className="site-layout">
                 <Header className="site-header">
                     <div className="header-left">
-                        {/* 面包屑或其他导航元素 */}
+                        {isMobile && (
+                            <Button
+                                type="text"
+                                icon={<MenuOutlined />}
+                                onClick={() => setMobileMenuVisible(true)}
+                                className="mobile-menu-btn"
+                            />
+                        )}
                     </div>
                     <div className="header-right">
                         <NotificationCenter />
@@ -141,7 +178,7 @@ export default function MainLayout() {
                                     icon={<UserOutlined />}
                                     style={{ backgroundColor: 'var(--color-gold-primary)', color: '#000' }}
                                 />
-                                <span className="user-name">{user.name}</span>
+                                {!isMobile && <span className="user-name">{user.name}</span>}
                             </div>
                         </Dropdown>
                     </div>
