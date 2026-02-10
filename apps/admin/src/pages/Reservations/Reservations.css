@@ -229,3 +229,39 @@
     display: flex !important;
     align-items: center !important;
 }
+
+/* 手机端适配 */
+@media (max-width: 768px) {
+    .reservations-page .toolbar {
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .reservations-page .toolbar .ant-space {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .reservations-page .ant-btn {
+        min-width: auto !important;
+        padding: 0 8px !important;
+        font-size: 12px !important;
+        height: 28px !important;
+    }
+
+    .reservations-page .ant-table-thead>tr>th {
+        font-size: 11px;
+        padding: 8px 6px !important;
+        letter-spacing: 0;
+    }
+
+    .reservations-page .ant-table-tbody>tr>td {
+        padding: 8px 6px !important;
+        font-size: 12px;
+    }
+
+    .reservations-page .ant-card {
+        border-radius: 16px;
+    }
+}

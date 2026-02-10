@@ -114,3 +114,34 @@
     padding: 40px;
     color: var(--text-muted);
 }
+
+/* 手机端适配 */
+@media (max-width: 768px) {
+    .toolbar {
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .toolbar .ant-space {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .table-card .ant-card-body {
+        padding: 14px;
+    }
+
+    .table-header h3 {
+        font-size: 15px;
+    }
+
+    .table-actions {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .table-actions .ant-btn {
+        width: 100%;
+    }
+}

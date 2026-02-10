@@ -128,3 +128,43 @@
     font-size: 24px;
     color: var(--color-gold-primary);
 }
+
+/* 手机端适配 */
+@media (max-width: 768px) {
+    .orders-page .toolbar {
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .order-summary {
+        flex-wrap: wrap;
+        gap: 16px;
+        padding: 12px;
+    }
+
+    .order-summary-item strong {
+        font-size: 18px;
+    }
+
+    .order-amount {
+        font-size: 15px;
+    }
+
+    .orders-page .ant-table-thead>tr>th {
+        font-size: 11px;
+        padding: 8px 6px !important;
+        letter-spacing: 0;
+    }
+
+    .orders-page .ant-table-tbody>tr>td {
+        padding: 8px 6px !important;
+        font-size: 12px;
+    }
+
+    .orders-page .ant-btn {
+        padding: 0 6px;
+        font-size: 12px;
+        height: 28px;
+    }
+}
