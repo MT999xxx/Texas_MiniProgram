@@ -8,13 +8,17 @@ export interface OrderItem {
         price: number;
     };
     quantity: number;
+    unitPrice?: number;
+    specType?: string;
     price: number;
+    amount: number;
     subtotal: number;
 }
 
 export interface Order {
     id: string;
     orderNo: string;
+    orderNumber: string;
     member: {
         id: string;
         nickname: string;
@@ -32,6 +36,7 @@ export interface Order {
     paymentMethod?: string;
     paidAt?: string;
     remark?: string;
+    notes?: string;
     createdAt: string;
     updatedAt: string;
 }

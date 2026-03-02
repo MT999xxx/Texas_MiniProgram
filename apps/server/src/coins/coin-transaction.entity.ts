@@ -7,6 +7,7 @@ export enum CoinTransactionType {
     EXCHANGE = 'EXCHANGE',      // 积分兑换
     CONSUME = 'CONSUME',        // 消费
     WITHDRAW = 'WITHDRAW',      // 取积分
+    REFUND = 'REFUND',          // 退款
 }
 
 export enum CoinTransactionStatus {

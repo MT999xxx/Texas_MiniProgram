@@ -228,7 +228,7 @@ export class WechatPayService {
     return true;
   }
 
-  // 申请退款
+  // 申请退款（微信支付 V3 API）
   async refund(params: {
     outTradeNo: string;
     outRefundNo: string;
@@ -237,13 +237,60 @@ export class WechatPayService {
     reason?: string;
   }): Promise<any> {
     if (!this.isAvailable()) {
-      this.logger.warn('微信支付不可用');
-      return null;
+      this.logger.warn('微信支付不可用，使用模拟退款');
+      return { refund_id: `mock_refund_${Date.now()}`, status: 'SUCCESS' };
     }
 
-    // TODO: 实现真实的退款功能
-    this.logger.log(`申请退款: ${params.outTradeNo}, 金额: ${params.refundAmount}`);
-    return { refund_id: `mock_refund_${Date.now()}`, status: 'SUCCESS' };
+    try {
+      const config = this.configService.getConfig();
+      const certificates = this.configService.getCertificateContent();
+      if (!certificates) {
+        this.logger.error('无法读取支付证书，退款失败');
+        return null;
+      }
+
+      const refundData = {
+        out_trade_no: params.outTradeNo,
+        out_refund_no: params.outRefundNo,
+        reason: params.reason || '管理员退款',
+        amount: {
+          refund: params.refundAmount,   // 退款金额（分）
+          total: params.totalAmount,     // 原订单金额（分）
+          currency: 'CNY',
+        },
+      };
+
+      const timestamp = Math.floor(Date.now() / 1000).toString();
+      const nonceStr = this.generateNonceStr();
+      const method = 'POST';
+      const url = '/v3/refund/domestic/refunds';
+      const body = JSON.stringify(refundData);
+
+      const signMessage = `${method}\n${url}\n${timestamp}\n${nonceStr}\n${body}\n`;
+      const sign = createSign('RSA-SHA256');
+      sign.update(signMessage);
+      const signature = sign.sign(certificates.key, 'base64');
+
+      const authHeader = `WECHATPAY2-SHA256-RSA2048 mchid="${config.mchId}",nonce_str="${nonceStr}",signature="${signature}",timestamp="${timestamp}",serial_no="${this.getCertSerialNo(certificates.cert)}"`;
+
+      const response = await axios.post(
+        'https://api.mch.weixin.qq.com/v3/refund/domestic/refunds',
+        refundData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': authHeader,
+          },
+        },
+      );
+
+      this.logger.log(`退款申请成功: ${response.data.refund_id}, 状态: ${response.data.status}`);
+      return response.data;
+    } catch (error: any) {
+      this.logger.error('微信退款异常:', error?.response?.data || error.message);
+      throw new Error(`微信退款失败: ${error?.response?.data?.message || error.message}`);
+    }
   }
 
   // 验证支付回调签名  

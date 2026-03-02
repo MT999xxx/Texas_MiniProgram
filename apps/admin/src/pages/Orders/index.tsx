@@ -59,7 +59,7 @@ export default function Orders() {
     const handleComplete = async (order: Order) => {
         modal.confirm({
             title: '确认完成订单',
-            content: `确定将订单 ${order.orderNo} 标记为已完成吗？`,
+            content: `确定将订单 ${order.orderNumber || order.orderNo} 标记为已完成吗？`,
             okText: '确认',
             cancelText: '取消',
             onOk: async () => {
@@ -118,22 +118,27 @@ export default function Orders() {
         return map[status] || 'default';
     };
 
-    const getPaymentMethodText = (method?: string) => {
-        const map: Record<string, string> = {
-            WECHAT: '微信支付',
-            ALIPAY: '支付宝',
-            CASH: '现金',
-            CARD: '刷卡',
-        };
-        return method ? (map[method] || method) : '-';
+    /** 根据后端 paymentMethod 字段或订单状态推断支付方式文本 */
+    const getPaymentMethodText = (order: Order) => {
+        if (order.paymentMethod) {
+            const map: Record<string, string> = {
+                wechat_pay: '微信支付',
+                coins: '金币支付',
+                backend_confirm: '后台确认',
+            };
+            return map[order.paymentMethod] || order.paymentMethod;
+        }
+        if (order.status === 'PENDING' || order.status === 'CANCELLED') return '未支付';
+        return '后台确认';
     };
 
     // 筛选后的数据
     const filteredOrders = orders.filter((order) => {
         if (!searchText) return true;
         const text = searchText.toLowerCase();
+        const orderNo = (order.orderNumber || order.orderNo || '').toLowerCase();
         return (
-            order.orderNo.toLowerCase().includes(text) ||
+            orderNo.includes(text) ||
             order.member?.nickname?.toLowerCase().includes(text) ||
             order.member?.phone?.includes(text)
         );
@@ -215,14 +220,14 @@ export default function Orders() {
                         详情
                     </Button>
                     {record.status === 'PAID' && (
-                        <>
-                            <Button size="small" type="primary" icon={<CheckOutlined />} onClick={() => handleComplete(record)}>
-                                完成
-                            </Button>
-                            <Button size="small" danger icon={<RollbackOutlined />} onClick={() => handleRefund(record)}>
-                                退款
-                            </Button>
-                        </>
+                        <Button size="small" type="primary" icon={<CheckOutlined />} onClick={() => handleComplete(record)}>
+                            完成
+                        </Button>
+                    )}
+                    {(record.status === 'PAID' || record.status === 'COMPLETED') && (
+                        <Button size="small" danger icon={<RollbackOutlined />} onClick={() => handleRefund(record)}>
+                            退款
+                        </Button>
                     )}
                 </Space>
             ),
@@ -302,7 +307,7 @@ export default function Orders() {
 
             {/* 订单详情抽屉 */}
             <Drawer
-                title={`订单详情 - ${selectedOrder?.orderNo || ''}`}
+                title={`订单详情 - ${selectedOrder?.orderNumber || selectedOrder?.orderNo || ''}`}
                 placement="right"
                 width={500}
                 open={drawerVisible}
@@ -311,7 +316,7 @@ export default function Orders() {
                 {selectedOrder && (
                     <div className="order-detail">
                         <Descriptions column={1} bordered size="small">
-                            <Descriptions.Item label="订单号">{selectedOrder.orderNo}</Descriptions.Item>
+                            <Descriptions.Item label="订单号">{selectedOrder.orderNumber || selectedOrder.orderNo}</Descriptions.Item>
                             <Descriptions.Item label="客户">{selectedOrder.member?.nickname}</Descriptions.Item>
                             <Descriptions.Item label="手机号">{selectedOrder.member?.phone}</Descriptions.Item>
                             <Descriptions.Item label="桌位">{selectedOrder.table?.name || '-'}</Descriptions.Item>
@@ -320,12 +325,12 @@ export default function Orders() {
                                     ¥{Number(selectedOrder.totalAmount).toFixed(2)}
                                 </span>
                             </Descriptions.Item>
-                            <Descriptions.Item label="支付方式">{getPaymentMethodText(selectedOrder.paymentMethod)}</Descriptions.Item>
+                            <Descriptions.Item label="支付方式">{getPaymentMethodText(selectedOrder)}</Descriptions.Item>
                             <Descriptions.Item label="状态">
                                 <Tag color={getStatusColor(selectedOrder.status)}>{getStatusText(selectedOrder.status)}</Tag>
                             </Descriptions.Item>
-                            {selectedOrder.remark && (
-                                <Descriptions.Item label="备注">{selectedOrder.remark}</Descriptions.Item>
+                            {(selectedOrder.remark || selectedOrder.notes) && (
+                                <Descriptions.Item label="备注">{selectedOrder.remark || selectedOrder.notes}</Descriptions.Item>
                             )}
                         </Descriptions>
 
@@ -334,9 +339,24 @@ export default function Orders() {
                             dataSource={selectedOrder.items}
                             columns={[
                                 { title: '菜品', dataIndex: ['menuItem', 'name'], key: 'name' },
-                                { title: '单价', dataIndex: 'price', key: 'price', render: (v) => `¥${v}` },
-                                { title: '数量', dataIndex: 'quantity', key: 'quantity' },
-                                { title: '小计', dataIndex: 'subtotal', key: 'subtotal', render: (v) => `¥${v}` },
+                                {
+                                    title: '单价', key: 'unitPrice',
+                                    render: (_: any, item: any) => {
+                                        const up = item.unitPrice ?? (item.quantity > 0 ? item.amount / item.quantity : null) ?? item.menuItem?.price;
+                                        return `¥${Number(up || 0).toFixed(2)}`;
+                                    },
+                                },
+                                {
+                                    title: '数量', key: 'quantity',
+                                    render: (_: any, item: any) => {
+                                        const spec = item.specType;
+                                        const qty = item.quantity || 0;
+                                        if (spec === 'dozen') return `${qty}打 (${qty * 12}瓶)`;
+                                        if (spec === 'half_dozen') return `${qty}组 (${qty * 6}瓶)`;
+                                        return `${qty}`;
+                                    },
+                                },
+                                { title: '小计', dataIndex: 'amount', key: 'amount', render: (v: any) => `¥${Number(v || 0).toFixed(2)}` },
                             ]}
                             rowKey="id"
                             pagination={false}
@@ -353,11 +373,12 @@ export default function Orders() {
                             ]}
                         />
                     </div>
-                )}
-            </Drawer>
+                )
+                }
+            </Drawer >
 
             {/* 退款弹窗 */}
-            <Modal
+            < Modal
                 title="申请退款"
                 open={refundModalVisible}
                 onOk={handleRefundSubmit}
@@ -368,7 +389,7 @@ export default function Orders() {
             >
                 <Form form={refundForm} layout="vertical">
                     <Form.Item label="订单号">
-                        <Input value={selectedOrder?.orderNo} disabled />
+                        <Input value={selectedOrder?.orderNumber || selectedOrder?.orderNo} disabled />
                     </Form.Item>
                     <Form.Item name="amount" label="退款金额" rules={[{ required: true, message: '请输入退款金额' }]}>
                         <Input prefix="¥" type="number" />
@@ -377,7 +398,7 @@ export default function Orders() {
                         <Input.TextArea rows={3} placeholder="请输入退款原因" />
                     </Form.Item>
                 </Form>
-            </Modal>
-        </div>
+            </Modal >
+        </div >
     );
 }

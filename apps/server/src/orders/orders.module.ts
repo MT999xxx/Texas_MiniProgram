@@ -10,12 +10,14 @@ import { TableEntity } from '../tables/table.entity';
 import { UserCouponEntity } from '../coupons/user-coupon.entity';
 import { MemberEntity } from '../membership/member.entity';
 import { CoinTransactionEntity } from '../coins/coin-transaction.entity';
+import { PaymentEntity } from '../payment/payment.entity';
 import { TableModule } from '../tables/table.module';
 import { ReservationModule } from '../reservation/reservation.module';
 import { MembershipModule } from '../membership/membership.module';
 import { LoyaltyModule } from '../loyalty/loyalty.module';
 import { MenuModule } from '../menu/menu.module';
 import { CouponsModule } from '../coupons/coupons.module';
+import { PaymentModule } from '../payment/payment.module';
 
 @Module({
   imports: [
@@ -27,7 +29,8 @@ import { CouponsModule } from '../coupons/coupons.module';
       TableEntity,
       UserCouponEntity,
       MemberEntity,
-      CoinTransactionEntity
+      CoinTransactionEntity,
+      PaymentEntity,
     ]),
     TableModule,
     ReservationModule,
@@ -35,6 +38,7 @@ import { CouponsModule } from '../coupons/coupons.module';
     LoyaltyModule,
     MenuModule,
     CouponsModule,
+    PaymentModule,
   ],
   providers: [OrdersService],
   controllers: [OrdersController],

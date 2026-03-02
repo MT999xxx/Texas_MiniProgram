@@ -28,6 +28,6 @@ import { NotificationService } from './notification.service';
     WechatPayConfigService,
     NotificationService,
   ],
-  exports: [PaymentService],
+  exports: [PaymentService, WechatPayService],
 })
 export class PaymentModule { }

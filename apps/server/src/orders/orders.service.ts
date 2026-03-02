@@ -17,6 +17,8 @@ import { UserCouponEntity, UserCouponStatus } from '../coupons/user-coupon.entit
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { MemberEntity } from '../membership/member.entity';
 import { CoinTransactionEntity, CoinTransactionType, CoinTransactionStatus } from '../coins/coin-transaction.entity';
+import { WechatPayService } from '../payment/wechat-pay.service';
+import { PaymentEntity, PaymentStatus } from '../payment/payment.entity';
 
 @Injectable()
 export class OrdersService {
@@ -37,12 +39,15 @@ export class OrdersService {
     private readonly memberRepo: Repository<MemberEntity>,
     @InjectRepository(CoinTransactionEntity)
     private readonly coinTransactionRepo: Repository<CoinTransactionEntity>,
+    @InjectRepository(PaymentEntity)
+    private readonly paymentRepo: Repository<PaymentEntity>,
     private readonly redisService: RedisService,
     private readonly tableService: TableService,
     private readonly reservationService: ReservationService,
     private readonly membershipService: MembershipService,
     private readonly loyaltyService: LoyaltyService,
     private readonly couponsService: CouponsService,
+    private readonly wechatPayService: WechatPayService,
   ) { }
 
   async create(dto: CreateOrderDto) {
@@ -131,6 +136,8 @@ export class OrdersService {
         this.orderItemRepo.create({
           menuItem,
           quantity: itemDto.quantity,
+          unitPrice,
+          specType: itemDto.specType || 'single',
           amount,
         }),
       );
@@ -287,6 +294,7 @@ export class OrdersService {
 
     order.status = OrderStatus.PAID;
     order.paidAt = new Date();
+    order.paymentMethod = 'wechat_pay';
     const saved = await this.orderRepo.save(order);
 
     await this.redisService.getClient().set(`order:${saved.id}:status`, saved.status);
@@ -361,6 +369,7 @@ export class OrdersService {
 
     // 标记订单为已支付
     order.status = OrderStatus.PAID;
+    order.paymentMethod = 'coins';
     const saved = await this.orderRepo.save(order);
     await this.redisService.getClient().set(`order:${saved.id}:status`, saved.status);
 
@@ -368,6 +377,80 @@ export class OrdersService {
     if (order.member) {
       await this.loyaltyService.awardPointsForOrder(saved);
     }
+
+    return saved;
+  }
+
+  /**
+   * 管理员退款：回补库存 + 金币退还（如果是金币支付）+ 状态标记为 CANCELLED
+   * @param orderId 订单ID
+   * @param reason  退款原因
+   * @param amount  退款金额（可选，默认全额退款）
+   */
+  async refund(orderId: string, reason: string, amount?: number): Promise<OrderEntity> {
+    const order = await this.orderRepo.findOne({
+      where: { id: orderId },
+      relations: ['member', 'items', 'items.menuItem'],
+    });
+    if (!order) {
+      throw new NotFoundException('订单不存在');
+    }
+
+    if (order.status !== OrderStatus.PAID && order.status !== OrderStatus.COMPLETED) {
+      throw new BadRequestException('仅已支付或已完成的订单可退款');
+    }
+
+    const refundAmount = amount ?? Number(order.totalAmount);
+
+    // 微信支付订单：调用微信退款 API 实际退款给客户
+    if (order.paymentMethod === 'wechat_pay' || !order.paymentMethod) {
+      const payment = await this.paymentRepo.findOne({
+        where: { order: { id: orderId }, status: PaymentStatus.SUCCESS },
+        order: { createdAt: 'DESC' },
+      });
+
+      if (payment) {
+        const refundNo = `REFUND_${Date.now()}_${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+        try {
+          await this.wechatPayService.refund({
+            outTradeNo: payment.paymentOrderNo,
+            outRefundNo: refundNo,
+            refundAmount: Math.round(refundAmount * 100),
+            totalAmount: Number(payment.amount),
+            reason,
+          });
+        } catch (err: any) {
+          throw new BadRequestException(`微信退款失败: ${err.message}`);
+        }
+      }
+    }
+
+    // 金币支付订单：退还金币到会员账户
+    if (order.paymentMethod === 'coins' && order.member) {
+      const member = await this.memberRepo.findOne({ where: { id: order.member.id } });
+      if (member) {
+        member.coins = Number(member.coins || 0) + refundAmount;
+        await this.memberRepo.save(member);
+
+        const transaction = this.coinTransactionRepo.create({
+          memberId: member.id,
+          type: CoinTransactionType.REFUND,
+          amount: refundAmount,
+          status: CoinTransactionStatus.SUCCESS,
+          remark: `订单退款: ${order.orderNumber}，原因: ${reason}`,
+        });
+        await this.coinTransactionRepo.save(transaction);
+      }
+    }
+
+    // 回补库存
+    await this.restockItems(order);
+
+    // 标记为已取消
+    order.status = OrderStatus.CANCELLED;
+    order.notes = `[退款] ${reason}`;
+    const saved = await this.orderRepo.save(order);
+    await this.redisService.getClient().set(`order:${saved.id}:status`, saved.status);
 
     return saved;
   }

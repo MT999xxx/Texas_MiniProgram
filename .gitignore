@@ -50,3 +50,8 @@ uploads/
 
 # OS
 Thumbs.db
+
+# WeChat Pay Certificates (NEVER commit these)
+certs/
+*.pem
+*.p12

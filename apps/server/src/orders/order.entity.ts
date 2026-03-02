@@ -66,6 +66,10 @@ export class OrderEntity {
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING })
   status!: OrderStatus;
 
+  @ApiPropertyOptional({ description: '支付方式', example: 'wechat_pay / coins / backend_confirm' })
+  @Column({ length: 32, nullable: true, name: 'payment_method' })
+  paymentMethod?: string;
+
   @ApiPropertyOptional({ description: '支付时间' })
   @Column({ nullable: true })
   paidAt?: Date;

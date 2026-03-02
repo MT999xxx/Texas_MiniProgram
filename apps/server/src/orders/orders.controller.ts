@@ -55,4 +55,16 @@ export class OrdersController {
   payWithCoins(@Param('id') id: string, @Body('memberId') memberId: string) {
     return this.ordersService.payWithCoins(id, memberId);
   }
+
+  @Post(':id/refund')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: '退款成功' })
+  @ApiBadRequestResponse({ description: '订单不存在或状态不允许退款' })
+  refund(
+    @Param('id') id: string,
+    @Body('reason') reason: string,
+    @Body('amount') amount?: number,
+  ) {
+    return this.ordersService.refund(id, reason, amount);
+  }
 }

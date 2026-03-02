@@ -1,3 +1,32 @@
+### [2026-02-24 14:55] - 订单退款功能（含微信实际退款）
+- [x] **需求**：管理员可以对客户错误下单的订单进行实际退款。
+- [x] **后端**：
+  - `CoinTransactionType` 新增 `REFUND` 枚举值。
+  - `WechatPayService.refund()` 实现真实微信 V3 退款 API（`/v3/refund/domestic/refunds`），RSA-SHA256 签名，支持 mock 回退。
+  - `OrdersService.refund()` 根据 `paymentMethod` 分发：微信支付调微信退款 API 实际退钱，金币支付退金币到会员账户。
+  - `OrdersController` 新增 `POST /orders/:id/refund` 端点。
+  - `OrdersModule` 注入 `PaymentModule`、`PaymentEntity`、`WechatPayService`。
+- [x] **前端**：退款按钮对 `PAID` + `COMPLETED` 状态均显示。
+- [x] **编译**：`vite build` 成功。
+
+### [2026-02-24 14:45] - 后台订单详情显示修复
+- [x] **问题**：订单详情中单价/小计显示 `¥undefined`，支付方式显示 `-`，数量显示不正确（12瓶显示为1）。
+- [x] **根因**：
+  - `OrderItemEntity` 未存储成交单价和规格类型，前端取 `menuItem.price` 在序列化后丢失。
+  - `OrderEntity` 无 `paymentMethod` 字段，前端仅按状态推断且与后端枚举值不完全匹配。
+  - 用户选择"一打"(dozen) 规格时 `quantity=1`（1打），但 `specType` 未持久化，无法还原瓶数。
+- [x] **后端修复**：
+  - `OrderItemEntity` 新增 `unitPrice`（成交单价）和 `specType`（规格类型）字段。
+  - `OrderEntity` 新增 `paymentMethod` 字段，`markAsPaid()` 设为 `wechat_pay`，`payWithCoins()` 设为 `coins`。
+  - `OrdersService.create()` 在创建订单项时保存 `unitPrice` 和 `specType`。
+- [x] **前端修复**：
+  - 单价：优先取 `unitPrice`，回退用 `amount/quantity` 反算，再回退取 `menuItem.price`。
+  - 数量：根据 `specType` 显示如"1打 (12瓶)"或"1组 (6瓶)"。
+  - 支付方式：优先读 `paymentMethod` 字段并翻译为中文，回退按状态推断。
+  - 适配后端字段名 `orderNumber`/`notes` 的兼容映射。
+- [x] **编译**：`vite build` 成功。
+- **注意**：新字段均 `nullable`，已有旧订单数据不受影响（前端做了向下兼容）。部署后需 TypeORM 同步建表（synchronize: true）。
+
 ### [2026-02-10 10:55] - 后台管理系统手机端深度适配
 - [x] **需求**：手机端比例不友好，部分区域看不全
 - [x] **Dashboard**：hero-panel 按钮纵向排列、数据区自动换行、图表减高、排行榜精简间距
