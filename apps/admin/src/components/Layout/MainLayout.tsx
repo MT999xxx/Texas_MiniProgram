@@ -15,6 +15,7 @@ import {
     AuditOutlined,
     SwapOutlined,
     MenuOutlined,
+    TrophyOutlined,
 } from '@ant-design/icons';
 import { Drawer, Button } from 'antd';
 import { useMediaQuery } from 'react-responsive';
@@ -77,6 +78,11 @@ export default function MainLayout() {
             key: '/orders',
             icon: <ShoppingCartOutlined />,
             label: '订单管理',
+        },
+        {
+            key: '/champion-ranking',
+            icon: <TrophyOutlined />,
+            label: '冠军赛排名',
         },
         {
             key: '/settings',

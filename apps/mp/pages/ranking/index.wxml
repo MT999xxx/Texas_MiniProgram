@@ -18,8 +18,12 @@
         <view class="tab-indicator" wx:if="{{currentTab === 1}}"></view>
       </view>
       <view class="tab-item {{currentTab === 2 ? 'active' : ''}}" bindtap="switchRankingTab" data-index="2">
-        <text class="tab-text">冠军榜</text>
+        <text class="tab-text">冠军赛周榜</text>
         <view class="tab-indicator" wx:if="{{currentTab === 2}}"></view>
+      </view>
+      <view class="tab-item {{currentTab === 3 ? 'active' : ''}}" bindtap="switchRankingTab" data-index="3">
+        <text class="tab-text">冠军赛月榜</text>
+        <view class="tab-indicator" wx:if="{{currentTab === 3}}"></view>
       </view>
     </view>
   </view>

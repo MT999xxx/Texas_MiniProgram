@@ -8,6 +8,7 @@ import Members from './pages/Members';
 import Orders from './pages/Orders';
 import DepositReview from './pages/DepositReview';
 import Transactions from './pages/Transactions';
+import ChampionRanking from './pages/ChampionRanking';
 import Settings from './pages/Settings';
 import MainLayout from './components/Layout/MainLayout';
 import AuthRoute from './components/AuthRoute';
@@ -49,6 +50,7 @@ function App() {
               <Route path="deposit-review" element={<DepositReview />} />
               <Route path="transactions" element={<Transactions />} />
               <Route path="orders" element={<Orders />} />
+              <Route path="champion-ranking" element={<ChampionRanking />} />
 
               {/* 系统设置 */}
               <Route path="settings" element={<Settings />} />

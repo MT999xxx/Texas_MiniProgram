@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LoyaltyTransactionEntity, LoyaltyTransactionType } from './loyalty-transaction.entity';
+import { ChampionRankingEntity, ChampionType } from './champion-ranking.entity';
 import { MembershipService } from '../membership/membership.service';
 import { OrderEntity } from '../orders/order.entity';
 import { MemberEntity } from '../membership/member.entity';
@@ -13,6 +14,8 @@ export class LoyaltyService {
     private readonly repo: Repository<LoyaltyTransactionEntity>,
     @InjectRepository(MemberEntity)
     private readonly memberRepo: Repository<MemberEntity>,
+    @InjectRepository(ChampionRankingEntity)
+    private readonly championRepo: Repository<ChampionRankingEntity>,
     private readonly membershipService: MembershipService,
   ) { }
 
@@ -36,7 +39,11 @@ export class LoyaltyService {
   }
 
   // 获取排行榜数据
-  async getLeaderboard(type: 'total' | 'weekly' | 'event' = 'total', limit: number | string = 50) {
+  async getLeaderboard(type: string = 'total', limit: number | string = 50) {
+    // 冠军赛类型走独立查询
+    if (type === 'champion_weekly' || type === 'champion_monthly') {
+      return this.getChampionLeaderboard(type as ChampionType);
+    }
     try {
       // 确保 limit 是数字
       const numLimit = typeof limit === 'string' ? parseInt(limit, 10) : limit;
@@ -77,7 +84,7 @@ export class LoyaltyService {
   }
 
   // 获取用户在排行榜中的排名
-  async getUserRank(memberId: string, type: 'total' | 'weekly' | 'event' = 'total') {
+  async getUserRank(memberId: string, type: string = 'total') {
     const rankings = await this.getLeaderboard(type, 1000); // 获取更多数据以确保包含目标用户
     const userRank = rankings.find(rank => rank.id === memberId);
 
@@ -154,5 +161,55 @@ export class LoyaltyService {
     }
 
     return { message: '测试数据创建成功', members: created };
+  }
+
+  /** 获取冠军赛排行榜（手动排名） */
+  async getChampionLeaderboard(type: ChampionType) {
+    try {
+      const entries = await this.championRepo.find({
+        where: { type },
+        relations: ['member', 'member.level'],
+        order: { rank: 'ASC' },
+      });
+
+      return entries.map(entry => {
+        const member = entry.member;
+        const code = member?.level?.code || member?.levelCode || 'V1';
+        const name = member?.level?.name || '';
+        return {
+          rank: entry.rank,
+          id: member?.id,
+          nickname: member?.nickname || '匿名用户',
+          avatar: member?.avatar,
+          points: member?.points || 0,
+          levelCode: code,
+          levelName: `${code}${name}`,
+          levelNumber: member?.level?.threshold || 0,
+        };
+      });
+    } catch (error) {
+      console.error('获取冠军赛排行榜失败:', error);
+      return [];
+    }
+  }
+
+  /** 批量保存冠军赛排名（先清空再插入） */
+  async saveChampionRankings(type: ChampionType, entries: { memberId: string; rank: number }[]) {
+    await this.championRepo.delete({ type });
+    const entities = entries.map(e =>
+      this.championRepo.create({ type, memberId: e.memberId, rank: e.rank }),
+    );
+    return this.championRepo.save(entities);
+  }
+
+  /** 添加单个冠军赛排名 */
+  async addChampionEntry(type: ChampionType, memberId: string, rank: number) {
+    const entry = this.championRepo.create({ type, memberId, rank });
+    return this.championRepo.save(entry);
+  }
+
+  /** 移除单个冠军赛排名 */
+  async removeChampionEntry(type: ChampionType, memberId: string) {
+    return this.championRepo.delete({ type, memberId });
   }
 }

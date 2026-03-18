@@ -1,3 +1,10 @@
+### [2026-03-18 16:28] - 冠军赛排行榜功能
+- [x] **需求**：排行榜「冠军榜」拆分为「冠军赛周榜」和「冠军赛月榜」，由后台手动管理排名。
+- [x] **后端**：新建 `champion_rankings` 表 + ChampionRankingEntity 实体，扩展 LoyaltyService CRUD，Controller 新增 GET/POST/DELETE `/loyalty/champion`。
+- [x] **管理后台**：新增「冠军赛排名」页面（添加会员/排序/删除/批量保存），侧边栏 TrophyOutlined 导航。
+- [x] **小程序**：Tab 从 3→4（半月榜/年榜/冠军赛周榜/冠军赛月榜），typeMap 扩展 champion_weekly/champion_monthly。
+- [x] **编译**：后端 tsc ✅ + 前端 vite build ✅。
+
 ### [2026-03-18 14:00] - 排行榜添加会员级别显示
 - [x] **需求**：在排行榜每个会员名次右侧显示其级别徽章（如"V5传奇钻石"）。
 - [x] **修改**：

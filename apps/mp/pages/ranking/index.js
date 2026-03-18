@@ -54,19 +54,18 @@ Page({
     let dateRange = '';
 
     if (this.data.currentTab === 0) {
-      // 半月榜 - 显示本周日期范围
+      // 半月榜
       const weekStart = new Date(now);
       weekStart.setDate(now.getDate() - now.getDay());
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekStart.getDate() + 6);
-
       dateRange = `${this.formatDate(weekStart)}至${this.formatDate(weekEnd)}`;
     } else if (this.data.currentTab === 1) {
-      // 年榜 - 显示今年
       dateRange = `${now.getFullYear()}年度`;
+    } else if (this.data.currentTab === 2) {
+      dateRange = '冠军赛周榜';
     } else {
-      // 冠军榜
-      dateRange = '活动专榜';
+      dateRange = '冠军赛月榜';
     }
 
     this.setData({ dateRange });
@@ -90,7 +89,8 @@ Page({
     const typeMap = {
       0: 'weekly', // 半月榜 -> 周榜
       1: 'total',  // 年榜 -> 总榜
-      2: 'event'   // 冠军榜 -> 活动榜
+      2: 'champion_weekly',  // 冠军赛周榜
+      3: 'champion_monthly'  // 冠军赛月榜
     };
 
     const type = typeMap[this.data.currentTab];
