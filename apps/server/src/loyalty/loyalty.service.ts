@@ -54,15 +54,20 @@ export class LoyaltyService {
         .getMany();
 
       // 计算排行榜数据
-      const rankings = members.map((member, index) => ({
-        rank: index + 1,
-        id: member.id,
-        nickname: member.nickname || '匿名用户',
-        avatar: member.avatar,
-        points: member.points,
-        levelName: member.level?.name || 'V1 普通会员',
-        levelNumber: member.level?.threshold || 0
-      }));
+      const rankings = members.map((member, index) => {
+        const code = member.level?.code || member.levelCode || 'V1';
+        const name = member.level?.name || '';
+        return {
+          rank: index + 1,
+          id: member.id,
+          nickname: member.nickname || '匿名用户',
+          avatar: member.avatar,
+          points: member.points,
+          levelCode: code,
+          levelName: `${code}${name}`,
+          levelNumber: member.level?.threshold || 0
+        };
+      });
 
       return rankings;
     } catch (error) {

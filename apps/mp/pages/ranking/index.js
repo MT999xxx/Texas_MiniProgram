@@ -129,7 +129,8 @@ Page({
         avatar: (item.avatar && item.avatar.startsWith('http') && !item.avatar.startsWith('http://tmp'))
           ? item.avatar
           : '/images/huiyuan2.jpg',
-        levelName: item.levelName || '普通会员'
+        levelCode: item.levelCode || 'V1',
+        levelName: item.levelName || ''
       }));
 
       console.log('格式化后的排行榜:', rankingList);

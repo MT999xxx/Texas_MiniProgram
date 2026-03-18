@@ -44,6 +44,11 @@
             <text class="rank-score">{{item.score}} <text class="score-unit">积分</text></text>
           </view>
 
+          <!-- 会员级别徽章 -->
+          <view class="rank-level-badge level-{{item.levelCode}}" wx:if="{{item.levelName}}">
+            <text class="rank-level-text">{{item.levelName}}</text>
+          </view>
+
           <!-- 装饰 -->
           <view class="item-accent" wx:if="{{index < 3}}"></view>
         </view>
