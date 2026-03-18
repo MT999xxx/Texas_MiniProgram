@@ -1,11 +1,12 @@
 import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { PaymentEntity, PaymentType, PaymentStatus, PaymentMethod, RechargeRecordEntity, RechargePackageEntity } from './payment.entity';
 import { WechatPayService } from './wechat-pay.service';
 import { MemberEntity } from '../membership/member.entity';
 import { OrderEntity, OrderStatus } from '../orders/order.entity';
 import { ReservationEntity } from '../reservation/reservation.entity';
+import { CoinTransactionEntity, CoinTransactionType, CoinTransactionStatus } from '../coins/coin-transaction.entity';
 
 @Injectable()
 export class PaymentService {
@@ -24,6 +25,8 @@ export class PaymentService {
     private orderRepo: Repository<OrderEntity>,
     @InjectRepository(ReservationEntity)
     private reservationRepo: Repository<ReservationEntity>,
+    @InjectRepository(CoinTransactionEntity)
+    private coinTransactionRepo: Repository<CoinTransactionEntity>,
     private wechatPayService: WechatPayService,
   ) { }
 
@@ -278,9 +281,8 @@ export class PaymentService {
 
   // ========== 支付回调处理 ==========
 
-  // 处理微信支付回调（简化版）
+  // 处理微信支付回调
   async handleWechatPayCallback(paymentOrderNo: string, transactionId: string) {
-    // 查找支付记录
     const payment = await this.paymentRepo.findOne({
       where: { paymentOrderNo },
       relations: ['member', 'order'],
@@ -291,20 +293,27 @@ export class PaymentService {
       throw new NotFoundException('支付记录不存在');
     }
 
-    // 避免重复处理
-    if (payment.status === PaymentStatus.SUCCESS) {
-      this.logger.warn(`支付已处理过: ${payment.id}`);
+    // 原子更新：仅当状态不是 SUCCESS 时才更新，防止并发重复处理
+    const updateResult = await this.paymentRepo
+      .createQueryBuilder()
+      .update(PaymentEntity)
+      .set({ status: PaymentStatus.SUCCESS, thirdPartyOrderNo: transactionId, paidAt: new Date() })
+      .where('id = :id AND status != :success', { id: payment.id, success: PaymentStatus.SUCCESS })
+      .execute();
+
+    if (!updateResult.affected || updateResult.affected === 0) {
+      this.logger.warn(`支付已处理过（原子检查）: ${payment.id}`);
       return { code: 'SUCCESS', message: '支付已处理' };
     }
 
-    // 更新支付记录
-    payment.thirdPartyOrderNo = transactionId;
-    payment.paidAt = new Date();
-    payment.status = PaymentStatus.SUCCESS;
-    await this.paymentRepo.save(payment);
-
-    // 处理支付成功逻辑
-    await this.handlePaymentSuccess(payment);
+    // 重新加载完整实体用于后续逻辑
+    const freshPayment = await this.paymentRepo.findOne({
+      where: { id: payment.id },
+      relations: ['member', 'order'],
+    });
+    if (freshPayment) {
+      await this.handlePaymentSuccess(freshPayment);
+    }
 
     return { code: 'SUCCESS', message: 'OK' };
   }
@@ -360,9 +369,17 @@ export class PaymentService {
 
   // 处理充值支付成功
   private async handleRechargePaymentSuccess(payment: PaymentEntity) {
-    // 检查是否是金币充值（通过 paymentOrderNo 前缀判断）
+    // 幂等检查：如果已有该支付ID对应的充值交易记录，说明已处理过
+    const existingTx = await this.coinTransactionRepo.findOne({
+      where: { transactionId: payment.paymentOrderNo, type: CoinTransactionType.RECHARGE },
+    });
+    if (existingTx) {
+      this.logger.warn(`充值已处理过（幂等检查）: paymentOrderNo=${payment.paymentOrderNo}`);
+      return;
+    }
+
+    // 金币充值（通过 paymentOrderNo 前缀判断）
     if (payment.paymentOrderNo.startsWith('COIN_')) {
-      // 金币充值：直接增加金币余额
       if (!payment.member) {
         this.logger.error(`金币充值支付记录缺少会员关联: ${payment.id}`);
         return;
@@ -382,6 +399,18 @@ export class PaymentService {
       member.points = Number(member.points || 0) + bonusPoints;
 
       await this.memberRepo.save(member);
+
+      // 记录充值交易，兼做幂等标记
+      const tx = this.coinTransactionRepo.create({
+        memberId: member.id,
+        type: CoinTransactionType.RECHARGE,
+        amount: coins,
+        paymentAmount: coins,
+        transactionId: payment.paymentOrderNo,
+        status: CoinTransactionStatus.SUCCESS,
+        remark: `金币充值: ${coins}元`,
+      });
+      await this.coinTransactionRepo.save(tx);
 
       this.logger.log(`金币充值成功: 用户${member.id} 获得${coins}金币 + ${bonusPoints}积分，当前余额: ${member.coins}金币, ${member.points}积分`);
       return;
@@ -425,18 +454,28 @@ export class PaymentService {
           this.logger.log(`微信支付状态: ${wechatResult.trade_state}`);
 
           if (wechatResult.trade_state === 'SUCCESS') {
-            // 支付成功，更新状态
-            payment.status = PaymentStatus.SUCCESS;
-            payment.thirdPartyOrderNo = wechatResult.transaction_id;
-            payment.paidAt = new Date();
-            await this.paymentRepo.save(payment);
+            // 原子更新：防止与微信回调并发导致重复处理
+            const updateResult = await this.paymentRepo
+              .createQueryBuilder()
+              .update(PaymentEntity)
+              .set({ status: PaymentStatus.SUCCESS, thirdPartyOrderNo: wechatResult.transaction_id, paidAt: new Date() })
+              .where('id = :id AND status != :success', { id: payment.id, success: PaymentStatus.SUCCESS })
+              .execute();
 
-            // 处理支付成功逻辑
-            await this.handlePaymentSuccess(payment);
-
-            this.logger.log(`支付状态同步成功: ${paymentId} -> SUCCESS`);
+            if (updateResult.affected && updateResult.affected > 0) {
+              // 只有本次原子更新成功才执行后续逻辑
+              const freshPayment = await this.paymentRepo.findOne({
+                where: { id: payment.id },
+                relations: ['member', 'order'],
+              });
+              if (freshPayment) {
+                await this.handlePaymentSuccess(freshPayment);
+              }
+              this.logger.log(`支付状态同步成功: ${paymentId} -> SUCCESS`);
+            } else {
+              this.logger.warn(`支付状态同步跳过（已被回调处理）: ${paymentId}`);
+            }
           } else if (wechatResult.trade_state === 'CLOSED' || wechatResult.trade_state === 'PAYERROR') {
-            // 支付失败/关闭
             payment.status = PaymentStatus.FAILED;
             await this.paymentRepo.save(payment);
           }

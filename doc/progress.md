@@ -1,3 +1,16 @@
+### [2026-03-03 00:42] - 金币充值重复加款严重 Bug 修复
+- [x] **问题**：金币充值时余额被重复累加，导致会员 YuAnJ_ 余额膨胀至 12,001,280 金币。
+- [x] **根因**：
+  - `handlePaymentSuccess` 有两条并发触发路径（微信回调 + 前端轮询），无原子性保护，导致金币被双倍甚至多倍加到账户。
+  - `handleRechargePaymentSuccess` 直接操作 `member.coins`，无幂等检查，无交易记录审计。
+- [x] **修复**：
+  - `handleWechatPayCallback`：使用原子 `UPDATE WHERE status != SUCCESS`，确保只有一条路径能触发后续逻辑。
+  - `getPaymentStatus`：同样使用原子更新，防止与回调并发。
+  - `handleRechargePaymentSuccess`：增加基于 `paymentOrderNo` 的 `CoinTransactionEntity` 幂等检查 + 创建审计记录。
+  - `payment.module.ts`：注入 `CoinTransactionEntity`。
+- [x] **编译**：`tsc` + `vite build` 均成功。
+- **注意**：YuAnJ_ 余额需管理员手动修正。
+
 ### [2026-02-24 14:55] - 订单退款功能（含微信实际退款）
 - [x] **需求**：管理员可以对客户错误下单的订单进行实际退款。
 - [x] **后端**：

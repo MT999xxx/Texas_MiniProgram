@@ -396,14 +396,15 @@ export class OrdersService {
       throw new NotFoundException('订单不存在');
     }
 
-    if (order.status !== OrderStatus.PAID && order.status !== OrderStatus.COMPLETED) {
-      throw new BadRequestException('仅已支付或已完成的订单可退款');
+    if (order.status !== OrderStatus.PAID && order.status !== OrderStatus.COMPLETED && order.status !== OrderStatus.CANCELLED) {
+      throw new BadRequestException('仅已支付、已完成或已取消的订单可退款');
     }
 
-    const refundAmount = amount ?? Number(order.totalAmount);
+    // 前端 <Input type="number"> 可能传入字符串，强制转为数字
+    const refundAmount = amount != null ? Number(amount) : Number(order.totalAmount);
 
-    // 微信支付订单：调用微信退款 API 实际退款给客户
-    if (order.paymentMethod === 'wechat_pay' || !order.paymentMethod) {
+    // 查找该订单的微信支付记录（无论 paymentMethod 字段是否正确设置）
+    if (order.paymentMethod !== 'coins') {
       const payment = await this.paymentRepo.findOne({
         where: { order: { id: orderId }, status: PaymentStatus.SUCCESS },
         order: { createdAt: 'DESC' },
@@ -420,7 +421,7 @@ export class OrdersService {
             reason,
           });
         } catch (err: any) {
-          throw new BadRequestException(`微信退款失败: ${err.message}`);
+          throw new BadRequestException(`微信退款失败: ${err.message || '未知错误'}`);
         }
       }
     }

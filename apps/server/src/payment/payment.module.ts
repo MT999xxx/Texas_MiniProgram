@@ -9,6 +9,7 @@ import { MemberEntity } from '../membership/member.entity';
 import { OrderEntity } from '../orders/order.entity';
 import { ReservationEntity } from '../reservation/reservation.entity';
 import { NotificationService } from './notification.service';
+import { CoinTransactionEntity } from '../coins/coin-transaction.entity';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { NotificationService } from './notification.service';
       MemberEntity,
       OrderEntity,
       ReservationEntity,
+      CoinTransactionEntity,
     ]),
   ],
   controllers: [PaymentController],

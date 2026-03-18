@@ -224,7 +224,7 @@ export default function Orders() {
                             完成
                         </Button>
                     )}
-                    {(record.status === 'PAID' || record.status === 'COMPLETED') && (
+                    {(record.status === 'PAID' || record.status === 'COMPLETED' || record.status === 'CANCELLED') && (
                         <Button size="small" danger icon={<RollbackOutlined />} onClick={() => handleRefund(record)}>
                             退款
                         </Button>
@@ -342,21 +342,28 @@ export default function Orders() {
                                 {
                                     title: '单价', key: 'unitPrice',
                                     render: (_: any, item: any) => {
-                                        const up = item.unitPrice ?? (item.quantity > 0 ? item.amount / item.quantity : null) ?? item.menuItem?.price;
-                                        return `¥${Number(up || 0).toFixed(2)}`;
+                                        const up = item.unitPrice ?? item.menuItem?.price ?? (item.quantity > 0 ? Number(item.amount) / item.quantity : null);
+                                        return up != null ? `¥${Number(up).toFixed(2)}` : '-';
                                     },
                                 },
                                 {
                                     title: '数量', key: 'quantity',
                                     render: (_: any, item: any) => {
                                         const spec = item.specType;
-                                        const qty = item.quantity || 0;
+                                        const qty = item.quantity || 1;
                                         if (spec === 'dozen') return `${qty}打 (${qty * 12}瓶)`;
                                         if (spec === 'half_dozen') return `${qty}组 (${qty * 6}瓶)`;
+                                        // 旧订单无 specType：用总价/单价推断实际数量
+                                        if (!spec && item.menuItem?.halfDozenPrice && Number(item.amount) === Number(item.menuItem.halfDozenPrice) * qty) {
+                                            return `${qty}组 (${qty * 6}瓶)`;
+                                        }
+                                        if (!spec && item.menuItem?.dozenPrice && Number(item.amount) === Number(item.menuItem.dozenPrice) * qty) {
+                                            return `${qty}打 (${qty * 12}瓶)`;
+                                        }
                                         return `${qty}`;
                                     },
                                 },
-                                { title: '小计', dataIndex: 'amount', key: 'amount', render: (v: any) => `¥${Number(v || 0).toFixed(2)}` },
+                                { title: '小计', dataIndex: 'amount', key: 'amount', render: (v: any) => v != null ? `¥${Number(v).toFixed(2)}` : '-' },
                             ]}
                             rowKey="id"
                             pagination={false}
