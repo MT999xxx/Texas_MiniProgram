@@ -113,6 +113,35 @@ export default function Members() {
         });
     };
 
+    const handleAdjustWineVouchers = (member: Member, isAdd: boolean) => {
+        let delta = 0;
+        modal.confirm({
+            title: isAdd ? '增加酒卷' : '扣除酒卷',
+            content: (
+                <div>
+                    <p>会员：{member.nickname}</p>
+                    <p>当前酒卷：{(member as any).wineVouchers ?? 0}张</p>
+                    <p>{isAdd ? '增加' : '扣除'}：
+                        <InputNumber
+                            min={0}
+                            defaultValue={0}
+                            onChange={(value) => delta = value || 0}
+                        />
+                    </p>
+                </div>
+            ),
+            onOk: async () => {
+                try {
+                    await memberApi.adjustWineVouchers(member.id, isAdd ? delta : -delta);
+                    message.success('酒卷调整成功');
+                    loadMembers();
+                } catch (error) {
+                    message.error('操作失败');
+                }
+            },
+        });
+    };
+
     const handleChangeLevel = (member: Member) => {
         let selectedLevel: string | null = member.levelCode || null;
         modal.confirm({
@@ -204,6 +233,16 @@ export default function Members() {
             ),
         },
         {
+            title: '酒卷',
+            dataIndex: 'wineVouchers',
+            key: 'wineVouchers',
+            render: (v: number) => (
+                <span style={{ fontWeight: 'bold', color: '#722ed1' }}>
+                    {v ?? 0}张
+                </span>
+            ),
+        },
+        {
             title: '累计消费',
             dataIndex: 'totalSpent',
             key: 'totalSpent',
@@ -252,6 +291,22 @@ export default function Members() {
                         onClick={() => handleAdjustCoins(record, false)}
                     >
                         金币-
+                    </Button>
+                    <Button
+                        size="small"
+                        style={{ background: '#722ed1', borderColor: '#722ed1', color: '#fff' }}
+                        icon={<PlusOutlined />}
+                        onClick={() => handleAdjustWineVouchers(record, true)}
+                    >
+                        酒卷+
+                    </Button>
+                    <Button
+                        size="small"
+                        style={{ background: '#531dab', borderColor: '#531dab', color: '#fff' }}
+                        icon={<MinusOutlined />}
+                        onClick={() => handleAdjustWineVouchers(record, false)}
+                    >
+                        酒卷-
                     </Button>
                 </Space>
             ),

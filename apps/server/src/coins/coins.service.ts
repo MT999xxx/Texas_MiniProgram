@@ -40,6 +40,7 @@ export class CoinsService {
             coins: member.coins,
             points: member.points,
             lotteryChances: member.lotteryChances,
+            wineVouchers: member.wineVouchers ?? 0,
             levelCode: member.levelCode || 'V1',
             levelName: member.level?.name || '尊荣白银',
         };
@@ -109,7 +110,28 @@ export class CoinsService {
         // 增加金币余额
         await this.memberRepo.increment({ id: transaction.memberId }, 'coins', transaction.amount);
 
-        return { success: true, message: '充值成功' };
+        // 按单次充值金额一次性赠送积分（非累计，必须单次达到对应档位）
+        const bonusPoints = this.calcRechargeBonusPoints(transaction.amount);
+        if (bonusPoints > 0) {
+            await this.memberRepo.increment({ id: transaction.memberId }, 'points', bonusPoints);
+        }
+
+        return { success: true, message: '充值成功', bonusPoints };
+    }
+
+    /**
+     * 阶梯积分赠送规则（单次充值，非累计）
+     * ¥500  → 赠10000积分
+     * ¥1000 → 赠24000积分
+     * ¥3000 → 赠80000积分
+     * ¥8000 → 赠200000积分
+     */
+    private calcRechargeBonusPoints(amount: number): number {
+        if (amount >= 8000) return 200000;
+        if (amount >= 3000) return 80000;
+        if (amount >= 1000) return 24000;
+        if (amount >= 500)  return 10000;
+        return 0;
     }
 
     /**

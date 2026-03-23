@@ -101,6 +101,14 @@ export class MembershipController {
     return this.membershipService.adjustCoins(id, dto.delta);
   }
 
+  @Patch('members/:id/wine-vouchers')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: '酒卷调整成功' })
+  @ApiBadRequestResponse({ description: '会员不存在或酒卷余额不足' })
+  adjustWineVouchers(@Param('id') id: string, @Body() dto: AdjustPointsDto) {
+    return this.membershipService.adjustWineVouchers(id, dto.delta);
+  }
+
   @Patch('members/:id/level')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: '会员等级修改成功' })

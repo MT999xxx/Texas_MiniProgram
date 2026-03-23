@@ -26,7 +26,7 @@ Page({
     stats: {
       coins: 0,
       points: 0,
-      coupons: 0
+      wineVouchers: 0
     },
     menuList: [
       { icon: '/images/shouye2.jpg', text: '我的订单', url: '/pages/order-list/index' },
@@ -37,10 +37,10 @@ Page({
     // 充值弹窗
     showRechargePopup: false,
     rechargeOptions: [
-      { amount: 500, bonus: 1000, desc: '赠送1000积分', level: 'V1尊荣白银' },
-      { amount: 1000, bonus: 7500, desc: '赠送7500积分', level: 'V2奢华黄金' },
-      { amount: 3000, bonus: 20000, desc: '赠送20000积分+9.5折', level: 'V3高贵铂金' },
-      { amount: 8000, bonus: 56000, desc: '8.5折+赠送56000积分', level: 'V4巅峰钻石' },
+      { amount: 500, bonus: 10000, desc: '赠送10000积分', level: 'V1尊荣白银' },
+      { amount: 1000, bonus: 24000, desc: '赠送24000积分', level: 'V2荣耀黄金' },
+      { amount: 3000, bonus: 80000, desc: '赠送80000积分', level: 'V3至尊铂金' },
+      { amount: 8000, bonus: 200000, desc: '赠送200000积分', level: 'V4传奇钻石' },
       { amount: 20000, bonus: 120000, desc: '7.5折+赠送12万积分', level: 'V5星耀黑金' }
     ],
     selectedAmount: 500,
@@ -445,7 +445,7 @@ Page({
         const levelNum = parseInt(levelCode.replace('V', '')) || 1;
 
         this.setData({
-          'stats.coupons': res.coupons || 0,
+          'stats.wineVouchers': res.wineVouchers ?? 0,
           'memberInfo.levelNum': levelNum,
           'memberInfo.levelName': res.levelName || '尊荣白银',
           loading: false
@@ -495,7 +495,7 @@ Page({
             stats: {
               coins: 0,
               points: 0,
-              coupons: 0
+              wineVouchers: 0
             }
           });
           wx.showToast({

@@ -1,4 +1,5 @@
 {
     "chatgpt.openOnStartup": true,
-    "chatgpt.runCodexInWindowsSubsystemForLinux": false
+    "chatgpt.runCodexInWindowsSubsystemForLinux": false,
+    "specstory.cloudSync.enabled": "never"
 }

@@ -79,6 +79,18 @@ export class MembershipService {
     return this.memberRepo.save(member);
   }
 
+  async adjustWineVouchers(memberId: string, delta: number) {
+    const member = await this.memberRepo.findOne({ where: { id: memberId } });
+    if (!member) {
+      throw new NotFoundException('Member not found');
+    }
+    member.wineVouchers = (member.wineVouchers || 0) + delta;
+    if (member.wineVouchers < 0) {
+      throw new NotFoundException('酒卷余额不足');
+    }
+    return this.memberRepo.save(member);
+  }
+
   findMemberById(id: string) {
     return this.memberRepo.findOne({ where: { id }, relations: ['level'] });
   }

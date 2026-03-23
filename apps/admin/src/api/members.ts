@@ -7,6 +7,7 @@ export interface Member {
     phone: string;
     points: number;
     coins: number;
+    wineVouchers: number;
     lotteryChances: number;
     totalSpent: number;
     levelCode?: string;
@@ -62,6 +63,11 @@ export const memberApi = {
 
     async adjustCoins(id: string, delta: number) {
         const response = await client.patch(`/membership/members/${id}/coins`, { delta });
+        return response.data;
+    },
+
+    async adjustWineVouchers(id: string, delta: number) {
+        const response = await client.patch(`/membership/members/${id}/wine-vouchers`, { delta });
         return response.data;
     },
 

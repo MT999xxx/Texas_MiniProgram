@@ -82,6 +82,24 @@ Page({
                     { icon: '🍿', text: '每月免费1份小吃' },
                     { icon: '💎', text: '尊享VIP黑金勋章' }
                 ]
+            },
+            {
+                id: 6,
+                name: '三条A合伙人',
+                requirement: '邀请制',
+                status: '尊享邀请',
+                progress: '',
+                color: '#7c4dff',
+                darkText: false,
+                bgGradient: 'linear-gradient(135deg, #1a0533 0%, #2d1b69 40%, #0d1f40 70%, #1a0533 100%)',
+                benefits: [
+                    { icon: '👑', text: '专属合伙人身份' },
+                    { icon: '🏷️', text: '尊享7折优惠' },
+                    { icon: '💰', text: '年终合伙人分红' },
+                    { icon: '🛎️', text: '专属私人管家' },
+                    { icon: '🎟️', text: '无限次免费入场' },
+                    { icon: '🌟', text: '永久彩虹荣耀勋章' }
+                ]
             }
         ]
     },

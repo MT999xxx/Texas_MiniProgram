@@ -56,9 +56,9 @@
           <skeleton shape="line" customStyle="width: 60rpx; height: 40rpx; margin: 10rpx auto;" />
         </block>
         <block wx:else>
-          <text class="stat-val font-bold text-gold">{{stats.coupons}}</text>
+          <text class="stat-val font-bold text-gold">{{stats.wineVouchers}}</text>
         </block>
-        <text class="stat-name">礼遇券</text>
+        <text class="stat-name">酒卷</text>
       </view>
     </view>
 

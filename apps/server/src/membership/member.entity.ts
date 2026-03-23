@@ -55,6 +55,10 @@ export class MemberEntity {
   @Column({ type: 'int', default: 0 })
   lotteryChances!: number;
 
+  @ApiProperty({ description: '酒卷数量' })
+  @Column({ type: 'int', default: 0 })
+  wineVouchers!: number;
+
   @ApiProperty({ type: String, format: 'date-time' })
   @CreateDateColumn()
   createdAt!: Date;
