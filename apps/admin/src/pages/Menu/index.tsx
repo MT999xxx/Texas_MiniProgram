@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Table, Card, Button, Space, Tag, Modal, Form, Input, InputNumber, Select, Tabs, Popconfirm, App, Upload, message as antdMessage } from 'antd';
+import { Table, Card, Button, Space, Tag, Modal, Form, Input, InputNumber, Select, Tabs, Popconfirm, App, Upload, Checkbox, message as antdMessage } from 'antd';
 import { PlusOutlined, ReloadOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined, LoadingOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import type { UploadFile, UploadProps } from 'antd';
@@ -83,6 +83,7 @@ export default function Menu() {
             imageUrl: item.imageUrl,
             halfDozenPrice: item.halfDozenPrice,
             dozenPrice: item.dozenPrice,
+            voucherEligible: item.voucherEligible ?? true,
         });
         setImageUrl(item.imageUrl);
         setItemModalVisible(true);
@@ -417,6 +418,9 @@ export default function Menu() {
                     </Form.Item>
                     <Form.Item name="description" label="描述">
                         <Input.TextArea placeholder="可选，简短描述" rows={2} />
+                    </Form.Item>
+                    <Form.Item name="voucherEligible" valuePropName="checked" initialValue={false}>
+                        <Checkbox>可用酒卷支付（鸡尾酒类勾选后客人可用酒卷抵扣）</Checkbox>
                     </Form.Item>
                     <Form.Item label="菜品图片" name="imageUrl">
                         <Upload

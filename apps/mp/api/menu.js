@@ -16,7 +16,11 @@ const menuApi = {
     payWithCoins: (orderId, memberId) => api.post(`/orders/${orderId}/pay-with-coins`, { memberId }),
 
     // 获取会员金币余额
-    getMemberBalance: (memberId) => api.get(`/coins/balance/${memberId}`)
+    getMemberBalance: (memberId) => api.get(`/coins/balance/${memberId}`),
+
+    // 酒卷抵扣鸡尾酒
+    payWithWineVouchers: (orderId, memberId, vouchersToUse, cocktailDiscount) =>
+        api.post(`/orders/${orderId}/pay-wine-vouchers`, { memberId, vouchersToUse, cocktailDiscount })
 };
 
 module.exports = menuApi;

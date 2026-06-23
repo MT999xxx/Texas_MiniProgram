@@ -20,6 +20,7 @@ export interface MenuItem {
     imageUrl?: string;
     halfDozenPrice?: number;
     dozenPrice?: number;
+    voucherEligible?: boolean;
     status: 'ON_SALE' | 'OFF_SHELF' | 'SOLD_OUT';
     createdAt: string;
     updatedAt: string;
@@ -46,6 +47,7 @@ export interface CreateItemDto {
     imageUrl?: string;
     halfDozenPrice?: number;
     dozenPrice?: number;
+    voucherEligible?: boolean;
 }
 
 export interface UpdateItemDto {
@@ -57,6 +59,7 @@ export interface UpdateItemDto {
     imageUrl?: string;
     halfDozenPrice?: number;
     dozenPrice?: number;
+    voucherEligible?: boolean;
     status?: string;
 }
 

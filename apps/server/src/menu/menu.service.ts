@@ -46,6 +46,7 @@ export class MenuService {
       imageUrl: dto.imageUrl,
       halfDozenPrice: dto.halfDozenPrice,
       dozenPrice: dto.dozenPrice,
+      voucherEligible: dto.voucherEligible ?? false,
     });
     return this.itemRepo.save(item);
   }
@@ -108,6 +109,7 @@ export class MenuService {
     if (dto.imageUrl !== undefined) item.imageUrl = dto.imageUrl;
     if (dto.halfDozenPrice !== undefined) item.halfDozenPrice = dto.halfDozenPrice;
     if (dto.dozenPrice !== undefined) item.dozenPrice = dto.dozenPrice;
+    if (dto.voucherEligible !== undefined) item.voucherEligible = dto.voucherEligible;
 
     return this.itemRepo.save(item);
   }

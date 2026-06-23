@@ -440,9 +440,10 @@ Page({
         util.animateNumber(this, 'stats.coins', res.coins || 0);
         util.animateNumber(this, 'stats.points', res.points || 0);
 
-        // 解析等级编码获取等级数字 (V1 -> 1, V4 -> 4)
+        // 解析等级编码获取等级数字（VP 等非数字后缀需映射）
         const levelCode = res.levelCode || 'V1';
-        const levelNum = parseInt(levelCode.replace('V', '')) || 1;
+        const levelCodeMap = { V1: 1, V2: 2, V3: 3, V4: 4, V5: 5, VP: 6 };
+        const levelNum = levelCodeMap[levelCode] || parseInt(levelCode.replace('V', '')) || 1;
 
         this.setData({
           'stats.wineVouchers': res.wineVouchers ?? 0,

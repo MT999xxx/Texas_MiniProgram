@@ -50,6 +50,10 @@ export class MenuItemEntity {
   @Column({ type: 'decimal', precision: 8, scale: 2, nullable: true, name: 'dozen_price' })
   dozenPrice?: number;
 
+  @ApiPropertyOptional({ description: '是否可用酒卷支付（仅鸡尾酒类有效）' })
+  @Column({ type: 'boolean', default: false, name: 'voucher_eligible' })
+  voucherEligible!: boolean;
+
   @ApiProperty({ type: String, format: 'date-time' })
   @CreateDateColumn()
   createdAt!: Date;

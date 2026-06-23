@@ -101,53 +101,83 @@ page {
   transition: all 0.3s ease;
 }
 
-/* 默认 V1 / 通用样式 */
+/* 默认 V1 / 通用样式 - 天蓝白紫渐变 */
 .luxury-card.level-theme-v1 {
-  background: linear-gradient(135deg, #ffffff 0%, #e6e6e6 100%);
-  color: #2c3e50;
+  background: linear-gradient(135deg, #dce8f8 0%, #eef4ff 40%, #e8e0f5 100%);
+  color: #2c3560;
+  box-shadow: 0 12rpx 40rpx rgba(100, 150, 240, 0.18);
 }
 .luxury-card.level-theme-v1 .level-v,
 .luxury-card.level-theme-v1 .level-num,
 .luxury-card.level-theme-v1 .level-title,
 .luxury-card.level-theme-v1 .growth-text,
 .luxury-card.level-theme-v1 .stat-label {
-  color: #2c3e50;
+  color: #3a4f9a;
 }
 
-/* V2 黄金 */
+/* V2 荣耀黄金 - 深天蓝转淡紫 */
 .luxury-card.level-theme-v2 {
-  background: linear-gradient(135deg, #e0f2e0 0%, #c4e3c4 100%);
-  color: #2e4d2e;
+  background: linear-gradient(135deg, #b8d4f0 0%, #d6e8ff 45%, #c8b8e8 100%);
+  color: #1e3060;
+  box-shadow: 0 12rpx 40rpx rgba(80, 130, 220, 0.22);
 }
 .luxury-card.level-theme-v2 .level-v,
 .luxury-card.level-theme-v2 .level-num,
 .luxury-card.level-theme-v2 .level-title,
 .luxury-card.level-theme-v2 .growth-text {
-  color: #2e4d2e;
+  color: #2a4a8a;
 }
 
-/* V3 铂金 */
+/* V3 高贵铂金 - 天蓝白紫柔和过渡 */
 .luxury-card.level-theme-v3 {
-  background: linear-gradient(135deg, #e0f0f2 0%, #c4dee3 100%);
-  color: #2e3a4d;
+  background: linear-gradient(135deg, #a8c8f0 0%, #f0f4ff 50%, #c0a8e8 100%);
+  color: #1a2860;
+  box-shadow: 0 12rpx 40rpx rgba(120, 100, 220, 0.22);
 }
 .luxury-card.level-theme-v3 .level-v,
 .luxury-card.level-theme-v3 .level-num,
 .luxury-card.level-theme-v3 .level-title,
 .luxury-card.level-theme-v3 .growth-text {
-  color: #2e3a4d;
+  color: #2040a0;
 }
 
-/* V4 钻石 */
+/* V4 巳峰钓石 - 深紫蓝天蓝元气 */
 .luxury-card.level-theme-v4 {
-  background: linear-gradient(135deg, #f2e0f2 0%, #e3c4e3 100%);
-  color: #4d2e4d;
+  background: linear-gradient(135deg, #8ab0e8 0%, #d0dcff 40%, #a888d8 100%);
+  color: #140840;
+  box-shadow: 0 12rpx 40rpx rgba(140, 80, 220, 0.28);
 }
 .luxury-card.level-theme-v4 .level-v,
 .luxury-card.level-theme-v4 .level-num,
 .luxury-card.level-theme-v4 .level-title,
 .luxury-card.level-theme-v4 .growth-text {
-  color: #4d2e4d;
+  color: #1a1060;
+}
+
+/* V5 星耀黑金 - 深色底金色字 */
+.luxury-card.level-theme-v5 {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 50%, #1a1a1a 100%);
+  color: #D4AF37;
+  box-shadow: 0 12rpx 40rpx rgba(212, 175, 55, 0.2);
+}
+.luxury-card.level-theme-v5 .level-v,
+.luxury-card.level-theme-v5 .level-num,
+.luxury-card.level-theme-v5 .level-title,
+.luxury-card.level-theme-v5 .growth-text {
+  color: #D4AF37;
+}
+
+/* V6 三条A合伙人 - 亮白紫渐变（参考滴滴高端卡片风格） */
+.luxury-card.level-theme-v6 {
+  background: linear-gradient(135deg, #e6f0ff 0%, #ffffff 30%, #e0c8ff 70%, #c49aff 100%);
+  color: #2a1060;
+  box-shadow: 0 12rpx 40rpx rgba(160, 100, 255, 0.25);
+}
+.luxury-card.level-theme-v6 .level-v,
+.luxury-card.level-theme-v6 .level-num,
+.luxury-card.level-theme-v6 .level-title,
+.luxury-card.level-theme-v6 .growth-text {
+  color: #4a1a90;
 }
 
 .luxury-card::after {

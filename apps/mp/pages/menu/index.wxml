@@ -66,7 +66,7 @@
                 <text class="price-unit">¥</text>
                 <text class="goods-price">{{item.price}}</text>
               </view>
-              <view class="add-btn-lux shimmer-effect" bindtap="addToCart" data-id="{{item.id}}" data-name="{{item.name}}" data-price="{{item.price}}" data-image-url="{{item.imageUrl}}" data-half-dozen-price="{{item.halfDozenPrice}}" data-dozen-price="{{item.dozenPrice}}">
+              <view class="add-btn-lux shimmer-effect" bindtap="addToCart" data-id="{{item.id}}" data-name="{{item.name}}" data-price="{{item.price}}" data-image-url="{{item.imageUrl}}" data-half-dozen-price="{{item.halfDozenPrice}}" data-dozen-price="{{item.dozenPrice}}" data-voucher-eligible="{{item.voucherEligible}}">
                 <view class="plus-icon"></view>
               </view>
             </view>

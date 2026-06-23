@@ -56,4 +56,8 @@ export class CreateMenuItemDto {
   @Min(0)
   @Type(() => Number)
   dozenPrice?: number;
+
+  @ApiPropertyOptional({ description: '是否可用酒卷支付' })
+  @IsOptional()
+  voucherEligible?: boolean;
 }

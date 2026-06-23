@@ -56,6 +56,19 @@ export class OrdersController {
     return this.ordersService.payWithCoins(id, memberId);
   }
 
+  @Post(':id/pay-wine-vouchers')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: '酒卷抵扣成功' })
+  @ApiBadRequestResponse({ description: '订单状态非法或酒卷余额不足' })
+  payWithWineVouchers(
+    @Param('id') id: string,
+    @Body('memberId') memberId: string,
+    @Body('vouchersToUse') vouchersToUse: number,
+    @Body('cocktailDiscount') cocktailDiscount: number,
+  ) {
+    return this.ordersService.payWithWineVouchers(id, memberId, vouchersToUse, cocktailDiscount);
+  }
+
   @Post(':id/refund')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: '退款成功' })

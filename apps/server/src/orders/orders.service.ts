@@ -382,6 +382,47 @@ export class OrdersService {
   }
 
   /**
+   * 酒卷抵扣鸡尾酒：扣减酒卷并更新订单抵扣金额
+   * 若抵扣后余额为0则直接标记PAID，否则保持PENDING等待支付
+   */
+  async payWithWineVouchers(
+    orderId: string,
+    memberId: string,
+    vouchersToUse: number,
+    cocktailDiscount: number,
+  ): Promise<{ remainingAmount: number; order: OrderEntity }> {
+    const order = await this.findById(orderId);
+    if (order.status !== OrderStatus.PENDING) {
+      throw new BadRequestException('订单状态不允许使用酒卷');
+    }
+    const member = await this.memberRepo.findOne({ where: { id: memberId } });
+    if (!member) throw new NotFoundException('会员不存在');
+    if ((member.wineVouchers ?? 0) < vouchersToUse) {
+      throw new BadRequestException(`酒卷余额不足，需要${vouchersToUse}张，当前${member.wineVouchers ?? 0}张`);
+    }
+    // 扣减酒卷
+    member.wineVouchers = (member.wineVouchers ?? 0) - vouchersToUse;
+    await this.memberRepo.save(member);
+    // 更新订单折扣和应付金额
+    const newDiscount = Number(order.discountAmount || 0) + cocktailDiscount;
+    const newTotal = Math.max(0, Number(order.totalAmount) - cocktailDiscount);
+    order.discountAmount = newDiscount;
+    order.totalAmount = newTotal;
+    // 若完全抵扣，直接标记已支付
+    if (newTotal <= 0) {
+      order.status = OrderStatus.PAID;
+      order.paymentMethod = '鸡尾酒优惠卷';
+      order.paidAt = new Date();
+    }
+    const saved = await this.orderRepo.save(order);
+    await this.redisService.getClient().set(`order:${saved.id}:status`, saved.status);
+    if (saved.status === OrderStatus.PAID && order.member) {
+      await this.loyaltyService.awardPointsForOrder(saved);
+    }
+    return { remainingAmount: newTotal, order: saved };
+  }
+
+  /**
    * 管理员退款：回补库存 + 金币退还（如果是金币支付）+ 状态标记为 CANCELLED
    * @param orderId 订单ID
    * @param reason  退款原因

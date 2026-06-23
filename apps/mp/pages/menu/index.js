@@ -191,7 +191,7 @@ Page({
    */
   addToCart(e) {
     const dataset = e.currentTarget.dataset;
-    const { id, name, price, imageUrl, halfDozenPrice, dozenPrice } = dataset;
+    const { id, name, price, imageUrl, halfDozenPrice, dozenPrice, voucherEligible } = dataset;
     const currentCategory = this.data.categories[this.data.currentCategory];
 
     // 判断是否是啤酒类商品，需要规格选择
@@ -203,6 +203,10 @@ Page({
 
     // 普通商品直接加入购物车
     const cart = { ...this.data.cart };
+    // 酒卷抵扣资格：优先使用后端 voucherEligible 字段，兜底按分类名判断
+    const isCocktail = voucherEligible !== undefined
+      ? !!voucherEligible
+      : !!(currentCategory && currentCategory.name && currentCategory.name.includes('鸡尾酒'));
 
     // 增加数量
     if (cart[id]) {
@@ -213,6 +217,7 @@ Page({
         name,
         price,
         quantity: 1,
+        isCocktail,
       };
     }
 
@@ -296,6 +301,7 @@ Page({
     if (cart[cartKey]) {
       cart[cartKey].quantity += 1;
     } else {
+      // 啤酒规格商品不属于鸡尾酒，无需标记
       cart[cartKey] = {
         id: specProduct.id,
         cartKey,
@@ -303,6 +309,7 @@ Page({
         basePrice: specProduct.price,
         price: parseFloat(specTotalPrice),
         quantity: 1,
+        isCocktail: false,
         specs: {
           package: selectedPackage,
           packageLabel: packageOption.label,
@@ -449,13 +456,6 @@ Page({
   },
 
   /**
-   * 阻止事件冒泡
-   */
-  stopPropagation() {
-    // 阻止事件冒泡到父元素
-  },
-
-  /**
    * 减少购物车商品（购物车详情中）
    */
   decreaseCart(e) {
@@ -516,7 +516,8 @@ Page({
   },
 
   /**
-   * 提交订单
+   * 提交订单并弹出支付选择（微信支付 / 金币支付 / 酒卷抵扣鸡尾酒后支付）
+   * 酒卷规则：1张酒卷抵扣1杯鸡尾酒，按单价升序优先抵扣低价商品
    */
   async submitOrder() {
     if (this.data.cartCount === 0) {
@@ -564,30 +565,51 @@ Page({
         note: '',
       });
 
-      // 获取会员金币余额
+      // 获取会员金币余额和酒卷数量
       let coinBalance = 0;
+      let wineVouchers = 0;
       try {
         const balanceInfo = await menuApi.getMemberBalance(memberId);
         coinBalance = Number(balanceInfo?.coins || 0);
+        wineVouchers = Number(balanceInfo?.wineVouchers || 0);
       } catch (e) {
-        console.log('获取金币余额失败:', e);
+        console.log('获取余额失败:', e);
       }
 
       this.setData({ loading: false });
+
+      // 酒卷抵扣计算：按单价升序取最低价的前N杯鸡尾酒（1张酒卷抵1杯）
+      const cocktailPrices = Object.values(this.data.cart)
+        .filter(item => item.isCocktail)
+        .flatMap(item => Array(item.quantity).fill(parseFloat(item.price)))
+        .sort((a, b) => a - b);
+      const usableVouchers = Math.min(wineVouchers, cocktailPrices.length);
+      const cocktailDiscount = parseFloat(
+        cocktailPrices.slice(0, usableVouchers).reduce((s, p) => s + p, 0).toFixed(2)
+      );
+      const canUseVoucher = usableVouchers > 0;
 
       // 弹出支付方式选择
       const orderAmount = this.data.cartAmount;
       const canPayWithCoins = coinBalance >= orderAmount;
 
+      const itemList = [
+        `微信支付 ¥${orderAmount.toFixed(2)}`,
+        `金币支付 ${orderAmount.toFixed(2)}金币 (余额: ${coinBalance.toFixed(2)})`,
+      ];
+      if (canUseVoucher) {
+        const after = (orderAmount - cocktailDiscount).toFixed(2);
+        itemList.push(`酒卷抵扣 -¥${cocktailDiscount.toFixed(2)}(用${usableVouchers}张) 剩余¥${after}`);
+      }
+      itemList.push('稍后支付');
+      // 酒卷选项的 tapIndex（仅在有酒卷时才存在）
+      const voucherIdx = canUseVoucher ? itemList.length - 2 : -1;
+
       wx.showActionSheet({
-        itemList: [
-          `微信支付 ¥${orderAmount.toFixed(2)}`,
-          `金币支付 ${orderAmount.toFixed(2)}金币 (余额: ${coinBalance.toFixed(2)})`,
-          '稍后支付'
-        ],
+        itemList,
         success: async (res) => {
           if (res.tapIndex === 0) {
-            // 微信支付
+            // 微信支付全额
             try {
               await PaymentUtils.createOrderPayment(order.id, {
                 successCallback: () => {
@@ -604,8 +626,9 @@ Page({
               console.error('微信支付失败:', error);
               this.clearCartAndNavigate();
             }
+
           } else if (res.tapIndex === 1) {
-            // 金币支付
+            // 金币支付全额
             if (!canPayWithCoins) {
               wx.showModal({
                 title: '金币余额不足',
@@ -620,8 +643,6 @@ Page({
               });
               return;
             }
-
-            // 执行金币支付
             try {
               wx.showLoading({ title: '支付中...' });
               await menuApi.payWithCoins(order.id, memberId);
@@ -632,6 +653,74 @@ Page({
               wx.hideLoading();
               wx.showToast({ title: error.message || '金币支付失败', icon: 'none' });
             }
+
+          } else if (canUseVoucher && res.tapIndex === voucherIdx) {
+            // 酒卷抵扣鸡尾酒后处理剩余金额
+            try {
+              wx.showLoading({ title: '抵扣中...' });
+              const result = await menuApi.payWithWineVouchers(
+                order.id, memberId, usableVouchers, cocktailDiscount
+              );
+              wx.hideLoading();
+              const remaining = result.remainingAmount;
+
+              if (remaining <= 0) {
+                // 全额抵扣，直接完成
+                wx.vibrateShort({ type: 'medium' });
+                wx.showToast({ title: '酒卷抵扣完成', icon: 'success' });
+                this.clearCartAndNavigate();
+              } else {
+                // 剩余金额再弹出选择支付方式
+                const coinEnough = coinBalance >= remaining;
+                wx.showActionSheet({
+                  itemList: [
+                    `微信支付剩余 ¥${remaining.toFixed(2)}`,
+                    `金币支付剩余 ${remaining.toFixed(2)}金币 (余额: ${coinBalance.toFixed(2)})`,
+                  ],
+                  success: async (res2) => {
+                    if (res2.tapIndex === 0) {
+                      // 微信支付剩余金额
+                      try {
+                        await PaymentUtils.createOrderPayment(order.id, {
+                          successCallback: () => {
+                            wx.vibrateShort({ type: 'medium' });
+                            this.clearCartAndNavigate();
+                          },
+                          failCallback: (err) => {
+                            if (!err.cancelled) wx.showToast({ title: err.message || '支付失败', icon: 'none' });
+                          },
+                        });
+                      } catch (e) { this.clearCartAndNavigate(); }
+                    } else {
+                      // 金币支付剩余金额
+                      if (!coinEnough) {
+                        wx.showModal({
+                          title: '金币余额不足',
+                          content: `需要${remaining.toFixed(2)}金币，当前余额${coinBalance.toFixed(2)}金币`,
+                          confirmText: '去充值',
+                          success: (m) => { if (m.confirm) wx.navigateTo({ url: '/pages/recharge/index' }); }
+                        });
+                        return;
+                      }
+                      try {
+                        wx.showLoading({ title: '支付中...' });
+                        await menuApi.payWithCoins(order.id, memberId);
+                        wx.hideLoading();
+                        wx.showToast({ title: '支付成功', icon: 'success' });
+                        this.clearCartAndNavigate();
+                      } catch (e) {
+                        wx.hideLoading();
+                        wx.showToast({ title: e.message || '金币支付失败', icon: 'none' });
+                      }
+                    }
+                  }
+                });
+              }
+            } catch (error) {
+              wx.hideLoading();
+              wx.showToast({ title: error.message || '酒卷抵扣失败', icon: 'none' });
+            }
+
           } else {
             // 稍后支付
             this.clearCartAndNavigate();

@@ -90,8 +90,8 @@ Page({
                 status: '尊享邀请',
                 progress: '',
                 color: '#7c4dff',
-                darkText: false,
-                bgGradient: 'linear-gradient(135deg, #1a0533 0%, #2d1b69 40%, #0d1f40 70%, #1a0533 100%)',
+                darkText: true,
+                bgGradient: 'linear-gradient(135deg, #e6f0ff 0%, #ffffff 30%, #e0c8ff 70%, #c49aff 100%)',
                 benefits: [
                     { icon: '👑', text: '专属合伙人身份' },
                     { icon: '🏷️', text: '尊享7折优惠' },

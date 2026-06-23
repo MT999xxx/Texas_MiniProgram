@@ -125,6 +125,8 @@ export default function Orders() {
                 wechat_pay: '微信支付',
                 coins: '金币支付',
                 backend_confirm: '后台确认',
+                wine_voucher: '酒卷',
+                '鸡尾酒优惠卷': '酒卷',
             };
             return map[order.paymentMethod] || order.paymentMethod;
         }

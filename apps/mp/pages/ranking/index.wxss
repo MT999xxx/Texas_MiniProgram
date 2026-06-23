@@ -295,7 +295,7 @@ page {
     0 0 28rpx rgba(100, 200, 255, 0.2);
 }
 
-/* 外层彩虹旋转边框 */
+/* 外层彩虹边框（静态，不旋转） */
 .rank-level-badge.level-VP::before {
   content: "";
   position: absolute;
@@ -307,7 +307,7 @@ page {
     #00ff88, #00cfff, #7c4dff,
     #ff4daa, #ff4d4d
   );
-  animation: vpRainbowSpin 4s linear infinite;
+  /* 删除 animation，保持静态彩虹 */
   z-index: -1;
 }
 
@@ -330,10 +330,6 @@ page {
   z-index: 1;
 }
 
-@keyframes vpRainbowSpin {
-  0%   { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
 
 @keyframes vpShimmer {
   0%   { left: -100%; }
