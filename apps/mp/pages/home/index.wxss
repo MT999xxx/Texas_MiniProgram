@@ -1,317 +1,261 @@
-/* =========================================================
-   Home Page - Royal Night Gold Specialist Styles
-   ========================================================= */
-
+/* pages/home/index.wxss */
 page {
-  background-color: #000;
-  overflow: hidden;
-}
-
-.home-redesign {
-  min-height: 100vh;
-  position: relative;
-  background-color: #000;
+  background: #050506;
   overflow-x: hidden;
 }
 
-/* 0. 背景层极致优化 (纯 CSS 沉浸式) */
-.home-redesign {
-  background: #050505;
-}
-
-.hero-bg-lux {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  z-index: 0;
-  background: 
-    radial-gradient(circle at 50% -20%, rgba(212, 175, 55, 0.15) 0%, transparent 60%),
-    radial-gradient(circle at -10% 40%, rgba(212, 175, 55, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 110% 60%, rgba(26, 21, 10, 0.8) 0%, #050505 100%);
-  overflow: hidden;
-}
-
-/* 动态金粉粒子 */
-.hero-bg-lux::before {
-  content: "";
-  position: absolute;
-  top: -50%; left: -50%; width: 200%; height: 200%;
-  background-image: radial-gradient(rgba(212, 175, 55, 0.15) 1rpx, transparent 1rpx);
-  background-size: 80rpx 80rpx;
-  opacity: 0.4;
-  animation: floatParticles 60s linear infinite;
-  mask-image: radial-gradient(circle at center, black, transparent 80%);
-  -webkit-mask-image: radial-gradient(circle at center, black, transparent 80%);
-}
-
-@keyframes floatParticles {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  100% { transform: translate(-5%, -5%) rotate(5deg); }
-}
-
-.hero-bg-lux::after {
-  content: "";
-  position: absolute;
-  top: 15%; left: 50%;
-  width: 140%; height: 600rpx;
-  background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.05) 0%, transparent 70%);
-  transform: translateX(-50%) rotate(-5deg);
-  filter: blur(100rpx);
-}
-
-/* 1. 自定义沉浸式导航线 */
-.custom-nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: 88rpx;
-  z-index: 100;
-  background: rgba(8, 8, 8, 0.4);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-top: env(safe-area-inset-top);
-  border-bottom: 1rpx solid rgba(255, 255, 255, 0.05);
-}
-
-.brand-small {
-  font-size: 22rpx;
-  color: #D4AF37;
-  letter-spacing: 12rpx;
-  font-weight: 300;
-  opacity: 0.8;
-}
-
-/* 2. Hero 品牌区 */
-.content-scroller {
+.home-page {
+  min-height: 100vh;
   position: relative;
-  z-index: 10;
-  padding-top: calc(120rpx + env(safe-area-inset-top));
+  overflow: visible;
+  color: #F8F5EC;
+}
+
+.panther-hero {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
   height: 100vh;
+  z-index: 0;
+}
+
+.hero-shade {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  background:
+    linear-gradient(180deg, rgba(5, 5, 6, 0.1) 0%, rgba(5, 5, 6, 0.25) 34%, rgba(5, 5, 6, 0.9) 78%, #050506 100%),
+    radial-gradient(circle at 16% 15%, rgba(230, 198, 120, 0.16), transparent 32%),
+    radial-gradient(circle at 82% 62%, rgba(157, 46, 69, 0.16), transparent 35%);
+}
+
+.hero-noise {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  opacity: 0.16;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.22) 1rpx, transparent 1rpx);
+  background-size: 72rpx 72rpx;
+}
+
+.home-content {
+  --setbar-tabbar-space: calc(154rpx + env(safe-area-inset-bottom));
+  position: relative;
+  z-index: 3;
+  min-height: 100vh;
+  padding: calc(34rpx + env(safe-area-inset-top)) 34rpx calc(154rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
-}
-
-.hero-section {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin-bottom: 60rpx;
-  padding: 40rpx 0;
 }
 
-.brand-logo-container {
-  position: relative;
-}
-
-.logo-text {
-  font-size: 160rpx;
-  font-weight: 900;
-  color: #D4AF37;
-  letter-spacing: 24rpx;
-  background: linear-gradient(180deg, #F9E498 0%, #D4AF37 50%, #B8860B 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 10rpx 40rpx rgba(212, 175, 55, 0.3);
-  display: block;
-}
-
-.brand-desc {
-  font-size: 20rpx;
-  color: #888;
-  letter-spacing: 12rpx;
-  margin-top: -20rpx;
-  opacity: 0.6;
-}
-
-.logo-glow {
-  position: absolute;
-  top: 50%; left: 50%;
-  width: 300rpx; height: 150rpx;
-  background: rgba(212, 175, 55, 0.15);
-  filter: blur(60rpx);
-  transform: translate(-50%, -50%);
-  z-index: -1;
-}
-
-.welcome-premium {
-  text-align: center;
-  margin-top: 40rpx;
-  animation: fadeIn 1.5s ease;
-}
-
-.w-top {
-  font-size: 22rpx;
-  color: #666;
-  letter-spacing: 20rpx;
-  margin-bottom: 20rpx;
-  display: block;
-  font-weight: 300;
-}
-
-.w-divider {
-  width: 100rpx;
-  height: 1rpx;
-  background: linear-gradient(to right, transparent, rgba(212, 175, 55, 0.5), transparent);
-  margin: 15rpx auto 30rpx;
-}
-
-.w-bottom {
-  font-size: 38rpx;
-  font-weight: 400;
-  letter-spacing: 8rpx;
-  color: #D4AF37;
-  text-shadow: 0 0 20rpx rgba(212, 175, 55, 0.4);
-}
-
-/* 3. 公告/活动浮动栏 */
-.floating-notices {
-  display: flex;
-  flex-direction: column;
-  gap: 24rpx;
-  padding: 0 50rpx;
-}
-
-.notice-pill {
-  display: flex;
-  align-items: center;
-  padding: 30rpx 40rpx;
-  border-radius: 60rpx;
-  background: rgba(255, 255, 255, 0.02) !important;
-  border: 1rpx solid rgba(212, 175, 55, 0.12) !important;
-  position: relative;
-  overflow: hidden;
-}
-
-.pill-icon { 
-  font-size: 32rpx; 
-  margin-right: 24rpx; 
-  filter: drop-shadow(0 0 10rpx rgba(212, 175, 55, 0.5));
-}
-
-.pill-text { 
-  font-size: 26rpx; 
-  color: #999; 
-  flex: 1; 
-  letter-spacing: 2rpx;
-}
-
-/* 4. 尊享功能卡片 (2列布局) */
-.action-grid {
+.top-line {
   display: flex;
   justify-content: space-between;
-  padding: 40rpx 40rpx;
-  gap: 30rpx;
+  align-items: flex-start;
 }
 
-.lux-action-card {
+.brand-mark {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-name {
+  font-size: 34rpx;
+  font-weight: 800;
+  letter-spacing: 2rpx;
+  color: #FFF3C8;
+  text-shadow: 0 10rpx 34rpx rgba(230, 198, 120, 0.28);
+}
+
+.brand-sub {
+  margin-top: 8rpx;
+  font-size: 14rpx;
+  letter-spacing: 4rpx;
+  color: rgba(255, 255, 255, 0.56);
+}
+
+.open-chip {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 12rpx 18rpx;
+  border-radius: 999rpx;
+  background: rgba(5, 5, 6, 0.42);
+  border: 1rpx solid rgba(230, 198, 120, 0.18);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 16rpx;
+  letter-spacing: 2rpx;
+  backdrop-filter: blur(18rpx);
+}
+
+.open-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #D64A3B;
+  box-shadow: 0 0 20rpx rgba(214, 74, 59, 0.9);
+}
+
+.hero-copy {
+  margin-top: auto;
+  width: 520rpx;
+}
+
+.eyebrow {
+  display: block;
+  font-size: 18rpx;
+  color: #E6C678;
+  letter-spacing: 6rpx;
+  font-weight: 700;
+}
+
+.hero-title {
+  display: block;
+  margin-top: 0;
+  font-size: 58rpx;
+  line-height: 1.08;
+  font-weight: 900;
+  letter-spacing: 0;
+  color: #F8F5EC;
+  text-shadow: 0 18rpx 48rpx rgba(0, 0, 0, 0.65);
+}
+
+.hero-desc {
+  display: block;
+  margin-top: 22rpx;
+  width: 430rpx;
+  font-size: 24rpx;
+  line-height: 1.55;
+  color: rgba(248, 245, 236, 0.7);
+}
+
+.primary-actions {
+  margin-top: 42rpx;
+  display: flex;
+  gap: 18rpx;
+}
+
+.primary-action {
   flex: 1;
-  height: 320rpx; /* 改为纵向卡片 */
-  background: rgba(255, 255, 255, 0.02);
-  border: 1rpx solid rgba(255, 255, 255, 0.05);
-  border-radius: 40rpx;
-  padding: 40rpx 30rpx;
+  min-height: 150rpx;
+  padding: 26rpx 24rpx;
+  border-radius: 28rpx;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(15rpx);
+  backdrop-filter: blur(26rpx);
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.primary-action:active {
+  transform: scale(0.98);
+  opacity: 0.86;
+}
+
+.order-action {
+  background: linear-gradient(135deg, rgba(255, 243, 200, 0.95), rgba(230, 198, 120, 0.82));
+  color: #080706;
+  box-shadow: 0 18rpx 42rpx rgba(230, 198, 120, 0.2);
+}
+
+.reserve-action {
+  background: rgba(255, 255, 255, 0.075);
+  border: 1rpx solid rgba(255, 255, 255, 0.13);
+  color: #F8F5EC;
+}
+
+.action-icon {
+  width: 52rpx;
+  height: 52rpx;
+  flex-shrink: 0;
+}
+
+.order-action .action-icon {
+  filter: brightness(0.25);
+}
+
+.action-copy {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
+  gap: 8rpx;
 }
 
-.lux-action-card:active {
-  transform: translateY(10rpx);
-  background: rgba(212, 175, 55, 0.05);
+.action-title {
+  font-size: 28rpx;
+  font-weight: 800;
+  line-height: 1.1;
 }
 
-.action-img {
-  width: 100rpx;
-  height: 100rpx;
-  margin-bottom: 30rpx;
-  filter: drop-shadow(0 0 15rpx rgba(212, 175, 55, 0.3));
-}
-
-/* CSS 纯享图标系统 */
-.css-icon-container {
-  width: 90rpx;
-  height: 90rpx;
-  margin-bottom: 34rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.icon-shape-food {
-  width: 50rpx;
-  height: 36rpx;
-  background: linear-gradient(135deg, #F9E498, #D4AF37);
-  border-radius: 40rpx 40rpx 4rpx 4rpx; /* 像一个餐盖 */
-  position: relative;
-}
-
-.icon-shape-food::after {
-  content: "";
-  position: absolute;
-  top: -8rpx; left: 50%;
-  width: 12rpx; height: 12rpx;
-  background: #D4AF37;
-  border-radius: 50%;
-  transform: translateX(-50%);
-}
-
-.icon-shape-table {
-  width: 60rpx;
-  height: 12rpx;
-  background: linear-gradient(135deg, #F9E498, #D4AF37);
-  border-radius: 4rpx;
-  position: relative;
-}
-
-.icon-shape-table::before,
-.icon-shape-table::after {
-  content: "";
-  position: absolute;
-  top: 12rpx;
-  width: 6rpx; height: 24rpx;
-  background: #D4AF37;
-}
-
-.icon-shape-table::before { left: 8rpx; }
-.icon-shape-table::after { right: 8rpx; }
-
-.card-title {
-  font-size: 32rpx;
-  color: #FDFDFD;
-  font-weight: 700;
-  margin-bottom: 12rpx;
-  letter-spacing: 2rpx;
-}
-
-.card-desc-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.card-desc {
+.action-sub {
   font-size: 18rpx;
-  color: rgba(255, 255, 255, 0.4);
-  text-align: center;
-  line-height: 1.6;
+  line-height: 1.35;
+  opacity: 0.7;
 }
 
-.card-accent {
-  position: absolute;
-  top: -20rpx;
-  right: -20rpx;
-  width: 100rpx;
-  height: 100rpx;
-  background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, transparent 70%);
+.concierge-list {
+  margin-top: 16rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
 }
 
-/* 弹窗升级 (首页专用) */
+.concierge-item {
+  min-height: 112rpx;
+  padding: 0 22rpx;
+  border-radius: 24rpx;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1rpx solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(22rpx);
+}
+
+.concierge-icon {
+  width: 42rpx;
+  height: 42rpx;
+  margin-right: 22rpx;
+  filter: drop-shadow(0 0 18rpx rgba(230, 198, 120, 0.26));
+}
+
+.concierge-copy {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.concierge-title {
+  font-size: 26rpx;
+  font-weight: 750;
+  color: #F8F5EC;
+}
+
+.concierge-sub {
+  font-size: 18rpx;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.concierge-arrow {
+  font-size: 48rpx;
+  color: rgba(230, 198, 120, 0.8);
+  line-height: 1;
+}
+
+.bottom-space {
+  height: 0;
+}
+
 .luxury-modal-home {
   width: 620rpx;
   padding: 60rpx 50rpx;
@@ -319,7 +263,7 @@ page {
 }
 
 .modal-head-gold {
-  color: #D4AF37;
+  color: #E6C678;
   font-size: 40rpx;
   text-align: center;
   font-weight: 700;
@@ -345,21 +289,12 @@ page {
   border-radius: 48rpx;
 }
 
-/* Animations */
-@keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-30rpx); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* =========================================================
-   签到弹窗样式
-   ========================================================= */
 .checkin-modal {
   width: 620rpx;
   padding: 50rpx 40rpx;
   border-radius: 30rpx;
-  background: rgba(30, 28, 24, 0.98) !important;
-  border: 1rpx solid rgba(212, 175, 55, 0.2) !important;
+  background: rgba(20, 18, 18, 0.98) !important;
+  border: 1rpx solid rgba(230, 198, 120, 0.2) !important;
   position: relative;
 }
 
@@ -383,9 +318,10 @@ page {
   margin-bottom: 40rpx;
 }
 
-.checkin-icon {
-  font-size: 50rpx;
-  margin-right: 20rpx;
+.checkin-icon-img {
+  width: 50rpx;
+  height: 50rpx;
+  margin-right: 18rpx;
 }
 
 .checkin-title {
@@ -395,7 +331,6 @@ page {
   letter-spacing: 2rpx;
 }
 
-/* 7天网格 */
 .checkin-grid {
   display: flex;
   flex-wrap: wrap;
@@ -417,12 +352,12 @@ page {
 }
 
 .checkin-day.today {
-  border: 2rpx solid #D4AF37;
-  background: rgba(212, 175, 55, 0.1);
+  border: 2rpx solid #E6C678;
+  background: rgba(230, 198, 120, 0.1);
 }
 
 .checkin-day.claimed {
-  background: rgba(212, 175, 55, 0.05);
+  background: rgba(230, 198, 120, 0.05);
 }
 
 .day-star {
@@ -431,18 +366,15 @@ page {
   margin-bottom: 10rpx;
 }
 
-.day-star.active {
-  color: #D4AF37;
-  text-shadow: 0 0 10rpx rgba(212, 175, 55, 0.5);
-}
-
+.day-star.active,
 .checkin-day.today .day-star {
-  color: #D4AF37;
+  color: #E6C678;
+  text-shadow: 0 0 10rpx rgba(230, 198, 120, 0.5);
 }
 
 .day-points {
   font-size: 22rpx;
-  color: #D4AF37;
+  color: #E6C678;
   font-weight: 600;
   margin-bottom: 6rpx;
 }
@@ -452,12 +384,11 @@ page {
   color: #888;
 }
 
-/* 签到按钮 */
 .checkin-btn {
   width: 100%;
   height: 96rpx;
   line-height: 96rpx;
-  background: linear-gradient(135deg, #F9E498 0%, #D4AF37 100%) !important;
+  background: linear-gradient(135deg, #FFF3C8 0%, #E6C678 100%) !important;
   color: #1a1a1a !important;
   font-size: 32rpx;
   font-weight: 700;
@@ -470,4 +401,3 @@ page {
   background: rgba(100, 100, 100, 0.3) !important;
   color: #666 !important;
 }
-

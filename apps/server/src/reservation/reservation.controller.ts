@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, Delete, UseGuards, Req } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiOkResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ReservationService } from './reservation.service';
-import { CreateReservationDto, CreateReservationWithDepositDto, UpdateReservationStatusDto } from './dto/create-reservation.dto';
+import { CreateReservationDto, CreateReservationWithDepositDto, UpdateReservationDto, UpdateReservationStatusDto } from './dto/create-reservation.dto';
 import { ReservationStatus } from './reservation.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
@@ -43,10 +43,23 @@ export class ReservationController {
     return this.reservationService.list({ memberId });
   }
 
+  @Get('available-tables')
+  @ApiOkResponse({ description: 'Available tables' })
+  getAvailableTables(@Query('date') date?: string) {
+    return this.reservationService.getAvailableTables(date);
+  }
+
   @Get(':id')
   @ApiOkResponse({ description: '预约详情' })
   getById(@Param('id') id: string) {
     return this.reservationService.findById(id);
+  }
+
+  @Patch(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: 'Update reservation' })
+  update(@Param('id') id: string, @Body() dto: UpdateReservationDto) {
+    return this.reservationService.update(id, dto);
   }
 
   @Patch(':id/status')

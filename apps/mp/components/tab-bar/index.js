@@ -12,22 +12,26 @@ Component({
             {
                 pagePath: "/pages/home/index",
                 text: "首页",
-                iconPath: "/images/shouye2.jpg"
+                iconPath: "/images/icons/home-muted.svg",
+                selectedIconPath: "/images/icons/home-red.svg"
             },
             {
                 pagePath: "/pages/table/index",
-                text: "桌面",
-                iconPath: "/images/zhuomian2.jpg"
+                text: "桌台",
+                iconPath: "/images/icons/tables-muted.svg",
+                selectedIconPath: "/images/icons/tables-red.svg"
             },
             {
                 pagePath: "/pages/ranking/index",
-                text: "排行榜",
-                iconPath: "/images/paihangbang2.jpg"
+                text: "排行",
+                iconPath: "/images/icons/rank-muted.svg",
+                selectedIconPath: "/images/icons/rank-red.svg"
             },
             {
                 pagePath: "/pages/member/index",
-                text: "会员",
-                iconPath: "/images/huiyuan2.jpg"
+                text: "我的",
+                iconPath: "/images/icons/me-muted.svg",
+                selectedIconPath: "/images/icons/me-red.svg"
             }
         ]
     },

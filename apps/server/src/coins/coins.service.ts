@@ -1,14 +1,24 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThanOrEqual } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CoinTransactionEntity, CoinTransactionType, CoinTransactionStatus } from './coin-transaction.entity';
 import { PointDepositEntity, PointDepositStatus } from './point-deposit.entity';
 import { CheckInEntity } from './check-in.entity';
+import { WineVoucherBatchEntity } from './wine-voucher-batch.entity';
 import { MemberEntity } from '../membership/member.entity';
 import { RechargeCoinsDto, ExchangeCoinsDto, DepositPointsDto, WithdrawPointsDto, ReviewDepositDto } from './dto/coins.dto';
 import { WechatPayService } from './wechat-pay.service';
+import {
+    COIN_RECHARGE_PACKAGES,
+    WINE_VOUCHER_PACKAGES,
+    WINE_VOUCHER_PURCHASE_BONUS_POINTS,
+    getCoinRechargePackage,
+    getEffectiveWineVoucherBatchExpiresAt,
+    getWineVoucherExpiresAt,
+    getWineVoucherPackage,
+} from './coin-rules';
 
-// 积分兑换金币的汇率：200积分 = 1金币
+// 历史积分转金币汇率：200积分 = 1金币
 const POINTS_PER_COIN = 200;
 
 @Injectable()
@@ -20,6 +30,8 @@ export class CoinsService {
         private readonly depositRepo: Repository<PointDepositEntity>,
         @InjectRepository(CheckInEntity)
         private readonly checkInRepo: Repository<CheckInEntity>,
+        @InjectRepository(WineVoucherBatchEntity)
+        private readonly wineVoucherBatchRepo: Repository<WineVoucherBatchEntity>,
         @InjectRepository(MemberEntity)
         private readonly memberRepo: Repository<MemberEntity>,
         private readonly wechatPayService: WechatPayService,
@@ -36,11 +48,17 @@ export class CoinsService {
         if (!member) {
             throw new NotFoundException('会员不存在');
         }
+        const voucherSummary = await this.getWineVoucherSummary(memberId, Number(member.wineVouchers || 0));
         return {
             coins: member.coins,
             points: member.points,
             lotteryChances: member.lotteryChances,
-            wineVouchers: member.wineVouchers ?? 0,
+            wineVouchers: voucherSummary.total,
+            expiringWineVouchers: voucherSummary.expiringSoon,
+            wineVoucherExpiresAt: voucherSummary.earliestExpiresAt,
+            wineVoucherExpiryReminder: voucherSummary.expiringSoon > 0
+                ? `有${voucherSummary.expiringSoon}张酒券将在24小时内过期，请尽快使用`
+                : '',
             levelCode: member.levelCode || 'V1',
             levelName: member.level?.name || '尊荣白银',
         };
@@ -56,12 +74,16 @@ export class CoinsService {
         }
 
         const outTradeNo = this.wechatPayService.generateOutTradeNo();
+        const rechargePackage = getCoinRechargePackage(dto.amount);
+        if (!rechargePackage) {
+            throw new BadRequestException('请选择有效的充值套餐');
+        }
 
         // 创建充值交易记录
         const transaction = this.transactionRepo.create({
             memberId,
             type: CoinTransactionType.RECHARGE,
-            amount: dto.amount, // 充值金额 = 金币数量（1:1）
+            amount: rechargePackage.coins,
             paymentAmount: dto.amount,
             transactionId: outTradeNo,
             status: CoinTransactionStatus.PENDING,
@@ -86,6 +108,8 @@ export class CoinsService {
             orderId: saved.id,
             outTradeNo,
             amount: dto.amount,
+            coins: rechargePackage.coins,
+            bonusPoints: rechargePackage.bonusPoints,
             paymentParams: payResult.paymentParams,
         };
     }
@@ -103,15 +127,17 @@ export class CoinsService {
             return { success: true, message: '订单已处理' };
         }
 
+        const rechargePackage = getCoinRechargePackage(Number(transaction.paymentAmount || 0));
+        const bonusPoints = rechargePackage?.bonusPoints || 0;
+
         // 更新交易状态
         transaction.status = CoinTransactionStatus.SUCCESS;
+        transaction.pointsUsed = bonusPoints;
         await this.transactionRepo.save(transaction);
 
         // 增加金币余额
         await this.memberRepo.increment({ id: transaction.memberId }, 'coins', transaction.amount);
 
-        // 按单次充值金额一次性赠送积分（非累计，必须单次达到对应档位）
-        const bonusPoints = this.calcRechargeBonusPoints(transaction.amount);
         if (bonusPoints > 0) {
             await this.memberRepo.increment({ id: transaction.memberId }, 'points', bonusPoints);
         }
@@ -126,16 +152,105 @@ export class CoinsService {
      * ¥3000 → 赠80000积分
      * ¥8000 → 赠200000积分
      */
-    private calcRechargeBonusPoints(amount: number): number {
-        if (amount >= 8000) return 200000;
-        if (amount >= 3000) return 80000;
-        if (amount >= 1000) return 24000;
-        if (amount >= 500)  return 10000;
-        return 0;
+    getCoinRechargePackages() {
+        return COIN_RECHARGE_PACKAGES;
+    }
+
+    getWineVoucherPackages() {
+        return WINE_VOUCHER_PACKAGES;
+    }
+
+    async purchaseWineVoucherPackage(memberId: string, packageId: string) {
+        const voucherPackage = getWineVoucherPackage(packageId);
+        if (!voucherPackage) {
+            throw new BadRequestException('酒券套餐不存在');
+        }
+
+        return this.memberRepo.manager.transaction(async (manager) => {
+            const memberRepo = manager.getRepository(MemberEntity);
+            const wineVoucherBatchRepo = manager.getRepository(WineVoucherBatchEntity);
+            const transactionRepo = manager.getRepository(CoinTransactionEntity);
+            const member = await memberRepo.findOne({ where: { id: memberId } });
+            if (!member) {
+                throw new NotFoundException('会员不存在');
+            }
+
+            const currentCoins = Number(member.coins || 0);
+            if (currentCoins < voucherPackage.price) {
+                throw new BadRequestException(`金币余额不足，需要${voucherPackage.price}金币，当前${currentCoins}金币`);
+            }
+
+            const expiresAt = getWineVoucherExpiresAt();
+
+            member.coins = currentCoins - voucherPackage.price;
+            const voucherCount = Number(voucherPackage.voucherCount || 0);
+            const bonusPoints = WINE_VOUCHER_PURCHASE_BONUS_POINTS * voucherCount;
+
+            member.points = Number(member.points || 0) + bonusPoints;
+            member.wineVouchers = Number(member.wineVouchers || 0) + voucherCount;
+
+            const voucherBatches = Array.from({ length: voucherCount }, () => wineVoucherBatchRepo.create({
+                memberId,
+                sourceType: 'member_purchase',
+                sourceId: voucherPackage.id,
+                packageName: voucherPackage.name,
+                quantity: 1,
+                remainingQuantity: 1,
+                bonusPoints: WINE_VOUCHER_PURCHASE_BONUS_POINTS,
+                expiresAt,
+                remark: `购买${voucherPackage.name}`,
+            }));
+            await wineVoucherBatchRepo.save(voucherBatches);
+
+            await transactionRepo.save(transactionRepo.create({
+                memberId,
+                type: CoinTransactionType.CONSUME,
+                amount: -voucherPackage.price,
+                status: CoinTransactionStatus.SUCCESS,
+                remark: `购买酒券：${voucherPackage.name}`,
+            }));
+
+            await memberRepo.save(member);
+
+            return {
+                success: true,
+                package: voucherPackage,
+                wineVouchers: member.wineVouchers,
+                currentCoins: member.coins,
+                currentPoints: member.points,
+                bonusPoints,
+                consumptionBonusPoints: 0,
+                expiresAt,
+            };
+        });
+    }
+
+    private async getWineVoucherSummary(memberId: string, legacyCount = 0) {
+        const now = new Date();
+        const soon = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+        const batches = await this.wineVoucherBatchRepo.find({
+            where: { memberId },
+            order: { expiresAt: 'ASC' },
+        });
+
+        const active = batches.filter((batch) => (
+            Number(batch.remainingQuantity || 0) > 0 &&
+            getEffectiveWineVoucherBatchExpiresAt(batch) >= now
+        ));
+        const batchTotal = active.reduce((sum, batch) => sum + Number(batch.remainingQuantity || 0), 0);
+        const expiringSoon = active
+            .filter((batch) => getEffectiveWineVoucherBatchExpiresAt(batch) <= soon)
+            .reduce((sum, batch) => sum + Number(batch.remainingQuantity || 0), 0);
+
+        return {
+            total: batchTotal > 0 ? batchTotal : legacyCount,
+            expiringSoon,
+            earliestExpiresAt: active[0] ? getEffectiveWineVoucherBatchExpiresAt(active[0]) : null,
+        };
     }
 
     /**
-     * 积分兑换金币
+     * 历史积分转金币接口
      */
     async exchangePointsToCoins(memberId: string, dto: ExchangeCoinsDto) {
         const member = await this.memberRepo.findOne({ where: { id: memberId } });
@@ -318,6 +433,62 @@ export class CoinsService {
             where: { memberId },
             order: { createdAt: 'DESC' },
         });
+    }
+
+    async getPointRecords(memberId: string) {
+        const [deposits, withdrawals] = await Promise.all([
+            this.depositRepo.find({
+                where: { memberId },
+                order: { createdAt: 'DESC' },
+                take: 50,
+            }),
+            this.transactionRepo.find({
+                where: { memberId, type: CoinTransactionType.WITHDRAW },
+                order: { createdAt: 'DESC' },
+                take: 50,
+            }),
+        ]);
+
+        const depositRecords = deposits.map((item) => ({
+            id: item.id,
+            type: 'DEPOSIT',
+            title: '存分',
+            points: Number(item.points || 0),
+            actualPoints: Number(item.actualPoints ?? item.points ?? 0),
+            status: item.status,
+            statusText: this.getPointRecordStatusText(item.status),
+            remark: item.reviewRemark || '',
+            createdAt: item.createdAt,
+            reviewedAt: item.reviewedAt || null,
+        }));
+
+        const withdrawRecords = withdrawals.map((item) => ({
+            id: item.id,
+            type: 'WITHDRAW',
+            title: '取分',
+            points: Number(item.pointsUsed || 0),
+            actualPoints: Number(item.pointsUsed || 0),
+            status: item.status,
+            statusText: this.getPointRecordStatusText(item.status),
+            remark: item.remark || '',
+            createdAt: item.createdAt,
+            reviewedAt: null,
+        }));
+
+        return [...depositRecords, ...withdrawRecords]
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .slice(0, 50);
+    }
+
+    private getPointRecordStatusText(status: string): string {
+        const map: Record<string, string> = {
+            PENDING: '待审核',
+            APPROVED: '已通过',
+            REJECTED: '已驳回',
+            SUCCESS: '成功',
+            FAILED: '失败',
+        };
+        return map[status] || status;
     }
 
     // ========== 签到功能 ==========

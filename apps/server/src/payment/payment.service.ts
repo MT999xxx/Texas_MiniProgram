@@ -1,12 +1,21 @@
-import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, NotFoundException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { PaymentEntity, PaymentType, PaymentStatus, PaymentMethod, RechargeRecordEntity, RechargePackageEntity } from './payment.entity';
-import { WechatPayService } from './wechat-pay.service';
+import { WechatPayOrderRequest, WechatPayService } from './wechat-pay.service';
 import { MemberEntity } from '../membership/member.entity';
 import { OrderEntity, OrderStatus } from '../orders/order.entity';
 import { ReservationEntity } from '../reservation/reservation.entity';
 import { CoinTransactionEntity, CoinTransactionType, CoinTransactionStatus } from '../coins/coin-transaction.entity';
+import { WineVoucherBatchEntity } from '../coins/wine-voucher-batch.entity';
+import {
+  COIN_RECHARGE_PACKAGES,
+  WINE_VOUCHER_PURCHASE_BONUS_POINTS,
+  getCoinRechargePackageFromCents,
+  getWineVoucherExpiresAt,
+  isWineVoucherMenuItem,
+} from '../coins/coin-rules';
+import { LoyaltyService } from '../loyalty/loyalty.service';
 
 @Injectable()
 export class PaymentService {
@@ -27,7 +36,11 @@ export class PaymentService {
     private reservationRepo: Repository<ReservationEntity>,
     @InjectRepository(CoinTransactionEntity)
     private coinTransactionRepo: Repository<CoinTransactionEntity>,
+    @InjectRepository(WineVoucherBatchEntity)
+    private wineVoucherBatchRepo: Repository<WineVoucherBatchEntity>,
     private wechatPayService: WechatPayService,
+    @Optional()
+    private readonly loyaltyService?: LoyaltyService,
   ) { }
 
   // ========== 创建支付 ==========
@@ -67,33 +80,26 @@ export class PaymentService {
     const saved = await this.paymentRepo.save(payment);
 
     // 调用微信支付
-    const wechatPayResult = await this.wechatPayService.createJsapiOrder({
+    const payerOpenid = this.resolvePayerOpenid(openid, member || order.member);
+    const wechatPayResult = await this.createWechatPaymentOrFail(payment, {
       outTradeNo: saved.paymentOrderNo,
       description: saved.description || '订单支付',
       amount: Number(saved.amount),
-      openid: openid || '',
-    });
+      openid: payerOpenid,
+    }, '创建微信支付订单失败');
 
-    if (wechatPayResult) {
-      // 更新支付状态为PROCESSING
-      payment.status = PaymentStatus.PROCESSING;
-      payment.thirdPartyOrderNo = wechatPayResult.prepayId;
-      await this.paymentRepo.save(payment);
-
-      return {
-        paymentId: saved.id,
-        paymentOrderNo: saved.paymentOrderNo,
-        amount: saved.amount,
-        // 微信支付参数
-        ...wechatPayResult,
-      };
-    }
-
-    // 微信支付创建失败，标记为FAILED
-    payment.status = PaymentStatus.FAILED;
+    // 更新支付状态为PROCESSING
+    payment.status = PaymentStatus.PROCESSING;
+    payment.thirdPartyOrderNo = wechatPayResult.prepayId;
     await this.paymentRepo.save(payment);
 
-    throw new BadRequestException('创建微信支付订单失败');
+    return {
+      paymentId: saved.id,
+      paymentOrderNo: saved.paymentOrderNo,
+      amount: saved.amount,
+      // 微信支付参数
+      ...wechatPayResult,
+    };
   }
 
   // 创建预约订金支付
@@ -131,31 +137,26 @@ export class PaymentService {
     const saved = await this.paymentRepo.save(payment);
 
     // 调用微信支付
-    const wechatPayResult = await this.wechatPayService.createJsapiOrder({
+    const payerOpenid = this.resolvePayerOpenid(openid, member);
+    const wechatPayResult = await this.createWechatPaymentOrFail(payment, {
       outTradeNo: saved.paymentOrderNo,
       description: saved.description || '预约订金',
       amount: Number(saved.amount),
-      openid: openid || '',
-    });
+      openid: payerOpenid,
+    }, '创建预约支付订单失败');
 
-    if (wechatPayResult) {
-      payment.status = PaymentStatus.PROCESSING;
-      payment.thirdPartyOrderNo = wechatPayResult.prepayId;
-      await this.paymentRepo.save(payment);
-
-      return {
-        paymentId: saved.id,
-        paymentOrderNo: saved.paymentOrderNo,
-        amount: saved.amount,
-        reservationId,
-        // 微信支付参数
-        ...wechatPayResult,
-      };
-    }
-
-    payment.status = PaymentStatus.FAILED;
+    payment.status = PaymentStatus.PROCESSING;
+    payment.thirdPartyOrderNo = wechatPayResult.prepayId;
     await this.paymentRepo.save(payment);
-    throw new BadRequestException('创建预约支付订单失败');
+
+    return {
+      paymentId: saved.id,
+      paymentOrderNo: saved.paymentOrderNo,
+      amount: saved.amount,
+      reservationId,
+      // 微信支付参数
+      ...wechatPayResult,
+    };
   }
 
   // 创建充值支付
@@ -202,30 +203,25 @@ export class PaymentService {
     const saved = await this.paymentRepo.save(payment);
 
     // 调用微信支付
-    const wechatPayResult = await this.wechatPayService.createJsapiOrder({
+    const payerOpenid = this.resolvePayerOpenid(openid, member);
+    const wechatPayResult = await this.createWechatPaymentOrFail(payment, {
       outTradeNo: saved.paymentOrderNo,
       description: saved.description || '积分充值',
       amount: Number(saved.amount),
-      openid: openid || '',
-    });
+      openid: payerOpenid,
+    }, '创建充值支付订单失败');
 
-    if (wechatPayResult) {
-      payment.status = PaymentStatus.PROCESSING;
-      payment.thirdPartyOrderNo = wechatPayResult.prepayId;
-      await this.paymentRepo.save(payment);
-
-      return {
-        paymentId: saved.id,
-        paymentOrderNo: saved.paymentOrderNo,
-        amount: saved.amount,
-        // 微信支付参数
-        ...wechatPayResult,
-      };
-    }
-
-    payment.status = PaymentStatus.FAILED;
+    payment.status = PaymentStatus.PROCESSING;
+    payment.thirdPartyOrderNo = wechatPayResult.prepayId;
     await this.paymentRepo.save(payment);
-    throw new BadRequestException('创建充值支付订单失败');
+
+    return {
+      paymentId: saved.id,
+      paymentOrderNo: saved.paymentOrderNo,
+      amount: saved.amount,
+      // 微信支付参数
+      ...wechatPayResult,
+    };
   }
 
   // 创建金币充值支付（直接按金额，不需要套餐）
@@ -237,6 +233,10 @@ export class PaymentService {
 
     if (amount <= 0) {
       throw new BadRequestException('充值金额必须大于0');
+    }
+    const rechargePackage = getCoinRechargePackageFromCents(amount * 100);
+    if (!rechargePackage) {
+      throw new BadRequestException('请选择有效的充值套餐');
     }
 
     // 创建支付记录
@@ -253,30 +253,26 @@ export class PaymentService {
     const saved = await this.paymentRepo.save(payment);
 
     // 调用微信支付
-    const wechatPayResult = await this.wechatPayService.createJsapiOrder({
+    const payerOpenid = this.resolvePayerOpenid(openid, member);
+    const wechatPayResult = await this.createWechatPaymentOrFail(payment, {
       outTradeNo: saved.paymentOrderNo,
       description: saved.description || '金币充值',
       amount: Number(saved.amount),
-      openid: openid || '',
-    });
+      openid: payerOpenid,
+    }, '创建金币充值支付订单失败');
 
-    if (wechatPayResult) {
-      payment.status = PaymentStatus.PROCESSING;
-      payment.thirdPartyOrderNo = wechatPayResult.prepayId;
-      await this.paymentRepo.save(payment);
-
-      return {
-        paymentId: saved.id,
-        paymentOrderNo: saved.paymentOrderNo,
-        amount: saved.amount,
-        coins: amount, // 充值多少钱就得多少金币（1:1）
-        ...wechatPayResult,
-      };
-    }
-
-    payment.status = PaymentStatus.FAILED;
+    payment.status = PaymentStatus.PROCESSING;
+    payment.thirdPartyOrderNo = wechatPayResult.prepayId;
     await this.paymentRepo.save(payment);
-    throw new BadRequestException('创建金币充值支付订单失败');
+
+    return {
+      paymentId: saved.id,
+      paymentOrderNo: saved.paymentOrderNo,
+      amount: saved.amount,
+      coins: rechargePackage.coins,
+      bonusPoints: rechargePackage.bonusPoints,
+      ...wechatPayResult,
+    };
   }
 
   // ========== 支付回调处理 ==========
@@ -303,6 +299,13 @@ export class PaymentService {
 
     if (!updateResult.affected || updateResult.affected === 0) {
       this.logger.warn(`支付已处理过（原子检查）: ${payment.id}`);
+      const handledPayment = await this.paymentRepo.findOne({
+        where: { id: payment.id },
+        relations: ['member', 'order'],
+      });
+      if (handledPayment) {
+        await this.settleSuccessfulRechargeIfNeeded(handledPayment);
+      }
       return { code: 'SUCCESS', message: '支付已处理' };
     }
 
@@ -333,6 +336,57 @@ export class PaymentService {
     }
   }
 
+  private async settleSuccessfulRechargeIfNeeded(payment: PaymentEntity) {
+    if (payment.status === PaymentStatus.SUCCESS && payment.type === PaymentType.RECHARGE) {
+      await this.handleRechargePaymentSuccess(payment);
+    }
+  }
+
+  private resolvePayerOpenid(openid?: string, member?: Pick<MemberEntity, 'userId'>): string {
+    const payerOpenid = (openid || member?.userId || '').trim();
+    if (!payerOpenid) {
+      throw new BadRequestException('缺少微信openid，请重新登录后再支付');
+    }
+    return payerOpenid;
+  }
+
+  private async createWechatPaymentOrFail(
+    payment: PaymentEntity,
+    request: WechatPayOrderRequest,
+    fallbackMessage: string,
+  ) {
+    try {
+      const result = await this.wechatPayService.createJsapiOrder(request);
+      if (result) {
+        return result;
+      }
+
+      await this.markPaymentCreationFailed(payment, fallbackMessage);
+      throw new BadRequestException(fallbackMessage);
+    } catch (error: any) {
+      const message = this.getPaymentCreationErrorMessage(error, fallbackMessage);
+      await this.markPaymentCreationFailed(payment, message);
+      throw new BadRequestException(message);
+    }
+  }
+
+  private async markPaymentCreationFailed(payment: PaymentEntity, failureReason: string) {
+    payment.status = PaymentStatus.FAILED;
+    payment.failureReason = failureReason;
+    await this.paymentRepo.save(payment);
+  }
+
+  private getPaymentCreationErrorMessage(error: any, fallbackMessage: string): string {
+    const response = error?.getResponse?.();
+    if (typeof response === 'string') {
+      return response;
+    }
+    if (response?.message) {
+      return Array.isArray(response.message) ? response.message.join('；') : String(response.message);
+    }
+    return error?.message || fallbackMessage;
+  }
+
   // 处理订单支付成功
   private async handleOrderPaymentSuccess(payment: PaymentEntity) {
     if (!payment.order) {
@@ -343,9 +397,18 @@ export class PaymentService {
     // 更新订单状态
     payment.order.status = OrderStatus.PAID;
     payment.order.paidAt = new Date();
-    await this.orderRepo.save(payment.order);
+    const savedOrder = await this.orderRepo.save(payment.order);
+    const rewardOrder = await this.orderRepo.findOne({
+      where: { id: savedOrder.id },
+      relations: ['member', 'items', 'items.menuItem', 'items.menuItem.category'],
+    });
 
-    this.logger.log(`订单支付成功: ${payment.order.id}`);
+    if (rewardOrder?.member) {
+      await this.loyaltyService?.awardPointsForOrder(rewardOrder);
+    }
+    await this.grantWineVoucherBenefitsForOrder(savedOrder.id);
+
+    this.logger.log(`订单支付成功: ${savedOrder.id}`);
   }
 
   // 处理预约订金支付成功
@@ -375,6 +438,9 @@ export class PaymentService {
     });
     if (existingTx) {
       this.logger.warn(`充值已处理过（幂等检查）: paymentOrderNo=${payment.paymentOrderNo}`);
+      if (payment.paymentOrderNo.startsWith('COIN_')) {
+        await this.repairCoinRechargeBonusPoints(payment, existingTx);
+      }
       return;
     }
 
@@ -390,12 +456,15 @@ export class PaymentService {
         return;
       }
 
-      // 金额是分，转换为元（1元=1金币）
-      const coins = Number(payment.amount) / 100;
+      const rechargePackage = getCoinRechargePackageFromCents(Number(payment.amount));
+      if (!rechargePackage) {
+        this.logger.error(`无效金币充值金额: ${payment.amount}`);
+        return;
+      }
+      const coins = rechargePackage.coins;
       member.coins = Number(member.coins || 0) + coins;
 
-      // 赠送积分：1元=15积分
-      const bonusPoints = coins * 15;
+      const bonusPoints = rechargePackage.bonusPoints;
       member.points = Number(member.points || 0) + bonusPoints;
 
       await this.memberRepo.save(member);
@@ -405,10 +474,11 @@ export class PaymentService {
         memberId: member.id,
         type: CoinTransactionType.RECHARGE,
         amount: coins,
-        paymentAmount: coins,
+        pointsUsed: bonusPoints,
+        paymentAmount: rechargePackage.amount,
         transactionId: payment.paymentOrderNo,
         status: CoinTransactionStatus.SUCCESS,
-        remark: `金币充值: ${coins}元`,
+        remark: `金币充值 ${coins}金币，赠送${bonusPoints}积分`,
       });
       await this.coinTransactionRepo.save(tx);
 
@@ -432,6 +502,77 @@ export class PaymentService {
     this.logger.log(`充值成功: 用户${rechargeRecord.member.id} 应获得${totalPoints}积分`);
   }
 
+  private async repairCoinRechargeBonusPoints(payment: PaymentEntity, existingTx: CoinTransactionEntity) {
+    const rechargePackage = getCoinRechargePackageFromCents(Number(payment.amount));
+    if (!rechargePackage) {
+      this.logger.error(`无效金币充值金额: ${payment.amount}`);
+      return;
+    }
+
+    const expectedBonusPoints = Number(rechargePackage.bonusPoints || 0);
+    const recordedBonusPoints = Number(existingTx.pointsUsed || 0);
+    const missingBonusPoints = Math.max(expectedBonusPoints - recordedBonusPoints, 0);
+    if (missingBonusPoints <= 0) {
+      return;
+    }
+
+    const memberId = existingTx.memberId || payment.member?.id;
+    if (!memberId) {
+      this.logger.error(`金币充值补积分失败：缺少会员ID payment=${payment.id}`);
+      return;
+    }
+
+    const member = await this.memberRepo.findOne({ where: { id: memberId } });
+    if (!member) {
+      this.logger.error(`金币充值补积分失败：找不到会员 ${memberId}`);
+      return;
+    }
+
+    member.points = Number(member.points || 0) + missingBonusPoints;
+    await this.memberRepo.save(member);
+
+    existingTx.pointsUsed = expectedBonusPoints;
+    existingTx.paymentAmount = existingTx.paymentAmount ?? rechargePackage.amount;
+    existingTx.remark = existingTx.remark || `金币充值 ${rechargePackage.coins}金币，赠送${expectedBonusPoints}积分`;
+    await this.coinTransactionRepo.save(existingTx);
+
+    this.logger.log(`金币充值补积分成功: 用户${memberId} 补发${missingBonusPoints}积分`);
+  }
+
+  private async grantWineVoucherBenefitsForOrder(orderId: string) {
+    const order = await this.orderRepo.findOne({
+      where: { id: orderId },
+      relations: ['member', 'items', 'items.menuItem', 'items.menuItem.category'],
+    });
+    if (!order?.member) return;
+
+    const voucherQuantity = (order.items || [])
+      .filter((item) => item.menuItem && isWineVoucherMenuItem(item.menuItem as any))
+      .reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+    if (voucherQuantity <= 0) return;
+
+    const expiresAt = getWineVoucherExpiresAt();
+    const memberId = order.member.id;
+    const voucherBatches = Array.from({ length: voucherQuantity }, () => this.wineVoucherBatchRepo.create({
+      memberId,
+      sourceType: 'menu_order',
+      sourceId: order.id,
+      packageName: '点单酒券',
+      quantity: 1,
+      remainingQuantity: 1,
+      bonusPoints: WINE_VOUCHER_PURCHASE_BONUS_POINTS,
+      expiresAt,
+      remark: `订单${order.orderNumber}购买酒券`,
+    }));
+    await this.wineVoucherBatchRepo.save(voucherBatches);
+
+    const member = await this.memberRepo.findOne({ where: { id: memberId } });
+    if (!member) return;
+    member.wineVouchers = Number(member.wineVouchers || 0) + voucherQuantity;
+    member.points = Number(member.points || 0) + WINE_VOUCHER_PURCHASE_BONUS_POINTS * voucherQuantity;
+    await this.memberRepo.save(member);
+  }
+
   // ========== 查询接口 ==========
 
   // 查询支付状态（带同步）
@@ -444,6 +585,9 @@ export class PaymentService {
     if (!payment) {
       throw new NotFoundException('支付记录不存在');
     }
+
+    let currentPayment = payment;
+    let settledInThisCall = false;
 
     // 如果状态还是 PENDING 或 PROCESSING，主动查询微信支付
     if (payment.status === PaymentStatus.PENDING || payment.status === PaymentStatus.PROCESSING) {
@@ -470,6 +614,8 @@ export class PaymentService {
               });
               if (freshPayment) {
                 await this.handlePaymentSuccess(freshPayment);
+                currentPayment = freshPayment;
+                settledInThisCall = true;
               }
               this.logger.log(`支付状态同步成功: ${paymentId} -> SUCCESS`);
             } else {
@@ -478,6 +624,7 @@ export class PaymentService {
           } else if (wechatResult.trade_state === 'CLOSED' || wechatResult.trade_state === 'PAYERROR') {
             payment.status = PaymentStatus.FAILED;
             await this.paymentRepo.save(payment);
+            currentPayment = payment;
           }
         }
       } catch (error) {
@@ -486,16 +633,27 @@ export class PaymentService {
       }
     }
 
-    return payment;
+    if (!settledInThisCall) {
+      await this.settleSuccessfulRechargeIfNeeded(currentPayment);
+    }
+
+    return currentPayment;
   }
 
 
   // 获取充值套餐列表
   async getRechargePackages() {
-    return this.packageRepo.find({
-      where: { isEnabled: true },
-      order: { sortOrder: 'ASC', amount: 'ASC' },
-    });
+    return COIN_RECHARGE_PACKAGES.map((item, index) => ({
+      id: item.id,
+      name: `${item.amount}元金币套餐`,
+      amount: item.amount * 100,
+      points: item.bonusPoints,
+      bonusPoints: item.bonusPoints,
+      coins: item.coins,
+      description: `得${item.coins}金币，赠送${item.bonusPoints}积分`,
+      isEnabled: true,
+      sortOrder: index + 1,
+    }));
   }
 
   // 获取用户支付记录

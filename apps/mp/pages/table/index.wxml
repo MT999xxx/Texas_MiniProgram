@@ -1,8 +1,13 @@
 <view class="container redesign-bg">
-  
+
+  <image class="table-page-bg" src="/images/setbar-panther-hero.jpg" mode="aspectFill" />
+
   <!-- 1. 顶部导航栏 -->
   <view class="header-bar">
-    <text class="store-name">AAA CLUB · CHONGQING</text>
+    <view class="table-brand">
+      <text class="store-name">实时桌台</text>
+      <text class="store-sub">Set baR 德州酒廊</text>
+    </view>
     <view class="rule-btn" bindtap="showRules">预约规则</view>
   </view>
 
@@ -35,25 +40,25 @@
 
     <!-- 牌桌视图 (重构椭圆布局) -->
     <view class="poker-table-container shadow-lux">
-      <image class="table-bg" src="/images/table_bg.jpg" mode="aspectFit" />
-      
+      <image class="table-bg" src="/images/setbar-poker-table.jpg" mode="aspectFit" />
+
       <!-- 9个座位 -->
       <block wx:for="{{seats}}" wx:key="id">
-        <view class="seat seat-{{item.seatNum}} {{item.status}}" 
-              bindtap="handleSeatClick" 
-              data-seatindex="{{index}}" 
+        <view class="seat seat-{{item.seatNum}} {{item.status}}"
+              bindtap="handleSeatClick"
+              data-seatindex="{{index}}"
               data-tabletype="main">
-          
+
           <view class="seat-number">{{item.seatNum}}</view>
 
           <!-- 空闲状态 -->
           <block wx:if="{{item.status === 'empty'}}">
-            <image class="avatar" src="/images/huiyuan2.jpg" style="opacity: 0.1;" />
+            <image class="avatar empty-avatar" src="/images/icons/seat-muted.svg" />
           </block>
 
           <!-- 已预约/游戏中 -->
           <block wx:else>
-            <image class="avatar" src="{{item.avatar || '/images/huiyuan2.jpg'}}" 
+            <image class="avatar" src="{{item.avatar || '/images/huiyuan2.jpg'}}"
                    binderror="onAvatarError" data-seatindex="{{index}}" data-tabletype="main" />
             <text class="nickname">{{item.name}}</text>
           </block>
@@ -88,22 +93,22 @@
     </view>
 
     <view class="poker-table-container shadow-lux">
-      <image class="table-bg" src="/images/table_bg.jpg" mode="aspectFit" />
-      
+      <image class="table-bg" src="/images/setbar-poker-table.jpg" mode="aspectFit" />
+
       <block wx:for="{{subSeats}}" wx:key="id">
         <view class="seat seat-{{item.seatNum}} {{item.status}}"
-              bindtap="handleSeatClick" 
-              data-seatindex="{{index}}" 
+              bindtap="handleSeatClick"
+              data-seatindex="{{index}}"
               data-tabletype="sub">
-          
+
           <view class="seat-number">{{item.seatNum}}</view>
 
           <block wx:if="{{item.status === 'empty'}}">
-            <image class="avatar" src="/images/huiyuan2.jpg" style="opacity: 0.1;" />
+            <image class="avatar empty-avatar" src="/images/icons/seat-muted.svg" />
           </block>
 
           <block wx:else>
-            <image class="avatar" src="{{item.avatar || '/images/huiyuan2.jpg'}}" 
+            <image class="avatar" src="{{item.avatar || '/images/huiyuan2.jpg'}}"
                    binderror="onAvatarError" data-seatindex="{{index}}" data-tabletype="sub" />
             <text class="nickname">{{item.name}}</text>
           </block>

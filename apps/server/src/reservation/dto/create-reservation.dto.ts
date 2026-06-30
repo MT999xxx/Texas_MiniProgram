@@ -74,3 +74,56 @@ export class UpdateReservationStatusDto {
   @IsEnum(ReservationStatus)
   status!: ReservationStatus;
 }
+
+export class UpdateReservationDto {
+  @ApiPropertyOptional({ description: '椤惧濮撳悕', maxLength: 64 })
+  @IsString()
+  @IsOptional()
+  @MaxLength(64)
+  customerName?: string;
+
+  @ApiPropertyOptional({ description: '鑱旂郴鐢佃瘽', maxLength: 32 })
+  @IsString()
+  @IsOptional()
+  @MaxLength(32)
+  phone?: string;
+
+  @ApiPropertyOptional({ description: '灏遍浜烘暟' })
+  @IsInt()
+  @IsOptional()
+  @Min(1)
+  partySize?: number;
+
+  @ApiPropertyOptional({ description: '妗屼綅ID' })
+  @IsString()
+  @IsOptional()
+  tableId?: string;
+
+  @ApiPropertyOptional({ description: '棰勭害鏃堕棿', type: String, format: 'date-time' })
+  @IsDateString()
+  @IsOptional()
+  reservedAt?: string;
+
+  @ApiPropertyOptional({ description: '搴т綅鍙?' })
+  @IsInt()
+  @IsOptional()
+  seatNumber?: number;
+
+  @ApiPropertyOptional({ description: '澶囨敞', maxLength: 200 })
+  @IsString()
+  @IsOptional()
+  @MaxLength(200)
+  note?: string;
+
+  @ApiPropertyOptional({ description: '澶囨敞', maxLength: 200 })
+  @IsString()
+  @IsOptional()
+  @MaxLength(200)
+  remark?: string;
+
+  @ApiPropertyOptional({ description: '璁㈤噾閲戦' })
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
+  depositAmount?: number;
+}

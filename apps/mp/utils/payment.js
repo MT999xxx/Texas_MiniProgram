@@ -146,16 +146,17 @@ class PaymentUtils {
             } else {
               resolve({
                 success: false,
-                message: '支付状态异常',
+                message: result.message || '支付结果确认中，请稍后刷新查看结果',
                 data: result.data,
+                uncertain: !!result.isTimeout || result.isPending || result.status === 'PENDING',
               });
             }
           } catch (error) {
             console.error('支付状态查询失败:', error);
-            // 即使查询失败，也认为支付可能成功了
+            // 支付已由微信返回成功，但后端未确认前不能触发业务成功回调。
             resolve({
-              success: true,
-              message: '支付完成，请稍后刷新查看结果',
+              success: false,
+              message: '支付结果确认中，请稍后刷新查看结果',
               uncertain: true,
             });
           }

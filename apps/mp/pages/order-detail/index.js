@@ -1,4 +1,4 @@
-const { request } = require('../../utils/request');
+const request = require('../../utils/request');
 const authManager = require('../../utils/auth');
 
 Page({
@@ -55,13 +55,20 @@ Page({
         method: 'GET'
       });
 
+      const processedItems = (order.items || []).map(item => ({
+        ...item,
+        displayAmount: this.formatMoney(this.resolveItemAmount(item))
+      }));
+
       // 处理数据格式
       const processedOrder = {
         ...order,
+        items: processedItems,
         orderNumber: this.generateOrderNumber(order.id, order.createdAt),
         statusText: this.getStatusText(order.status),
         createdAtText: this.formatDateTime(order.createdAt),
-        totalQuantity: order.items.reduce((sum, i) => sum + i.quantity, 0),
+        totalQuantity: processedItems.reduce((sum, i) => sum + i.quantity, 0),
+        ...this.formatOrderPricing(order),
       };
 
       // 生成进度步骤
@@ -153,6 +160,67 @@ Page({
     const minutes = String(date.getMinutes()).padStart(2, '0');
 
     return `${year}-${month}-${day} ${hours}:${minutes}`;
+  },
+
+  formatOrderPricing(order) {
+    const itemsAmount = this.calculateItemsAmount(order.items || []);
+    const originalAmount = this.firstPositiveAmount(order.originalAmount, itemsAmount, order.totalAmount);
+    const payAmount = this.toAmount(order.finalAmount ?? order.totalAmount);
+    const configuredDiscount = this.toAmount(order.discountAmount ?? order.discount);
+    const displayDiscount = configuredDiscount > 0
+      ? configuredDiscount
+      : Math.max(0, originalAmount - payAmount);
+    const isWineVoucher = order.paymentMethod === 'wine_voucher';
+
+    return {
+      displayOriginalAmount: this.formatMoney(originalAmount),
+      displayDiscountAmount: this.formatMoney(displayDiscount),
+      displayPayAmount: this.formatMoney(payAmount),
+      showDiscountAmount: displayDiscount > 0,
+      discountLabel: isWineVoucher ? '酒券抵扣' : '尊享折扣',
+      paymentMethodText: this.getPaymentMethodText(order.paymentMethod)
+    };
+  },
+
+  calculateItemsAmount(items) {
+    return items.reduce((sum, item) => sum + this.resolveItemAmount(item), 0);
+  },
+
+  resolveItemAmount(item) {
+    const amount = this.toAmount(item.amount);
+    if (amount > 0) return amount;
+
+    const quantity = Number(item.quantity || 1);
+    const unitPrice = this.toAmount(item.unitPrice ?? item.menuItem?.price);
+    return unitPrice * quantity;
+  },
+
+  firstPositiveAmount(...values) {
+    for (const value of values) {
+      const amount = this.toAmount(value);
+      if (amount > 0) return amount;
+    }
+    return 0;
+  },
+
+  toAmount(value) {
+    const amount = Number(value || 0);
+    return Number.isFinite(amount) ? amount : 0;
+  },
+
+  formatMoney(value) {
+    return this.toAmount(value).toFixed(2);
+  },
+
+  getPaymentMethodText(method) {
+    const methodMap = {
+      wine_voucher: '酒券支付',
+      wechat_pay: '微信支付',
+      coins: '金币支付',
+      backend_confirm: '后台确认',
+      '鸡尾酒优惠卷': '酒券支付'
+    };
+    return methodMap[method] || '';
   },
 
   // 生成进度步骤

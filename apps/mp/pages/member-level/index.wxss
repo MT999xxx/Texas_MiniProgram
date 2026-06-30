@@ -24,14 +24,14 @@
 
 .back-icon {
   font-size: 40rpx;
-  color: var(--gold-500, #D4AF37);
+  color: var(--gold-500, #E6C678);
   font-weight: bold;
 }
 
 .nav-title {
   font-size: 34rpx;
   font-weight: 600;
-  color: var(--gold-500, #D4AF37);
+  color: var(--gold-500, #E6C678);
 }
 
 .nav-placeholder {
@@ -185,13 +185,23 @@
 .title-text {
   font-size: 32rpx;
   font-weight: 600;
-  color: var(--gold-500, #D4AF37);
+  color: var(--gold-500, #E6C678);
 }
 
 .benefits-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 30rpx 20rpx;
+}
+
+.benefits-empty {
+  min-height: 180rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 26rpx;
+  letter-spacing: 2rpx;
 }
 
 .benefit-item {
@@ -207,7 +217,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(212, 175, 55, 0.15);
+  background: rgba(230, 198, 120, 0.15);
   border-radius: 16rpx;
   font-size: 36rpx;
 }
@@ -232,10 +242,10 @@
   font-size: 32rpx;
   font-weight: 600;
   border-radius: 50rpx;
-  background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+  background: linear-gradient(135deg, #E6C678 0%, #8C6A2F 100%);
   color: #1a1a1a;
   border: none;
-  box-shadow: 0 10rpx 30rpx rgba(212, 175, 55, 0.3);
+  box-shadow: 0 10rpx 30rpx rgba(230, 198, 120, 0.3);
 }
 
 .recharge-btn::after {

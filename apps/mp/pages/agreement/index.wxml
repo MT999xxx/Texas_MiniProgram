@@ -5,7 +5,7 @@
   <view class="section">
     <view class="section-title">一、协议的接受与修改</view>
     <view class="section-content">
-      欢迎使用"三条A德州扑克俱乐部"小程序（以下简称"本小程序"）。本协议是您与三条A德州扑克俱乐部（以下简称"我们"）之间关于您使用本小程序服务所订立的协议。
+      欢迎使用"Set baR"小程序（以下简称"本小程序"）。本协议是您与Set baR（以下简称"我们"）之间关于您使用本小程序服务所订立的协议。
 
       在使用本小程序提供的点餐、预约、会员服务之前，请您务必审慎阅读、充分理解本协议各条款内容，特别是免除或者限制责任的条款。
 
@@ -103,7 +103,7 @@
     <view class="section-content">
       如您对本协议有任何疑问或建议，请通过以下方式联系我们：
 
-      <text class="highlight">俱乐部名称：</text>三条A德州扑克俱乐部
+      <text class="highlight">俱乐部名称：</text>Set baR
 
       <text class="highlight">客服电话：</text>请到门店咨询
 
@@ -112,6 +112,6 @@
   </view>
 
   <view class="footer">
-    <view class="footer-text">© 2025 三条A德州扑克俱乐部 版权所有</view>
+    <view class="footer-text">© 2025 Set baR 版权所有</view>
   </view>
 </view>

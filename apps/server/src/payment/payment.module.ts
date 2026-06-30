@@ -10,6 +10,8 @@ import { OrderEntity } from '../orders/order.entity';
 import { ReservationEntity } from '../reservation/reservation.entity';
 import { NotificationService } from './notification.service';
 import { CoinTransactionEntity } from '../coins/coin-transaction.entity';
+import { WineVoucherBatchEntity } from '../coins/wine-voucher-batch.entity';
+import { LoyaltyModule } from '../loyalty/loyalty.module';
 
 @Module({
   imports: [
@@ -21,7 +23,9 @@ import { CoinTransactionEntity } from '../coins/coin-transaction.entity';
       OrderEntity,
       ReservationEntity,
       CoinTransactionEntity,
+      WineVoucherBatchEntity,
     ]),
+    LoyaltyModule,
   ],
   controllers: [PaymentController],
   providers: [

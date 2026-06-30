@@ -1,6 +1,6 @@
 /* Pages/reservation/index.wxss */
 page {
-  background-color: #080808;
+  background-color: #050506;
 }
 
 .container {
@@ -44,9 +44,9 @@ page {
 .sec-icon-line {
   width: 6rpx;
   height: 30rpx;
-  background: #D4AF37;
+  background: #E6C678;
   margin-right: 20rpx;
-  box-shadow: 0 0 10rpx #D4AF37;
+  box-shadow: 0 0 10rpx #E6C678;
 }
 
 .sec-title {
@@ -76,7 +76,7 @@ page {
 }
 
 .required {
-  color: #D4AF37;
+  color: #E6C678;
   margin-right: 6rpx;
 }
 
@@ -124,7 +124,7 @@ page {
 .tips-dot {
   width: 12rpx;
   height: 12rpx;
-  background: #D4AF37;
+  background: #E6C678;
   border-radius: 50%;
   margin-right: 20rpx;
   margin-top: 10rpx;
@@ -161,12 +161,12 @@ page {
   width: 100% !important;
   height: 100rpx !important;
   line-height: 100rpx !important;
-  background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%) !important;
+  background: linear-gradient(135deg, #E6C678 0%, #8C6A2F 100%) !important;
   color: #000 !important;
   border-radius: 50rpx !important;
   font-size: 32rpx !important;
   font-weight: 800 !important;
-  box-shadow: 0 10rpx 30rpx rgba(212, 175, 55, 0.3) !important;
+  box-shadow: 0 10rpx 30rpx rgba(230, 198, 120, 0.3) !important;
 }
 
 .btn-history {

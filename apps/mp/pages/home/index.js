@@ -1,4 +1,4 @@
-﻿// pages/home/index.js
+// pages/home/index.js
 const app = getApp();
 const noticeApi = require('../../api/notice');
 const coinsApi = require('../../api/coins');
@@ -7,9 +7,9 @@ const authManager = require('../../utils/auth');
 console.log('home/index.js loaded');
 
 Page({
-  data: {   
+  data: {
     // 暂时使用本地图片，避免CDN 404问题
-    bgUrl: '/images/hourse2.jpg',
+    bgUrl: '/images/setbar-panther-hero.jpg',
     modalVisible: false,
     modalTitle: '',
     modalContent: '',
@@ -197,6 +197,24 @@ Page({
     });
   },
 
+  goToRanking: function () {
+    wx.redirectTo({
+      url: '/pages/ranking/index',
+      fail: (err) => {
+        console.log("跳转失败", err);
+      }
+    });
+  },
+
+  goToMember: function () {
+    wx.redirectTo({
+      url: '/pages/member/index',
+      fail: (err) => {
+        console.log("跳转失败", err);
+      }
+    });
+  },
+
   // 更新昵称
   updateNickname: function () {
     wx.showToast({
@@ -225,9 +243,9 @@ Page({
    */
   onShareAppMessage: function () {
     return {
-      title: '三条A·皇家扑克俱乐部',
+      title: 'Set baR · 德州酒廊与鸡尾酒吧',
       path: '/pages/home/index',
-      imageUrl: '/images/share-cover.jpg'
+      imageUrl: '/images/setbar-panther-hero.jpg'
     };
   },
 
@@ -236,8 +254,8 @@ Page({
    */
   onShareTimeline: function () {
     return {
-      title: '三条A·皇家扑克俱乐部 - 尊享德州扑克体验',
-      imageUrl: '/images/share-cover.jpg'
+      title: 'Set baR · 德州酒廊与鸡尾酒吧',
+      imageUrl: '/images/setbar-panther-hero.jpg'
     };
   }
 });

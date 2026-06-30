@@ -6,7 +6,7 @@ const authManager = require('../../utils/auth');
 Page({
     data: {
         // 本地圆桌背景图片
-        tableBgUrl: '/images/table_bg.jpg',
+        tableBgUrl: '/images/setbar-poker-table.jpg',
         // 主赛事桌信息
         mainTable: {
             name: '主赛事桌',
@@ -585,7 +585,7 @@ Page({
      */
     onShareAppMessage() {
         return {
-            title: '三条A·皇家扑克俱乐部 - 实时桌况',
+            title: 'Set baR · 实时桌台状态',
             path: '/pages/table/index',
             imageUrl: '/images/share-cover.jpg'
         };
@@ -596,7 +596,7 @@ Page({
      */
     onShareTimeline() {
         return {
-            title: '三条A·皇家扑克俱乐部 - 实时桌况',
+            title: 'Set baR · 实时桌台状态',
             imageUrl: '/images/share-cover.jpg'
         };
     }

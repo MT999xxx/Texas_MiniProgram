@@ -1,20 +1,22 @@
 <view class="container redesign-bg">
   <view class="hero-bg-lux-menu"></view>
-  <!-- 1. 沉浸式头部导航 -->
-  <view class="header-bar glass-panel shadow-lux">
+  <!-- 1. 点餐头部 -->
+  <view class="header-bar">
     <view class="brand-info">
-      <text class="store-name text-gold-gradient font-bold">AAA CLUB</text>
-      <text class="store-slogan">ROYAL POKER & BAR</text>
+      <text class="store-kicker">Set baR</text>
+      <text class="store-brand">Set baR</text>
+      <text class="store-name font-bold">酒水菜单</text>
+      <text class="store-slogan">送至当前桌台</text>
     </view>
   </view>
 
-  <!-- 2. 桌位选择区 (极简金边) -->
-  <view class="table-selector glass-panel gold-border">
-    <view class="table-icon">📍</view>
+  <!-- 2. 桌位选择区 -->
+  <view class="table-selector">
+    <image class="table-icon-img" src="/images/icons/seat-red.svg" mode="aspectFit" />
     <scroll-view scroll-x class="table-scroll">
-      <view 
-        wx:for="{{tables}}" 
-        wx:key="id" 
+      <view
+        wx:for="{{tables}}"
+        wx:key="id"
         class="table-item {{selectedTableId === item.id ? 'selected shadow-lux' : ''}}"
         bindtap="selectTable"
         data-table-id="{{item.id}}"
@@ -30,9 +32,9 @@
 
   <!-- 3. 点餐主区域 -->
   <view class="content-container">
-    
+
     <!-- 左侧分类 (极暗侧边栏) -->
-    <scroll-view scroll-y class="sidebar">
+    <scroll-view scroll-y class="sidebar {{cartCount > 0 ? 'has-cart' : ''}}">
       <block wx:for="{{categories}}" wx:key="id">
         <view class="category-item {{currentCategory === index ? 'active' : ''}}" bindtap="switchCategory" data-index="{{index}}">
           <text class="cat-name">{{item.name}}</text>
@@ -42,10 +44,10 @@
     </scroll-view>
 
     <!-- 右侧商品列表 -->
-    <scroll-view scroll-y class="goods-list">
+    <scroll-view scroll-y class="goods-list {{cartCount > 0 ? 'has-cart' : ''}}">
       <!-- Loading状态 (骨架屏) -->
       <block wx:if="{{loading}}">
-        <view wx:for="{{[1,2,3,4]}}" wx:key="*this" class="goods-item glass-panel gold-border shadow-lux" style="border-color: rgba(212, 175, 55, 0.1);">
+        <view wx:for="{{[1,2,3,4]}}" wx:key="*this" class="goods-item loading-item">
           <skeleton shape="block" customStyle="width: 140rpx; height: 140rpx; border-radius: 12rpx; margin-right: 20rpx;" />
           <view class="goods-info" style="flex: 1;">
             <skeleton shape="line" customStyle="width: 60%; margin-bottom: 20rpx;" />
@@ -56,18 +58,19 @@
       </block>
 
       <block wx:if="{{!loading}}" wx:for="{{goodsList}}" wx:key="id">
-        <view class="goods-item glass-panel gold-border shadow-lux">
+        <view class="goods-item">
           <image class="goods-image" src="{{item.imageUrl}}" mode="aspectFill" />
           <view class="goods-info">
             <text class="goods-name">{{item.name}}</text>
             <text class="goods-desc">{{item.description}}</text>
+            <text class="goods-bonus" wx:if="{{item.bonusPoints > 0}}">赠{{item.bonusPoints}}积分</text>
             <view class="price-row">
               <view class="price-box">
                 <text class="price-unit">¥</text>
                 <text class="goods-price">{{item.price}}</text>
               </view>
-              <view class="add-btn-lux shimmer-effect" bindtap="addToCart" data-id="{{item.id}}" data-name="{{item.name}}" data-price="{{item.price}}" data-image-url="{{item.imageUrl}}" data-half-dozen-price="{{item.halfDozenPrice}}" data-dozen-price="{{item.dozenPrice}}" data-voucher-eligible="{{item.voucherEligible}}">
-                <view class="plus-icon"></view>
+              <view class="add-btn-lux" bindtap="addToCart" data-id="{{item.id}}" data-name="{{item.name}}" data-price="{{item.price}}" data-image-url="{{item.imageUrl}}" data-half-dozen-price="{{item.halfDozenPrice}}" data-dozen-price="{{item.dozenPrice}}" data-voucher-eligible="{{item.voucherEligible}}">
+                <image class="plus-icon-img" src="/images/icons/plus-red.svg" mode="aspectFit" />
               </view>
             </view>
           </view>
@@ -81,8 +84,8 @@
   <!-- 4. 尊享购物车底部栏 -->
   <view class="cart-bar glass-panel shadow-lux shimmer-effect" wx:if="{{cartCount > 0}}">
     <view class="cart-info" bindtap="toggleCart">
-      <view class="cart-icon-box gold-border">
-        <view class="css-cart-icon"></view>
+      <view class="cart-icon-box">
+        <image class="cart-icon-img" src="/images/icons/cart-gold.svg" mode="aspectFit" />
         <view class="cart-badge">{{cartCount}}</view>
       </view>
       <view class="cart-price">
@@ -102,7 +105,7 @@
       <view class="cart-header">
         <text class="text-gold font-bold">已选礼遇</text>
         <view class="clear-cart-box" bindtap="clearCart">
-          <text class="clear-icon">🗑️</text>
+          <image class="clear-icon-img" src="/images/icons/delete-muted.svg" mode="aspectFit" />
           <text>清空</text>
         </view>
       </view>
@@ -144,14 +147,14 @@
         </view>
         <view class="spec-close-btn" catchtap="hideSpecDialog">✕</view>
       </view>
-      
+
       <scroll-view scroll-y class="spec-body-lux">
         <!-- 包装规格选择 -->
         <view class="spec-section">
           <text class="spec-label">品鉴规格</text>
           <view class="spec-options">
-            <view 
-              wx:for="{{packageOptions}}" 
+            <view
+              wx:for="{{packageOptions}}"
               wx:key="value"
               class="spec-option {{selectedPackage === item.value ? 'selected shadow-lux' : ''}}"
               bindtap="selectPackage"
@@ -168,8 +171,8 @@
         <view class="spec-section">
           <text class="spec-label">侍酒温度</text>
           <view class="spec-options">
-            <view 
-              wx:for="{{temperatureOptions}}" 
+            <view
+              wx:for="{{temperatureOptions}}"
               wx:key="value"
               class="spec-option {{selectedTemperature === item.value ? 'selected shadow-lux' : ''}}"
               bindtap="selectTemperature"

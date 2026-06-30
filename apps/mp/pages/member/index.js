@@ -2,6 +2,7 @@
 const authManager = require('../../utils/auth');
 const coinsApi = require('../../api/coins');
 const util = require('../../utils/util');
+const PaymentUtils = require('../../utils/payment');
 
 Page({
 
@@ -29,19 +30,18 @@ Page({
       wineVouchers: 0
     },
     menuList: [
-      { icon: '/images/shouye2.jpg', text: '我的订单', url: '/pages/order-list/index' },
-      { icon: '/images/zhuomian2.jpg', text: '我的预约', url: '/pages/reservation/index' },
-      { icon: '/images/paihangbang2.jpg', text: '我的优惠券', url: '' },
+      { icon: '/images/icons/orders-gold.svg', text: '我的订单', url: '/pages/order-list/index' },
+      { icon: '/images/icons/reserve-gold.svg', text: '我的预约', url: '/pages/reservation/index' },
+      { icon: '/images/icons/coupon-gold.svg', text: '我的优惠券', url: '/pages/coupons/index?tab=AVAILABLE' },
     ],
 
     // 充值弹窗
     showRechargePopup: false,
     rechargeOptions: [
-      { amount: 500, bonus: 10000, desc: '赠送10000积分', level: 'V1尊荣白银' },
-      { amount: 1000, bonus: 24000, desc: '赠送24000积分', level: 'V2荣耀黄金' },
-      { amount: 3000, bonus: 80000, desc: '赠送80000积分', level: 'V3至尊铂金' },
-      { amount: 8000, bonus: 200000, desc: '赠送200000积分', level: 'V4传奇钻石' },
-      { amount: 20000, bonus: 120000, desc: '7.5折+赠送12万积分', level: 'V5星耀黑金' }
+      { amount: 500, coins: 60, bonus: 30000, desc: '60金币 · 赠送30000积分' },
+      { amount: 1000, coins: 150, bonus: 80000, desc: '150金币 · 赠送80000积分' },
+      { amount: 2000, coins: 400, bonus: 200000, desc: '400金币 · 赠送200000积分' },
+      { amount: 5000, coins: 1000, bonus: 600000, desc: '1000金币 · 赠送600000积分' }
     ],
     selectedAmount: 500,
     inputAmount: '',
@@ -53,10 +53,20 @@ Page({
     // 取积分弹窗
     showWithdrawPopup: false,
     withdrawAmount: '',
+    showPointRecordsPopup: false,
+    pointRecordsLoading: false,
+    pointRecords: [],
 
-    // 积分兑换金币弹窗
+    // 酒券购买弹窗
     showExchangePopup: false,
-    exchangeCoins: '',
+    voucherPackages: [
+      { id: 'member-voucher-disabled', name: '月赛畅饮券', price: 138, voucherCount: 1, description: '15天有效，赠送8000积分' },
+      { id: 'sng-wine-set', name: 'SNG酒券套餐', price: 78, voucherCount: 1, description: '15天有效，赠送8000积分' },
+      { id: 'budweiser-duo', name: '百威啤酒2瓶', price: 99, voucherCount: 1, description: '15天有效，赠送8000积分' },
+      { id: 'cocktail-single', name: '鸡尾酒一杯', price: 99, voucherCount: 1, description: '15天有效，赠送8000积分' }
+    ],
+    purchasingVoucherId: '',
+    voucherExpiryReminder: '',
 
     // 邮请奖励
     showInvitePopup: false,
@@ -284,25 +294,42 @@ Page({
           package: res.package,
           signType: res.signType || 'RSA',
           paySign: res.paySign,
-          success: () => {
+          success: async () => {
             // 支付成功后，主动查询支付状态来触发后端处理（防止回调延迟）
             wx.showLoading({ title: '处理中...' });
-            coinsApi.getPaymentStatus(paymentId)
-              .then(() => {
-                wx.hideLoading();
-                wx.vibrateShort({ type: 'medium' });
-                wx.showToast({ title: '充值成功', icon: 'success' });
-                this.hideRecharge();
-                this.loadBalance();
-              })
-              .catch(() => {
-                wx.hideLoading();
-                // 即使查询失败也显示成功（微信支付已成功）
-                wx.vibrateShort({ type: 'medium' });
-                wx.showToast({ title: '充值成功', icon: 'success' });
-                this.hideRecharge();
-                this.loadBalance();
+            try {
+              const result = await PaymentUtils.pollPaymentStatus(paymentId, {
+                maxAttempts: 12,
+                interval: 1000,
+                timeout: 20000,
               });
+
+              wx.hideLoading();
+              if (result.isPaid) {
+                wx.vibrateShort({ type: 'medium' });
+                wx.showToast({ title: '充值成功', icon: 'success' });
+                this.hideRecharge();
+                this.loadBalance();
+                return;
+              }
+
+              this.loadBalance();
+              wx.showModal({
+                title: '入账确认中',
+                content: '微信支付已返回成功，但后端暂未确认入账。请稍后刷新会员中心，或联系工作人员核对。',
+                showCancel: false,
+                confirmText: '知道了',
+              });
+            } catch (error) {
+              wx.hideLoading();
+              this.loadBalance();
+              wx.showModal({
+                title: '入账确认中',
+                content: '支付结果确认失败，请稍后刷新会员中心。如余额仍未变化，请联系工作人员。',
+                showCancel: false,
+                confirmText: '知道了',
+              });
+            }
           },
           fail: (err) => {
             if (err.errMsg.includes('cancel')) {
@@ -345,6 +372,9 @@ Page({
         wx.vibrateShort({ type: 'medium' });
         wx.showToast({ title: '申请已提交，等待审核', icon: 'success' });
         this.hideDepositDialog();
+        if (this.data.showPointRecordsPopup) {
+          this.loadPointRecords();
+        }
       })
       .catch(err => {
         wx.hideLoading();
@@ -383,6 +413,9 @@ Page({
         wx.showToast({ title: '取积分成功', icon: 'success' });
         this.hideWithdrawDialog();
         this.loadBalance();
+        if (this.data.showPointRecordsPopup) {
+          this.loadPointRecords();
+        }
       })
       .catch(err => {
         wx.hideLoading();
@@ -390,43 +423,116 @@ Page({
       });
   },
 
-  // ========== 积分兑换金币 ==========
+  showPointRecordsDialog() {
+    if (!this.data.isLogin) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
+
+    this.setData({ showPointRecordsPopup: true });
+    this.loadPointRecords();
+  },
+
+  hidePointRecordsDialog() {
+    this.setData({ showPointRecordsPopup: false });
+  },
+
+  loadPointRecords() {
+    if (!this.data.memberId) return;
+
+    this.setData({ pointRecordsLoading: true });
+    coinsApi.getPointRecords(this.data.memberId)
+      .then(records => {
+        this.setData({
+          pointRecords: (records || []).map(item => this.formatPointRecord(item)),
+          pointRecordsLoading: false
+        });
+      })
+      .catch(err => {
+        this.setData({ pointRecordsLoading: false });
+        wx.showToast({ title: err.message || '记录加载失败', icon: 'none' });
+      });
+  },
+
+  formatPointRecord(record) {
+    const isWithdraw = record.type === 'WITHDRAW';
+    const points = Number(record.points || record.actualPoints || 0);
+    return {
+      ...record,
+      pointsText: `${isWithdraw ? '-' : '+'}${points}`,
+      directionClass: isWithdraw ? 'minus' : 'plus',
+      createdAtText: this.formatRecordTime(record.createdAt),
+      remark: record.remark || ''
+    };
+  },
+
+  formatRecordTime(dateStr) {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${month}-${day} ${hours}:${minutes}`;
+  },
+
+  // ========== 酒券购买 ==========
   showExchangeDialog() {
-    this.setData({ showExchangePopup: true, exchangeCoins: '' });
+    wx.navigateTo({ url: '/pages/coupons/index?tab=AVAILABLE' });
   },
   hideExchangeDialog() {
-    this.setData({ showExchangePopup: false });
+    this.setData({ showExchangePopup: false, purchasingVoucherId: '' });
   },
-  onExchangeInput(e) {
-    this.setData({ exchangeCoins: e.detail.value });
-  },
-  clearExchangeInput() {
-    this.setData({ exchangeCoins: '' });
-  },
-  submitExchange() {
-    const coins = parseInt(this.data.exchangeCoins);
-    if (!coins || coins <= 0) {
-      wx.showToast({ title: '请输入有效的金币数量', icon: 'none' });
+  purchaseVoucher(e) {
+    if (this.data.purchasingVoucherId) return;
+    const packageId = e.currentTarget.dataset.id;
+    const item = this.data.voucherPackages.find(v => v.id === packageId);
+    if (!item) {
+      this.showVoucherPurchaseResult('购买失败', '酒券套餐不存在');
       return;
     }
-    const pointsNeeded = coins * 20;
-    if (pointsNeeded > this.data.stats.points) {
-      wx.showToast({ title: `积分不足，需要 ${pointsNeeded} 积分`, icon: 'none' });
+    if (!this.data.isLogin) {
+      this.showVoucherPurchaseResult('购买失败', '请先登录后再购买酒券');
       return;
     }
-    wx.showLoading({ title: '兑换中...' });
-    coinsApi.exchangeCoins(this.data.memberId, coins)
+    if (Number(this.data.stats.coins || 0) < Number(item.price || 0)) {
+      this.showVoucherPurchaseResult('购买失败', `金币余额不足，需要${item.price}金币`);
+      return;
+    }
+    this.setData({ purchasingVoucherId: packageId });
+    wx.showLoading({ title: '购买中...' });
+    coinsApi.purchaseMemberVoucherDisabled(this.data.memberId, packageId)
       .then(res => {
         wx.hideLoading();
         wx.vibrateShort({ type: 'medium' });
-        wx.showToast({ title: `成功兑换 ${coins} 金币`, icon: 'success' });
         this.hideExchangeDialog();
         this.loadBalance();
+        this.showVoucherPurchaseResult(
+          '购买成功',
+          `已获得${item.voucherCount || 1}张${item.name}，可在我的优惠券查看`,
+          true
+        );
       })
       .catch(err => {
         wx.hideLoading();
-        wx.showToast({ title: err.message || '兑换失败', icon: 'none' });
+        this.setData({ purchasingVoucherId: '' });
+        this.showVoucherPurchaseResult('购买失败', err.message || '购买失败，请稍后再试');
       });
+  },
+
+  showVoucherPurchaseResult(title, content, canViewCoupons = false) {
+    wx.showModal({
+      title,
+      content,
+      showCancel: canViewCoupons,
+      confirmText: canViewCoupons ? '去查看' : '知道了',
+      cancelText: '继续购买',
+      success: (res) => {
+        if (canViewCoupons && res.confirm) {
+          wx.navigateTo({ url: '/pages/coupons/index?tab=AVAILABLE' });
+        }
+      }
+    });
   },
 
   /**
@@ -447,10 +553,14 @@ Page({
 
         this.setData({
           'stats.wineVouchers': res.wineVouchers ?? 0,
+          voucherExpiryReminder: res.wineVoucherExpiryReminder || '',
           'memberInfo.levelNum': levelNum,
           'memberInfo.levelName': res.levelName || '尊荣白银',
           loading: false
         });
+        if (res.wineVoucherExpiryReminder) {
+          wx.showToast({ title: res.wineVoucherExpiryReminder, icon: 'none', duration: 2600 });
+        }
       })
       .catch(() => {
         this.setData({ loading: false });

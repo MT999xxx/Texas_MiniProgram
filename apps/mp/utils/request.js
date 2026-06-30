@@ -3,17 +3,14 @@ const request = (options = {}) => {
     const app = getApp();
     const apiBase = (app?.globalData?.apiBase || 'http://localhost:3000').replace(/\/$/, '');
 
-    // 获取token
     const token = wx.getStorageSync('token');
 
-    // 设置请求头
     const headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       ...options.header,
     };
 
-    // 添加Authorization头
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }
@@ -27,11 +24,9 @@ const request = (options = {}) => {
           resolve(res.data);
         } else if (res.statusCode === 401) {
           console.warn(`[API 401] ${options.url}`);
-          // token过期或无效
           wx.removeStorageSync('token');
           wx.removeStorageSync('userInfo');
 
-          // 不是登录接口的话，跳转到登录页面
           if (!options.url.includes('/auth/')) {
             wx.showToast({
               title: '请先登录',
@@ -40,10 +35,10 @@ const request = (options = {}) => {
               complete: () => {
                 setTimeout(() => {
                   wx.navigateTo({
-                    url: '/pages/login/index'
+                    url: '/pages/login/index',
                   });
                 }, 1000);
-              }
+              },
             });
           }
 
@@ -72,7 +67,6 @@ const request = (options = {}) => {
   });
 };
 
-// 便捷方法
 const api = {
   get: (url, params = {}) => {
     const queryString = Object.keys(params).length > 0
@@ -85,18 +79,11 @@ const api = {
   delete: (url, options = {}) => request({ ...options, url, method: 'DELETE' }),
 };
 
-// 向后兼容：支持 request.get() 和 api.get() 两种用法
 request.get = api.get;
 request.post = api.post;
 request.put = api.put;
 request.delete = api.delete;
 
-/**
- * 上传文件到服务器
- * @param {string} filePath - 本地文件临时路径
- * @param {string} url - 上传接口路径
- * @param {string} name - 文件字段名，默认 'file'
- */
 const uploadFile = (filePath, url = '/uploads/avatar', name = 'file') => {
   return new Promise((resolve, reject) => {
     const app = getApp();
@@ -105,10 +92,10 @@ const uploadFile = (filePath, url = '/uploads/avatar', name = 'file') => {
 
     wx.uploadFile({
       url: `${apiBase}${url}`,
-      filePath: filePath,
-      name: name,
+      filePath,
+      name,
       header: {
-        'Authorization': token ? `Bearer ${token}` : '',
+        Authorization: token ? `Bearer ${token}` : '',
       },
       success: (res) => {
         if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -134,4 +121,3 @@ module.exports = request;
 module.exports.api = api;
 module.exports.uploadFile = uploadFile;
 module.exports.default = request;
-

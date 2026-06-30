@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { CreateReservationDto, CreateReservationWithDepositDto } from './dto/create-reservation.dto';
+import { Between, Repository } from 'typeorm';
+import { CreateReservationDto, CreateReservationWithDepositDto, UpdateReservationDto } from './dto/create-reservation.dto';
 import { ReservationEntity, ReservationStatus } from './reservation.entity';
 import { TableService } from '../tables/table.service';
 import { TableStatus } from '../tables/table.entity';
@@ -142,6 +142,67 @@ export class ReservationService {
       throw new NotFoundException('Reservation not found');
     }
     return reservation;
+  }
+
+  async update(id: string, dto: UpdateReservationDto): Promise<ReservationEntity> {
+    const reservation = await this.findById(id);
+
+    if (dto.tableId && dto.tableId !== reservation.table.id) {
+      const table = await this.tableService.findById(dto.tableId);
+      if (!table) {
+        throw new NotFoundException('Table not found');
+      }
+      reservation.table = table;
+    }
+
+    if (dto.customerName !== undefined) reservation.customerName = dto.customerName;
+    if (dto.phone !== undefined) reservation.phone = dto.phone;
+    if (dto.partySize !== undefined) reservation.partySize = dto.partySize;
+    if (dto.reservedAt !== undefined) reservation.reservedAt = new Date(dto.reservedAt);
+    if (dto.seatNumber !== undefined) reservation.seatNumber = dto.seatNumber;
+    if (dto.note !== undefined) reservation.note = dto.note;
+    if (dto.remark !== undefined) reservation.note = dto.remark;
+    if (dto.depositAmount !== undefined) reservation.depositAmount = dto.depositAmount;
+
+    return this.repo.save(reservation);
+  }
+
+  async getAvailableTables(date?: string) {
+    const tables = await this.tableService.list();
+    const reservableTables = tables.filter((table) => table.isActive && table.status !== TableStatus.MAINTENANCE);
+
+    if (!date) {
+      return reservableTables.filter((table) => table.status === TableStatus.AVAILABLE);
+    }
+
+    const start = new Date(date);
+    if (Number.isNaN(start.getTime())) {
+      return reservableTables.filter((table) => table.status === TableStatus.AVAILABLE);
+    }
+
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 1);
+
+    const reservations = await this.repo.find({
+      where: [
+        {
+          reservedAt: Between(start, end),
+          status: ReservationStatus.PENDING,
+        },
+        {
+          reservedAt: Between(start, end),
+          status: ReservationStatus.CONFIRMED,
+        },
+      ],
+      relations: ['table'],
+    });
+
+    const bookedTableIds = new Set(
+      reservations.map((reservation) => reservation.table.id),
+    );
+
+    return reservableTables.filter((table) => !bookedTableIds.has(table.id));
   }
 
   // 创建预约（带订金）- 返回预约ID，前端需要再调用支付接口

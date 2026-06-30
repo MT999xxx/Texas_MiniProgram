@@ -1,6 +1,6 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { EntityManager, In, Repository } from 'typeorm';
 import { OrderEntity, OrderStatus } from './order.entity';
 import { OrderItemEntity } from './order-item.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -17,8 +17,26 @@ import { UserCouponEntity, UserCouponStatus } from '../coupons/user-coupon.entit
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { MemberEntity } from '../membership/member.entity';
 import { CoinTransactionEntity, CoinTransactionType, CoinTransactionStatus } from '../coins/coin-transaction.entity';
+import { WineVoucherBatchEntity } from '../coins/wine-voucher-batch.entity';
+import { WineVoucherRedemptionEntity } from '../coins/wine-voucher-redemption.entity';
+import {
+  WINE_VOUCHER_PURCHASE_BONUS_POINTS,
+  getCoinConsumptionBonusPoints,
+  getEffectiveWineVoucherBatchExpiresAt,
+  getWineVoucherExpiresAt,
+  isWineVoucherMenuItem,
+} from '../coins/coin-rules';
 import { WechatPayService } from '../payment/wechat-pay.service';
 import { PaymentEntity, PaymentStatus } from '../payment/payment.entity';
+import { AdminNotificationsService } from '../notifications/admin-notifications.service';
+
+type WineVoucherRedemptionOrderInput = {
+  memberId: string;
+  tableId: string;
+  optionName: string;
+  items: { menuItemId: string; quantity: number; specType?: string }[];
+  redemption?: WineVoucherRedemptionEntity;
+};
 
 @Injectable()
 export class OrdersService {
@@ -39,6 +57,8 @@ export class OrdersService {
     private readonly memberRepo: Repository<MemberEntity>,
     @InjectRepository(CoinTransactionEntity)
     private readonly coinTransactionRepo: Repository<CoinTransactionEntity>,
+    @InjectRepository(WineVoucherBatchEntity)
+    private readonly wineVoucherBatchRepo: Repository<WineVoucherBatchEntity>,
     @InjectRepository(PaymentEntity)
     private readonly paymentRepo: Repository<PaymentEntity>,
     private readonly redisService: RedisService,
@@ -48,6 +68,8 @@ export class OrdersService {
     private readonly loyaltyService: LoyaltyService,
     private readonly couponsService: CouponsService,
     private readonly wechatPayService: WechatPayService,
+    @Optional()
+    private readonly adminNotificationsService?: AdminNotificationsService,
   ) { }
 
   async create(dto: CreateOrderDto) {
@@ -182,6 +204,86 @@ export class OrdersService {
     if (table) {
       await this.redisService.getClient().set(`table:${table.id}:lastOrder`, saved.id);
     }
+    await this.adminNotificationsService?.createOrderNotification(saved).catch(() => undefined);
+    return saved;
+  }
+
+  async createWineVoucherRedemptionOrder(
+    dto: WineVoucherRedemptionOrderInput,
+    manager?: EntityManager,
+  ): Promise<OrderEntity> {
+    const orderRepo = manager?.getRepository(OrderEntity) || this.orderRepo;
+    const orderItemRepo = manager?.getRepository(OrderItemEntity) || this.orderItemRepo;
+    const menuRepo = manager?.getRepository(MenuItemEntity) || this.menuRepo;
+    const memberRepo = manager?.getRepository(MemberEntity) || this.memberRepo;
+    const tableRepo = manager?.getRepository(TableEntity) || this.tableRepo;
+
+    const member = await memberRepo.findOne({ where: { id: dto.memberId } });
+    if (!member) throw new NotFoundException('会员不存在');
+
+    const table = await tableRepo.findOne({ where: { id: dto.tableId } });
+    if (!table) throw new NotFoundException('桌位不存在');
+    if (table.status === TableStatus.AVAILABLE) {
+      table.status = TableStatus.IN_USE;
+      await tableRepo.save(table);
+    }
+
+    const menuIds = dto.items.map((item) => item.menuItemId);
+    const menuItems = await menuRepo.find({ where: { id: In(menuIds) } });
+    if (menuItems.length !== menuIds.length) {
+      throw new NotFoundException('兑换商品不存在');
+    }
+
+    const items: OrderItemEntity[] = [];
+    let originalAmount = 0;
+    for (const itemDto of dto.items) {
+      const menuItem = menuItems.find((item) => item.id === itemDto.menuItemId)!;
+      if (menuItem.stock < itemDto.quantity) {
+        throw new BadRequestException(`库存不足：${menuItem.name}`);
+      }
+
+      menuItem.stock -= itemDto.quantity;
+      if (menuItem.stock === 0) {
+        menuItem.status = 'SOLD_OUT' as any;
+      }
+
+      let unitPrice = Number(menuItem.price);
+      if (itemDto.specType === 'half_dozen' && menuItem.halfDozenPrice) {
+        unitPrice = Number(menuItem.halfDozenPrice);
+      } else if (itemDto.specType === 'dozen' && menuItem.dozenPrice) {
+        unitPrice = Number(menuItem.dozenPrice);
+      }
+
+      const amount = unitPrice * itemDto.quantity;
+      originalAmount += amount;
+      items.push(orderItemRepo.create({
+        menuItem,
+        quantity: itemDto.quantity,
+        unitPrice,
+        specType: itemDto.specType || 'single',
+        amount,
+      }));
+    }
+
+    await menuRepo.save(menuItems);
+
+    const order = orderRepo.create({
+      orderNumber: this.generateOrderNumber(),
+      member,
+      table,
+      originalAmount,
+      discountAmount: originalAmount,
+      totalAmount: 0,
+      status: OrderStatus.PAID,
+      paidAt: new Date(),
+      notes: `酒券兑换：${dto.optionName}`,
+      items,
+    });
+    order.paymentMethod = 'wine_voucher';
+
+    const saved = await orderRepo.save(order);
+    await this.redisService.getClient().set(`order:${saved.id}:status`, saved.status);
+    await this.redisService.getClient().set(`table:${table.id}:lastOrder`, saved.id);
     return saved;
   }
 
@@ -239,7 +341,7 @@ export class OrdersService {
   async updateStatus(id: string, dto: UpdateOrderStatusDto) {
     const order = await this.orderRepo.findOne({
       where: { id },
-      relations: ['member', 'items', 'items.menuItem'],
+      relations: ['member', 'items', 'items.menuItem', 'items.menuItem.category'],
     });
     if (!order) {
       throw new NotFoundException('Order not found');
@@ -255,6 +357,12 @@ export class OrdersService {
       await this.restockItems(order);
     }
     return saved;
+  }
+
+  async updateRemark(id: string, remark: string): Promise<OrderEntity> {
+    const order = await this.findById(id);
+    order.notes = remark;
+    return this.orderRepo.save(order);
   }
 
   private async restockItems(order: OrderEntity) {
@@ -353,8 +461,13 @@ export class OrdersService {
       throw new BadRequestException(`金币余额不足，需要${orderAmount}金币，当前余额${memberCoins}金币`);
     }
 
+    const consumptionBonusPoints = getCoinConsumptionBonusPoints(
+      this.getCoinRewardableAmount(order),
+    );
+
     // 扣除金币
     member.coins = memberCoins - orderAmount;
+    member.points = Number(member.points || 0) + consumptionBonusPoints;
     await this.memberRepo.save(member);
 
     // 记录金币消费交易
@@ -373,12 +486,22 @@ export class OrdersService {
     const saved = await this.orderRepo.save(order);
     await this.redisService.getClient().set(`order:${saved.id}:status`, saved.status);
 
-    // 如果有会员，奖励积分
-    if (order.member) {
-      await this.loyaltyService.awardPointsForOrder(saved);
-    }
+    await this.grantWineVoucherBenefitsForOrder(saved);
 
     return saved;
+  }
+
+  private getCoinRewardableAmount(order: OrderEntity): number {
+    const items = order.items || [];
+    if (items.length === 0) {
+      return Number(order.totalAmount || 0);
+    }
+
+    const nonVoucherAmount = items
+      .filter((item) => !isWineVoucherMenuItem(item.menuItem as any))
+      .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+
+    return Math.min(nonVoucherAmount, Number(order.totalAmount || 0));
   }
 
   /**
@@ -397,11 +520,12 @@ export class OrdersService {
     }
     const member = await this.memberRepo.findOne({ where: { id: memberId } });
     if (!member) throw new NotFoundException('会员不存在');
-    if ((member.wineVouchers ?? 0) < vouchersToUse) {
-      throw new BadRequestException(`酒卷余额不足，需要${vouchersToUse}张，当前${member.wineVouchers ?? 0}张`);
+    const availableVouchers = await this.getAvailableWineVoucherCount(memberId, Number(member.wineVouchers || 0));
+    if (availableVouchers < vouchersToUse) {
+      throw new BadRequestException(`酒券余额不足，需要${vouchersToUse}张，当前${availableVouchers}张`);
     }
-    // 扣减酒卷
-    member.wineVouchers = (member.wineVouchers ?? 0) - vouchersToUse;
+    await this.consumeWineVoucherBatches(memberId, vouchersToUse);
+    member.wineVouchers = Math.max(0, Number(member.wineVouchers || 0) - vouchersToUse);
     await this.memberRepo.save(member);
     // 更新订单折扣和应付金额
     const newDiscount = Number(order.discountAmount || 0) + cocktailDiscount;
@@ -418,8 +542,79 @@ export class OrdersService {
     await this.redisService.getClient().set(`order:${saved.id}:status`, saved.status);
     if (saved.status === OrderStatus.PAID && order.member) {
       await this.loyaltyService.awardPointsForOrder(saved);
+      await this.grantWineVoucherBenefitsForOrder(saved);
     }
     return { remainingAmount: newTotal, order: saved };
+  }
+
+  private async getAvailableWineVoucherCount(memberId: string, legacyCount = 0): Promise<number> {
+    const batches = await this.wineVoucherBatchRepo.find({
+      where: {
+        memberId,
+      },
+    });
+    const now = new Date();
+    const batchTotal = batches
+      .filter((batch) => getEffectiveWineVoucherBatchExpiresAt(batch) >= now)
+      .reduce((sum, batch) => sum + Math.max(0, Number(batch.remainingQuantity || 0)), 0);
+    return batchTotal > 0 ? batchTotal : legacyCount;
+  }
+
+  private async consumeWineVoucherBatches(memberId: string, quantity: number): Promise<void> {
+    if (quantity <= 0) return;
+    let remaining = quantity;
+    const batches = await this.wineVoucherBatchRepo.find({
+      where: {
+        memberId,
+      },
+      order: { expiresAt: 'ASC', createdAt: 'ASC' },
+    });
+    const now = new Date();
+
+    for (const batch of batches.filter((item) => getEffectiveWineVoucherBatchExpiresAt(item) >= now)) {
+      if (remaining <= 0) break;
+      const available = Math.max(0, Number(batch.remainingQuantity || 0));
+      if (available <= 0) continue;
+      const used = Math.min(available, remaining);
+      batch.remainingQuantity = available - used;
+      remaining -= used;
+      await this.wineVoucherBatchRepo.save(batch);
+    }
+  }
+
+  private async grantWineVoucherBenefitsForOrder(order: OrderEntity): Promise<void> {
+    const fullOrder = await this.orderRepo.findOne({
+      where: { id: order.id },
+      relations: ['member', 'items', 'items.menuItem', 'items.menuItem.category'],
+    });
+    if (!fullOrder?.member) return;
+
+    const voucherQuantity = (fullOrder.items || [])
+      .filter((item) => item.menuItem && isWineVoucherMenuItem(item.menuItem as any))
+      .reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+
+    if (voucherQuantity <= 0) return;
+
+    const expiresAt = getWineVoucherExpiresAt();
+    const memberId = fullOrder.member.id;
+    const voucherBatches = Array.from({ length: voucherQuantity }, () => this.wineVoucherBatchRepo.create({
+      memberId,
+      sourceType: 'menu_order',
+      sourceId: fullOrder.id,
+      packageName: '点单酒券',
+      quantity: 1,
+      remainingQuantity: 1,
+      bonusPoints: WINE_VOUCHER_PURCHASE_BONUS_POINTS,
+      expiresAt,
+      remark: `订单${fullOrder.orderNumber}购买酒券`,
+    }));
+    await this.wineVoucherBatchRepo.save(voucherBatches);
+
+    const member = await this.memberRepo.findOne({ where: { id: memberId } });
+    if (!member) return;
+    member.wineVouchers = Number(member.wineVouchers || 0) + voucherQuantity;
+    member.points = Number(member.points || 0) + WINE_VOUCHER_PURCHASE_BONUS_POINTS * voucherQuantity;
+    await this.memberRepo.save(member);
   }
 
   /**

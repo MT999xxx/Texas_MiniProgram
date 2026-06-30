@@ -15,9 +15,7 @@ Page({
                 color: '#7a7a7a',
                 darkText: true,
                 bgGradient: 'linear-gradient(135deg, #ffffff 0%, #e6e6e6 100%)',
-                benefits: [
-                    { icon: '🎁', text: '赠送1000积分' }
-                ]
+                benefits: []
             },
             {
                 id: 2,
@@ -28,9 +26,7 @@ Page({
                 color: '#2e4d2e',
                 darkText: true,
                 bgGradient: 'linear-gradient(135deg, #e0f2e0 0%, #c4e3c4 100%)',
-                benefits: [
-                    { icon: '🎁', text: '赠送7500积分' }
-                ]
+                benefits: []
             },
             {
                 id: 3,
@@ -41,12 +37,7 @@ Page({
                 color: '#2e3a4d',
                 darkText: true,
                 bgGradient: 'linear-gradient(135deg, #e0f0f2 0%, #c4dee3 100%)',
-                benefits: [
-                    { icon: '🏷️', text: '享受9.5折优惠' },
-                    { icon: '🍺', text: '每月免费2瓶啤酒' },
-                    { icon: '🍿', text: '每月免费1份小吃' },
-                    { icon: '🎁', text: '赠送20000积分' }
-                ]
+                benefits: []
             },
             {
                 id: 4,
@@ -57,13 +48,7 @@ Page({
                 color: '#4d2e4d',
                 darkText: true,
                 bgGradient: 'linear-gradient(135deg, #f2e0f2 0%, #e3c4e3 100%)',
-                benefits: [
-                    { icon: '🏷️', text: '享受8.5折优惠' },
-                    { icon: '💆', text: '足疗券1张' },
-                    { icon: '🍸', text: '每月免费1杯调酒' },
-                    { icon: '🍿', text: '每月免费1份小吃' },
-                    { icon: '🎁', text: '赠送56000积分' }
-                ]
+                benefits: []
             },
             {
                 id: 5,
@@ -74,32 +59,18 @@ Page({
                 color: '#1a1a1a',
                 darkText: false,
                 bgGradient: 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
-                benefits: [
-                    { icon: '🏷️', text: '享受7.5折优惠' },
-                    { icon: '🎁', text: '赠送120000积分' },
-                    { icon: '💆', text: '足疗券1张' },
-                    { icon: '🍸', text: '每月免费1杯调酒' },
-                    { icon: '🍿', text: '每月免费1份小吃' },
-                    { icon: '💎', text: '尊享VIP黑金勋章' }
-                ]
+                benefits: []
             },
             {
                 id: 6,
-                name: '三条A合伙人',
+                name: 'Set baR合伙人',
                 requirement: '邀请制',
                 status: '尊享邀请',
                 progress: '',
                 color: '#7c4dff',
                 darkText: true,
                 bgGradient: 'linear-gradient(135deg, #e6f0ff 0%, #ffffff 30%, #e0c8ff 70%, #c49aff 100%)',
-                benefits: [
-                    { icon: '👑', text: '专属合伙人身份' },
-                    { icon: '🏷️', text: '尊享7折优惠' },
-                    { icon: '💰', text: '年终合伙人分红' },
-                    { icon: '🛎️', text: '专属私人管家' },
-                    { icon: '🎟️', text: '无限次免费入场' },
-                    { icon: '🌟', text: '永久彩虹荣耀勋章' }
-                ]
+                benefits: []
             }
         ]
     },

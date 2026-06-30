@@ -1,10 +1,11 @@
 <view class="container">
   <view class="hero-bg-lux-ranking"></view>
-  
+
   <!-- 1. 沉浸式头部区域 -->
   <view class="header-section">
-    <view class="store-label">AAA CLUB · CHONGQING</view>
-    <view class="page-title text-gold-gradient shimmer-effect">排行榜</view>
+    <image class="rank-hero-icon" src="/images/icons/trophy-gold.svg" mode="aspectFit" />
+    <view class="store-label">Set baR 夜场积分</view>
+    <view class="page-title">排行榜</view>
     <view class="date-range">{{dateRange}}</view>
 
     <!-- Tab 栏 (极简设计) -->
@@ -38,10 +39,10 @@
           <view class="rank-badge {{'rank-' + item.rank}}">
             <text class="rank-num-text">{{item.rank}}</text>
           </view>
-          
+
           <!-- 头像 -->
           <image class="rank-avatar gold-border" src="{{item.avatar}}" />
-          
+
           <!-- 信息 -->
           <view class="rank-info">
             <text class="rank-name">{{item.name}}</text>
@@ -68,11 +69,11 @@
         <text class="user-name">{{currentUserRank.name}}</text>
         <text class="user-score">{{currentUserRank.score}} 积分</text>
       </view>
-      <text class="rank-text">No.{{currentUserRank.rank}}</text>
+      <text class="rank-text">第 {{currentUserRank.rank}} 名</text>
     </view>
   </view>
 
-  <view style="height: 150rpx;"></view>
+  <view style="height: 230rpx;"></view>
   <!-- 底部导航栏 -->
   <tab-bar selected="2"></tab-bar>
 

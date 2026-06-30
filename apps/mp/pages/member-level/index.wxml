@@ -61,15 +61,8 @@
       <text class="title-text">会员权益</text>
     </view>
     
-    <view class="benefits-grid">
-      <view 
-        class="benefit-item" 
-        wx:for="{{memberLevels[currentLevel].benefits}}" 
-        wx:key="text"
-      >
-        <view class="benefit-icon">{{item.icon}}</view>
-        <text class="benefit-text">{{item.text}}</text>
-      </view>
+    <view class="benefits-empty">
+      <text>会员权益内容待更新</text>
     </view>
   </view>
 

@@ -10,6 +10,11 @@ import { MemberEntity } from './src/membership/member.entity';
 import { OrderEntity } from './src/orders/order.entity';
 import { OrderItemEntity } from './src/orders/order-item.entity';
 import { LoyaltyTransactionEntity } from './src/loyalty/loyalty-transaction.entity';
+import { WineVoucherBatchEntity } from './src/coins/wine-voucher-batch.entity';
+import { WineVoucherRedeemOptionEntity } from './src/coins/wine-voucher-redeem-option.entity';
+import { WineVoucherRedeemItemEntity } from './src/coins/wine-voucher-redeem-item.entity';
+import { WineVoucherRedemptionEntity } from './src/coins/wine-voucher-redemption.entity';
+import { AdminNotificationEntity } from './src/notifications/admin-notification.entity';
 
 dotenv.config();
 
@@ -32,6 +37,11 @@ const AppDataSource = new DataSource({
     OrderEntity,
     OrderItemEntity,
     LoyaltyTransactionEntity,
+    WineVoucherBatchEntity,
+    WineVoucherRedeemOptionEntity,
+    WineVoucherRedeemItemEntity,
+    WineVoucherRedemptionEntity,
+    AdminNotificationEntity,
   ],
 });
 

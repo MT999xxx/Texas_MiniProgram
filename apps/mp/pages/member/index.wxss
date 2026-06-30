@@ -2,18 +2,19 @@
 page {
   background-color: #030304;
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, sans-serif;
-  padding-bottom: 120rpx;
+  --setbar-tabbar-space: calc(154rpx + env(safe-area-inset-bottom));
+  padding-bottom: calc(154rpx + env(safe-area-inset-bottom));
 }
 
 /* =========================================================
-   Member Page - Royal Night Gold Specialist Styles
+   Member Page - Set baR Specialist Styles
    ========================================================= */
 
 .redesign-bg {
   min-height: 100vh;
   position: relative;
   z-index: 10;
-  padding: 40rpx 30rpx;
+  padding: 40rpx 30rpx calc(160rpx + env(safe-area-inset-bottom));
   overflow-x: hidden;
 }
 
@@ -22,35 +23,62 @@ page {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   z-index: 0;
-  background: 
-    radial-gradient(circle at 100% 0%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 0% 100%, rgba(26, 21, 10, 0.5) 0%, #030304 100%);
+  background:
+    linear-gradient(180deg, rgba(5, 5, 6, 0.48), #050506 72%),
+    url('/images/setbar-panther-hero.jpg');
+  background-size: cover;
+  background-position: 76% 14%;
+  opacity: 0.78;
 }
 
 .hero-bg-lux-member::before {
   content: "";
   position: absolute;
   top: -50%; left: -50%; width: 200%; height: 200%;
-  background-image: radial-gradient(rgba(212, 175, 55, 0.1) 1rpx, transparent 1rpx);
+  background-image: radial-gradient(rgba(230, 198, 120, 0.1) 1rpx, transparent 1rpx);
   background-size: 100rpx 100rpx;
   opacity: 0.3;
   animation: floatParticles 80s linear infinite;
+}
+
+.member-page-title {
+  position: relative;
+  z-index: 11;
+  margin: 12rpx 0 34rpx 10rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.member-kicker {
+  font-size: 16rpx;
+  color: #D64A3B;
+  letter-spacing: 6rpx;
+  font-weight: 800;
+}
+
+.member-heading {
+  margin-top: 8rpx;
+  font-size: 58rpx;
+  line-height: 1;
+  color: #F8F5EC;
+  font-weight: 900;
+  text-shadow: 0 18rpx 44rpx rgba(0,0,0,0.72);
 }
 
 /* 1. 用户信息区域 */
 .premium-user-box {
   display: flex;
   align-items: center;
-  margin-bottom: 50rpx;
+  margin-bottom: 30rpx;
   padding-left: 10rpx;
 }
 
 .avatar-border {
   padding: 6rpx;
-  border-radius: 50%;
-  background: conic-gradient(from 0deg, #D4AF37, #4a0e0e, #D4AF37);
+  border-radius: 34rpx;
+  background: conic-gradient(from 0deg, #E6C678, #D64A3B, #421018, #E6C678);
   margin-right: 30rpx;
-  box-shadow: 0 0 30rpx rgba(212, 175, 55, 0.2);
+  box-shadow: 0 0 30rpx rgba(230, 198, 120, 0.2);
   animation: rotateGlow 4s linear infinite;
   display: flex;
   align-items: center;
@@ -65,7 +93,7 @@ page {
 .user-avatar {
   width: 120rpx;
   height: 120rpx;
-  border-radius: 50%;
+  border-radius: 28rpx;
   border: 4rpx solid #000;
   background: #111;
   transform: rotate(-0deg); /* 抵消外层旋转 */
@@ -79,23 +107,11 @@ page {
   display: block;
 }
 
-.user-id-badge {
-  display: flex;
-  align-items: center;
-  font-size: 22rpx;
-  color: #888;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 4rpx 16rpx;
-  border-radius: 20rpx;
-}
-
-.id-label { margin-right: 8rpx; }
-
 /* 2. 会员身份与数据展示 (毛玻璃卡片) */
 .luxury-card {
-  margin: 30rpx;
+  margin: 24rpx 0 30rpx;
   padding: 40rpx;
-  border-radius: 24rpx;
+  border-radius: 32rpx;
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -157,17 +173,17 @@ page {
 /* V5 星耀黑金 - 深色底金色字 */
 .luxury-card.level-theme-v5 {
   background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 50%, #1a1a1a 100%);
-  color: #D4AF37;
-  box-shadow: 0 12rpx 40rpx rgba(212, 175, 55, 0.2);
+  color: #E6C678;
+  box-shadow: 0 12rpx 40rpx rgba(230, 198, 120, 0.2);
 }
 .luxury-card.level-theme-v5 .level-v,
 .luxury-card.level-theme-v5 .level-num,
 .luxury-card.level-theme-v5 .level-title,
 .luxury-card.level-theme-v5 .growth-text {
-  color: #D4AF37;
+  color: #E6C678;
 }
 
-/* V6 三条A合伙人 - 亮白紫渐变（参考滴滴高端卡片风格） */
+/* V6 Set baR合伙人 - 亮白紫渐变（参考滴滴高端卡片风格） */
 .luxury-card.level-theme-v6 {
   background: linear-gradient(135deg, #e6f0ff 0%, #ffffff 30%, #e0c8ff 70%, #c49aff 100%);
   color: #2a1060;
@@ -208,7 +224,7 @@ page {
 .level-v {
   font-style: italic;
   font-size: 48rpx;
-  color: #D4AF37;
+  color: #E6C678;
   font-weight: 800;
   margin-right: 4rpx;
 }
@@ -216,13 +232,13 @@ page {
 .level-num {
   font-size: 56rpx;
   font-weight: 800;
-  color: #D4AF37;
+  color: #E6C678;
   margin-right: 16rpx;
 }
 
 .level-title {
   font-size: 24rpx;
-  color: rgba(212, 175, 55, 0.8);
+  color: rgba(230, 198, 120, 0.8);
   letter-spacing: 2rpx;
 }
 
@@ -246,9 +262,9 @@ page {
 
 .growth-inner {
   height: 100%;
-  background: var(--gold-500, #D4AF37);
+  background: var(--gold-500, #E6C678);
   border-radius: 10rpx;
-  box-shadow: 0 0 10rpx rgba(212, 175, 55, 0.5);
+  box-shadow: 0 0 10rpx rgba(230, 198, 120, 0.5);
 }
 
 .level-theme-v1 .growth-inner,
@@ -275,7 +291,7 @@ page {
 .stat-val {
   font-size: 52rpx;
   margin-bottom: 12rpx;
-  text-shadow: 0 0 30rpx rgba(212, 175, 55, 0.5);
+  text-shadow: 0 0 30rpx rgba(230, 198, 120, 0.5);
   font-family: 'SF Pro Display', sans-serif;
   font-weight: 800;
 }
@@ -303,25 +319,29 @@ page {
 .quick-nav {
   display: flex;
   justify-content: space-between;
+  gap: 12rpx;
   padding: 0 20rpx;
+  margin-top: 34rpx;
 }
 
 .nav-item {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-width: 0;
 }
 
 .nav-item text {
   font-size: 22rpx;
-  color: #D4AF37;
+  color: #E6C678;
   margin-top: 12rpx;
 }
 
 .icon-circle {
   width: 90rpx;
   height: 90rpx;
-  border-radius: 50%;
+  border-radius: 26rpx;
   background: rgba(255, 255, 255, 0.03);
   display: flex;
   align-items: center;
@@ -330,12 +350,17 @@ page {
   overflow: hidden;
 }
 
+.quick-icon-img {
+  width: 42rpx;
+  height: 42rpx;
+}
+
 /* CSS 纯享小图标 */
 .css-icon-in, .css-icon-out {
   width: 24rpx;
   height: 24rpx;
-  border-left: 4rpx solid #D4AF37;
-  border-bottom: 4rpx solid #D4AF37;
+  border-left: 4rpx solid #E6C678;
+  border-bottom: 4rpx solid #E6C678;
   position: relative;
 }
 
@@ -346,7 +371,7 @@ page {
   content: "";
   position: absolute;
   width: 4rpx; height: 32rpx;
-  background: #D4AF37;
+  background: #E6C678;
   transform-origin: center;
 }
 
@@ -356,14 +381,14 @@ page {
 .css-icon-exchange {
   width: 32rpx;
   height: 32rpx;
-  border: 4rpx solid #D4AF37;
+  border: 4rpx solid #E6C678;
   border-radius: 50%;
   position: relative;
 }
 
 .css-icon-exchange::before {
   content: "$";
-  color: #D4AF37;
+  color: #E6C678;
   font-size: 20rpx;
   font-weight: bold;
 }
@@ -384,7 +409,7 @@ page {
 .invite-title {
   font-size: 32rpx;
   font-weight: bold;
-  color: var(--gold-500, #D4AF37);
+  color: var(--gold-500, #E6C678);
 }
 
 .invite-desc {
@@ -423,7 +448,7 @@ page {
 
 .copy-btn {
   padding: 8rpx 16rpx;
-  background: rgba(212, 175, 55, 0.2);
+  background: rgba(230, 198, 120, 0.2);
   border-radius: 8rpx;
 }
 
@@ -457,7 +482,7 @@ page {
 
 .confirm-btn {
   padding: 12rpx 32rpx;
-  background: var(--gold-500, #D4AF37);
+  background: var(--gold-500, #E6C678);
   border-radius: 30rpx;
   color: #1a1a1a;
   font-size: 26rpx;
@@ -474,12 +499,12 @@ page {
 
 .invited-title {
   font-size: 28rpx;
-  color: var(--gold-500, #D4AF37);
+  color: var(--gold-500, #E6C678);
 }
 
 .invited-arrow {
   font-size: 24rpx;
-  color: var(--gold-500, #D4AF37);
+  color: var(--gold-500, #E6C678);
 }
 
 /* 邀请弹窗特定样式 */
@@ -509,7 +534,7 @@ page {
 
 /* 3. 功能菜单列表 */
 .menu-container {
-  margin-top: 50rpx;
+  margin-top: 34rpx;
 }
 
 .menu-group-title {
@@ -522,7 +547,9 @@ page {
 }
 
 .premium-menu {
-  border-radius: 24rpx;
+  border-radius: 28rpx;
+  background: rgba(255,255,255,0.055) !important;
+  border: 1rpx solid rgba(255,255,255,0.08);
   overflow: hidden;
 }
 
@@ -536,7 +563,7 @@ page {
 }
 
 .premium-menu-item:active {
-  background: rgba(212, 175, 55, 0.03);
+  background: rgba(230, 198, 120, 0.03);
 }
 
 .premium-menu-item:last-child {
@@ -549,12 +576,26 @@ page {
 }
 
 .menu-icon-wrapper {
-  width: 12rpx;
-  height: 12rpx;
-  background: #D4AF37;
-  border-radius: 50%;
-  margin-right: 30rpx;
-  box-shadow: 0 0 10rpx #D4AF37;
+  width: 46rpx;
+  height: 46rpx;
+  border-radius: 18rpx;
+  margin-right: 24rpx;
+  background: rgba(214, 74, 59, 0.12);
+  border: 1rpx solid rgba(214, 74, 59, 0.24);
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-icon-img {
+  width: 28rpx;
+  height: 28rpx;
+}
+
+.copy-icon-img {
+  width: 26rpx;
+  height: 26rpx;
 }
 
 .menu-label {
@@ -592,13 +633,13 @@ page {
 }
 
 @keyframes slideUp {
-  from { 
-    transform: translateY(100rpx) scale(0.9); 
-    opacity: 0; 
+  from {
+    transform: translateY(100rpx) scale(0.9);
+    opacity: 0;
   }
-  to { 
-    transform: translateY(0) scale(1); 
-    opacity: 1; 
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
   }
 }
 
@@ -606,7 +647,7 @@ page {
   text-align: center;
   font-size: 36rpx;
   font-weight: 700;
-  color: #D4AF37;
+  color: #E6C678;
   margin-bottom: 50rpx;
 }
 
@@ -627,13 +668,13 @@ page {
 }
 
 .active-grid {
-  background: rgba(212, 175, 55, 0.1);
-  border-color: #D4AF37;
+  background: rgba(230, 198, 120, 0.1);
+  border-color: #E6C678;
 }
 
 .grid-val {
   font-size: 32rpx;
-  color: #D4AF37;
+  color: #E6C678;
   font-weight: bold;
   display: block;
 }
@@ -644,13 +685,13 @@ page {
 }
 
 .input-luxury {
-  border-bottom: 2rpx solid rgba(212, 175, 55, 0.2);
+  border-bottom: 2rpx solid rgba(230, 198, 120, 0.2);
   padding: 20rpx 0;
   margin-bottom: 30rpx;
 }
 .lux-bonus {
   font-size: 22rpx;
-  color: #D4AF37;
+  color: #E6C678;
   margin-top: 10rpx;
   opacity: 0.8;
 }
@@ -660,7 +701,7 @@ page {
   padding: 24rpx;
   border-radius: 12rpx;
   margin-bottom: 40rpx;
-  border: 1rpx solid rgba(212, 175, 55, 0.1);
+  border: 1rpx solid rgba(230, 198, 120, 0.1);
 }
 
 .lux-rules text {
@@ -668,6 +709,160 @@ page {
   font-size: 22rpx;
   color: #888;
   margin-bottom: 10rpx;
+}
+
+.recharge-rules {
+  margin-top: 22rpx;
+}
+
+.voucher-modal {
+  max-height: 82vh;
+}
+
+.voucher-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+  margin-top: 20rpx;
+}
+
+.voucher-package {
+  min-height: 118rpx;
+  padding: 24rpx;
+  border-radius: 22rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1rpx solid rgba(230, 198, 120, 0.16);
+}
+
+.voucher-package:active {
+  transform: scale(0.985);
+  opacity: 0.88;
+}
+
+.voucher-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.voucher-name {
+  font-size: 28rpx;
+  font-weight: 800;
+  color: #F8F5EC;
+}
+
+.voucher-desc {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.46);
+}
+
+.voucher-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8rpx;
+  margin-left: 20rpx;
+}
+
+.voucher-price {
+  font-size: 28rpx;
+  font-weight: 800;
+  color: #E6C678;
+}
+
+.voucher-count {
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
+  font-size: 18rpx;
+  color: #FFF3C8;
+  background: rgba(214, 74, 59, 0.22);
+}
+
+.point-records-modal {
+  max-height: 78vh;
+}
+
+.point-record-list {
+  max-height: 620rpx;
+  margin-bottom: 34rpx;
+}
+
+.point-record-empty {
+  padding: 88rpx 0;
+  text-align: center;
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.48);
+}
+
+.point-record-item {
+  padding: 26rpx 0;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.08);
+}
+
+.point-record-item:last-child {
+  border-bottom: 0;
+}
+
+.point-record-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.point-record-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.point-record-title {
+  font-size: 28rpx;
+  font-weight: 800;
+  color: #F8F5EC;
+}
+
+.point-record-time {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.point-record-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8rpx;
+}
+
+.point-record-points {
+  font-size: 32rpx;
+  font-weight: 900;
+}
+
+.point-record-points.plus {
+  color: #E6C678;
+}
+
+.point-record-points.minus {
+  color: #D64A3B;
+}
+
+.point-record-status {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.56);
+}
+
+.point-record-remark {
+  display: block;
+  margin-top: 14rpx;
+  font-size: 22rpx;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.42);
 }
 
 .modal-btns {
@@ -691,10 +886,10 @@ page {
 }
 
 .btn-confirm {
-  background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+  background: linear-gradient(135deg, #E6C678 0%, #8C6A2F 100%);
   color: #000;
   font-weight: bold;
-  box-shadow: 0 8rpx 20rpx rgba(212, 175, 55, 0.3);
+  box-shadow: 0 8rpx 20rpx rgba(230, 198, 120, 0.3);
 }
 
 .btn-confirm:active {
@@ -707,7 +902,7 @@ page {
 }
 
 .action-btn:active {
-  background: rgba(139, 0, 0, 0.3);
+  background: rgba(157, 46, 69, 0.3);
 }
 
 /* --- 7. 弹窗额外样式 --- */
@@ -734,7 +929,7 @@ page {
 }
 
 .exchange-rate {
-  background: linear-gradient(90deg, #8b0000, #4a0e0e);
+  background: linear-gradient(90deg, #9D2E45, #421018);
   color: #fff;
   text-align: center;
   padding: 16rpx;
@@ -748,7 +943,7 @@ page {
   font-size: 28rpx;
   text-align: center;
   padding: 16rpx;
-  background: rgba(139, 0, 0, 0.1);
+  background: rgba(157, 46, 69, 0.1);
   border-radius: 10rpx;
   margin: 20rpx 0;
 }

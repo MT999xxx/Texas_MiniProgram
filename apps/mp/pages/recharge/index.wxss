@@ -1,6 +1,6 @@
 /* Pages/recharge/index.wxss */
 page {
-  background-color: #080808;
+  background-color: #050506;
 }
 
 .container {
@@ -15,9 +15,9 @@ page {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   z-index: 0;
-  background: 
-    radial-gradient(circle at 100% 100%, rgba(212, 175, 55, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at -20% -20%, rgba(26, 21, 10, 0.5) 0%, #080808 100%);
+  background:
+    radial-gradient(circle at 100% 100%, rgba(230, 198, 120, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at -20% -20%, rgba(26, 21, 10, 0.5) 0%, #050506 100%);
 }
 
 /* 1. 账户英雄位 */
@@ -33,7 +33,7 @@ page {
   position: absolute;
   top: -20%; right: -10%;
   width: 300rpx; height: 300rpx;
-  background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(230, 198, 120, 0.1) 0%, transparent 70%);
 }
 
 .user-main {
@@ -64,7 +64,7 @@ page {
 
 .membership-tag {
   font-size: 16rpx;
-  color: #D4AF37;
+  color: #E6C678;
   letter-spacing: 4rpx;
   font-weight: 700;
 }
@@ -86,8 +86,8 @@ page {
   font-size: 72rpx;
   font-weight: 900;
   line-height: 1;
-  color: #D4AF37;
-  text-shadow: 0 0 40rpx rgba(212, 175, 55, 0.4);
+  color: #E6C678;
+  text-shadow: 0 0 40rpx rgba(230, 198, 120, 0.4);
   font-family: 'SF Pro Display', sans-serif;
 }
 
@@ -129,7 +129,7 @@ page {
 
 .sec-indicator {
   width: 20rpx; height: 4rpx;
-  background: #D4AF37;
+  background: #E6C678;
   margin-right: 16rpx;
 }
 
@@ -158,19 +158,19 @@ page {
 
 .package-lux:active {
   transform: translateY(-4rpx);
-  background: rgba(212, 175, 55, 0.05) !important;
-  border-color: rgba(212, 175, 55, 0.3) !important;
+  background: rgba(230, 198, 120, 0.05) !important;
+  border-color: rgba(230, 198, 120, 0.3) !important;
 }
 
 .package-featured {
-  background: rgba(212, 175, 55, 0.03) !important;
-  border-color: rgba(212, 175, 55, 0.25) !important;
+  background: rgba(230, 198, 120, 0.03) !important;
+  border-color: rgba(230, 198, 120, 0.25) !important;
 }
 
 .featured-ribbon {
   position: absolute;
   top: 10rpx; right: -30rpx;
-  background: #D4AF37;
+  background: #E6C678;
   color: #000;
   font-size: 14rpx;
   font-weight: 900;
@@ -208,7 +208,7 @@ page {
 .benefit-row .b-v { font-size: 20rpx; color: #555; font-family: monospace; }
 
 .gold-benefit .b-l, .gold-benefit .b-v {
-  color: #D4AF37;
+  color: #E6C678;
 }
 
 .pack-footer {
@@ -221,7 +221,7 @@ page {
 }
 
 .total-label { font-size: 18rpx; color: #222; }
-.total-points { font-size: 24rpx; color: #D4AF37; font-weight: 700; }
+.total-points { font-size: 24rpx; color: #E6C678; font-weight: 700; }
 
 /* 3. 温馨提示 */
 .service-notes {
@@ -237,7 +237,7 @@ page {
 
 .notes-dot {
   width: 8rpx; height: 8rpx;
-  background: #D4AF37;
+  background: #E6C678;
   border-radius: 50%;
   margin-right: 16rpx;
 }
@@ -266,7 +266,7 @@ page {
 
 .css-icon-shield-gold {
   width: 30rpx; height: 36rpx;
-  border: 2rpx solid rgba(212, 175, 55, 0.2);
+  border: 2rpx solid rgba(230, 198, 120, 0.2);
   border-radius: 4rpx 4rpx 15rpx 15rpx;
   position: relative;
 }
@@ -275,7 +275,7 @@ page {
   position: absolute;
   top: 10rpx; left: 8rpx;
   width: 10rpx; height: 10rpx;
-  background: rgba(212, 175, 55, 0.2);
+  background: rgba(230, 198, 120, 0.2);
   border-radius: 50%;
 }
 
@@ -307,8 +307,8 @@ page {
 
 .orb-loading {
   width: 80rpx; height: 80rpx;
-  border: 2rpx solid rgba(212, 175, 55, 0.1);
-  border-top-color: #D4AF37;
+  border: 2rpx solid rgba(230, 198, 120, 0.1);
+  border-top-color: #E6C678;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 40rpx;
@@ -318,6 +318,6 @@ page {
 
 .pay-text {
   font-size: 24rpx;
-  color: #D4AF37;
+  color: #E6C678;
   letter-spacing: 2rpx;
 }

@@ -2,16 +2,17 @@
   <view class="hero-bg-lux-member"></view>
   
   <!-- 1. 用户信息区域 (沉浸式) -->
+  <view class="member-page-title">
+    <text class="member-kicker">Set baR</text>
+    <text class="member-heading">会员中心</text>
+  </view>
+
   <view class="premium-user-box" bindtap="onUserInfoClick">
     <view class="avatar-border">
       <image class="user-avatar" src="{{userInfo.avatar}}" binderror="onAvatarError" />
     </view>
     <view class="user-details">
       <text class="user-nickname">{{userInfo.nickname}}</text>
-      <view class="user-id-badge">
-        <text class="id-label">UID:</text>
-        <text class="id-value">{{userInfo.id}}</text>
-      </view>
     </view>
   </view>
 
@@ -58,7 +59,7 @@
         <block wx:else>
           <text class="stat-val font-bold text-gold">{{stats.wineVouchers}}</text>
         </block>
-        <text class="stat-name">酒卷</text>
+        <text class="stat-name">酒券</text>
       </view>
     </view>
 
@@ -69,21 +70,27 @@
     <view class="quick-nav">
       <view class="nav-item" bindtap="showDepositDialog">
         <view class="icon-circle gold-border shimmer-effect">
-          <view class="css-icon-in"></view>
+          <image class="quick-icon-img" src="/images/icons/wallet-gold.svg" mode="aspectFit" />
         </view>
         <text>存分</text>
       </view>
       <view class="nav-item" bindtap="showWithdrawDialog">
         <view class="icon-circle gold-border shimmer-effect">
-          <view class="css-icon-out"></view>
+          <image class="quick-icon-img" src="/images/icons/coupon-gold.svg" mode="aspectFit" />
         </view>
         <text>取分</text>
       </view>
       <view class="nav-item" bindtap="showExchangeDialog">
         <view class="icon-circle gold-border shimmer-effect">
-          <view class="css-icon-exchange"></view>
+          <image class="quick-icon-img" src="/images/icons/special-gold.svg" mode="aspectFit" />
         </view>
         <text>兑换</text>
+      </view>
+      <view class="nav-item" bindtap="showPointRecordsDialog">
+        <view class="icon-circle gold-border shimmer-effect">
+          <image class="quick-icon-img" src="/images/icons/orders-gold.svg" mode="aspectFit" />
+        </view>
+        <text>记录</text>
       </view>
     </view>
   </view>
@@ -95,7 +102,9 @@
       <block wx:for="{{menuList}}" wx:key="text">
         <view class="premium-menu-item" bindtap="onMenuClick" data-index="{{index}}">
           <view class="menu-info">
-            <view class="menu-icon-wrapper"></view>
+            <view class="menu-icon-wrapper">
+              <image class="menu-icon-img" src="{{item.icon}}" mode="aspectFit" />
+            </view>
             <text class="menu-label">{{item.text}}</text>
           </view>
           <view class="menu-arrow-icon"></view>
@@ -104,7 +113,9 @@
       <!-- 邀请奖励入口 -->
       <view class="premium-menu-item" bindtap="showInvitePopup">
         <view class="menu-info">
-          <view class="menu-icon-wrapper"></view>
+          <view class="menu-icon-wrapper">
+            <image class="menu-icon-img" src="/images/icons/members-gold.svg" mode="aspectFit" />
+          </view>
           <text class="menu-label">邀请奖励</text>
         </view>
         <view class="menu-arrow-icon"></view>
@@ -118,7 +129,7 @@
   </view>
 
   <!-- 底部占位 -->
-  <view style="height: 120rpx;"></view>
+  <view style="height: 230rpx;"></view>
   <tab-bar selected="3"></tab-bar>
 
   <!-- ================= 弹窗重构 (基于全局样式) ================= -->
@@ -137,11 +148,9 @@
         </view>
       </view>
 
-      <view class="input-luxury container">
-        <input class="lux-input" type="number" placeholder="输入其他金额" 
-               placeholder-class="lux-placeholder" value="{{inputAmount}}" 
-               bindinput="onInputAmount" />
-        <view class="lux-bonus">赠送 {{selectedAmount ? (selectedAmount * 10) : (inputAmount * 10 || 0)}} 积分</view>
+      <view class="lux-rules recharge-rules">
+        <text>• 充值仅开放固定套餐</text>
+        <text>• 选择套餐后按对应金币和积分入账</text>
       </view>
 
       <view class="modal-btns">
@@ -189,22 +198,62 @@
     </view>
   </view>
 
-  <!-- 积分兑换金币弹窗 -->
+  <!-- 存取分记录弹窗 -->
+  <view class="modal-mask" wx:if="{{showPointRecordsPopup}}" bindtap="hidePointRecordsDialog">
+    <view class="luxury-modal glass-panel gold-border point-records-modal" catchtap="stopBubble">
+      <view class="modal-head">存取分记录</view>
+      <view wx:if="{{pointRecordsLoading}}" class="point-record-empty">加载中...</view>
+      <view wx:elif="{{pointRecords.length === 0}}" class="point-record-empty">暂无存取分记录</view>
+      <scroll-view wx:else scroll-y class="point-record-list">
+        <view wx:for="{{pointRecords}}" wx:key="id" class="point-record-item">
+          <view class="point-record-row">
+            <view class="point-record-main">
+              <text class="point-record-title">{{item.title}}</text>
+              <text class="point-record-time">{{item.createdAtText}}</text>
+            </view>
+            <view class="point-record-side">
+              <text class="point-record-points {{item.directionClass}}">{{item.pointsText}}</text>
+              <text class="point-record-status">{{item.statusText}}</text>
+            </view>
+          </view>
+          <text wx:if="{{item.remark}}" class="point-record-remark">{{item.remark}}</text>
+        </view>
+      </scroll-view>
+      <view class="modal-btns">
+        <view class="btn-cancel" bindtap="hidePointRecordsDialog">返回</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 酒券购买弹窗 -->
   <view class="modal-mask" wx:if="{{showExchangePopup}}" bindtap="hideExchangeDialog">
-    <view class="luxury-modal glass-panel gold-border" catchtap="stopBubble">
-      <view class="modal-head">积分兑换金币</view>
-      <view class="input-luxury">
-        <input class="lux-input" type="number" placeholder="请输入要兑换的金币数量" 
-               value="{{exchangeCoins}}" bindinput="onExchangeInput" />
+    <view class="luxury-modal glass-panel gold-border member-voucher-disabled-modal" catchtap="stopBubble">
+      <view class="modal-head">酒券购买</view>
+      <view class="voucher-list">
+        <view
+          wx:for="{{voucherPackages}}"
+          wx:key="id"
+          class="voucher-package"
+          bindtap="purchaseVoucher"
+          data-id="{{item.id}}"
+        >
+          <view class="voucher-main">
+            <text class="voucher-name">{{item.name}}</text>
+            <text class="voucher-desc">{{item.description || '15天有效，赠送8000积分'}}</text>
+          </view>
+          <view class="voucher-side">
+            <text class="voucher-price">{{item.price}}金币</text>
+            <text class="voucher-count">{{item.voucherCount || 1}}张</text>
+          </view>
+        </view>
       </view>
       <view class="lux-rules">
-        <text>• 兑换比例：200积分 = 1金币</text>
-        <text>• 当前积分余额：{{stats.points}}</text>
-        <text>• 预计消耗积分：{{exchangeCoins ? exchangeCoins * 200 : 0}}</text>
+        <text>• 酒券15天有效，过期自动失效</text>
+        <text>• 最后一天会提醒快过期</text>
+        <text>• 购买酒券赠送8000积分</text>
       </view>
       <view class="modal-btns">
         <view class="btn-cancel" bindtap="hideExchangeDialog">返回</view>
-        <view class="btn-confirm" bindtap="submitExchange">确认兑换</view>
       </view>
     </view>
   </view>
@@ -223,7 +272,7 @@
         <view class="code-value-box">
           <text class="code-value">{{inviteCode || 'e7f0014b'}}</text>
           <view class="copy-btn" bindtap="copyInviteCode">
-            <text class="copy-icon">📋</text>
+            <image class="copy-icon-img" src="/images/icons/orders-gold.svg" mode="aspectFit" />
           </view>
         </view>
       </view>
@@ -247,4 +296,3 @@
   </view>
 
 </view>
-

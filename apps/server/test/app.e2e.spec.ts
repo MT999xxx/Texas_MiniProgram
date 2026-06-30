@@ -157,7 +157,7 @@ describe('API E2E (sqlite)', () => {
     // assert points awarded
     const memberRepo = moduleRef.get(getRepositoryToken(MemberEntity));
     const refreshedMember = await memberRepo.findOne({ where: { id: member.body.id } });
-    expect(refreshedMember?.points).toBe(100);
+    expect(refreshedMember?.points).toBe(5000);
 
     // assert loyalty record
     const loyaltyRepo = moduleRef.get(getRepositoryToken(LoyaltyTransactionEntity));
@@ -167,6 +167,6 @@ describe('API E2E (sqlite)', () => {
     });
     expect(loyaltyRecords.length).toBeGreaterThanOrEqual(1);
     expect(loyaltyRecords[0].type).toBe(LoyaltyTransactionType.EARN);
-    expect(loyaltyRecords[0].points).toBe(100);
+    expect(loyaltyRecords[0].points).toBe(5000);
   });
 });

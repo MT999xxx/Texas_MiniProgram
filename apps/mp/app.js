@@ -2,15 +2,12 @@ const authManager = require('./utils/auth');
 
 App({
   globalData: {
-    // 生产环境地址 (HTTPS)
     apiBase: 'https://dezhoubar.xyz/api',
-    // 静态文件服务地址
     cdnBase: 'https://dezhoubar.xyz/api/static/images',
     userInfo: null,
   },
 
   async onLaunch() {
-    // 尝试静默登录
     try {
       const isLoggedIn = await authManager.checkLogin();
       if (isLoggedIn) {
@@ -22,17 +19,14 @@ App({
     }
   },
 
-  // 获取用户信息
   getUserInfo() {
     return this.globalData.userInfo || authManager.userInfo;
   },
 
-  // 检查登录状态
   async checkLoginStatus() {
     return await authManager.checkLogin();
   },
 
-  // 强制登录
   requireLogin(redirectUrl) {
     const url = redirectUrl
       ? `/pages/login/index?redirect=${encodeURIComponent(redirectUrl)}`
@@ -42,7 +36,7 @@ App({
       url,
       fail: () => {
         wx.redirectTo({ url });
-      }
+      },
     });
-  }
+  },
 });

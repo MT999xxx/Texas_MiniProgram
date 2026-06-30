@@ -2,7 +2,7 @@
   <!-- 1. 沉浸式头部导航 -->
   <view class="header-section">
     <view class="page-title text-gold-gradient shimmer-effect">尊享预约</view>
-    <view class="header-subtitle">ROYAL RESERVATION · 名仕之选</view>
+    <view class="header-subtitle">Set baR 桌台预约 · 私享夜场</view>
   </view>
 
   <!-- 2. 预约主表单 -->

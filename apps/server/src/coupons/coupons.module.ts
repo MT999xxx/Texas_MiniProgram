@@ -4,11 +4,12 @@ import { CouponsController } from './coupons.controller';
 import { CouponsService } from './coupons.service';
 import { CouponEntity } from './coupon.entity';
 import { UserCouponEntity } from './user-coupon.entity';
+import { WineVoucherBatchEntity } from '../coins/wine-voucher-batch.entity';
 import { MembershipModule } from '../membership/membership.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([CouponEntity, UserCouponEntity]),
+    TypeOrmModule.forFeature([CouponEntity, UserCouponEntity, WineVoucherBatchEntity]),
     MembershipModule,
   ],
   controllers: [CouponsController],

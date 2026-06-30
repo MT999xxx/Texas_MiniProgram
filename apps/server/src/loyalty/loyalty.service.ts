@@ -6,6 +6,7 @@ import { ChampionRankingEntity, ChampionType } from './champion-ranking.entity';
 import { MembershipService } from '../membership/membership.service';
 import { OrderEntity } from '../orders/order.entity';
 import { MemberEntity } from '../membership/member.entity';
+import { getCoinConsumptionBonusPoints, isWineVoucherMenuItem } from '../coins/coin-rules';
 
 @Injectable()
 export class LoyaltyService {
@@ -23,7 +24,7 @@ export class LoyaltyService {
     if (!order.member) {
       return null;
     }
-    const points = Math.floor(Number(order.totalAmount));
+    const points = getCoinConsumptionBonusPoints(this.getOrderRewardableAmount(order));
     if (points <= 0) {
       return null;
     }
@@ -36,6 +37,19 @@ export class LoyaltyService {
       remark: '订单消费奖励',
     });
     return this.repo.save(trx);
+  }
+
+  private getOrderRewardableAmount(order: OrderEntity): number {
+    const items = order.items || [];
+    if (items.length === 0) {
+      return Number(order.totalAmount || 0);
+    }
+
+    const nonVoucherAmount = items
+      .filter((item) => !isWineVoucherMenuItem(item.menuItem as any))
+      .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+
+    return Math.min(nonVoucherAmount, Number(order.totalAmount || 0));
   }
 
   // 获取排行榜数据

@@ -236,7 +236,7 @@ Page({
    */
   onShareAppMessage() {
     return {
-      title: '德州扑克排行榜 - 看看谁是德州之王！',
+      title: 'Set baR 排行榜 · 看看今晚谁在榜上',
       path: '/pages/ranking/index'
     };
   }

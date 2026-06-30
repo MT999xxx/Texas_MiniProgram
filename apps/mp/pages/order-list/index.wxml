@@ -51,7 +51,7 @@
         <!-- 订单头部 -->
         <view class="order-header">
           <view class="order-id-box">
-            <text class="order-label">NO.</text>
+            <text class="order-label">订单号</text>
             <text class="order-sn">{{item.orderNumber}}</text>
           </view>
           <view class="status-badge status-{{item.status}}">

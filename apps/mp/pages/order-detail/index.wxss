@@ -1,6 +1,6 @@
 /* Pages/order-detail/index.wxss */
 page {
-  background-color: #080808;
+  background-color: #050506;
 }
 
 .container {
@@ -11,8 +11,8 @@ page {
 /* 加载渲染 */
 .loading-lux {
   width: 40rpx; height: 40rpx;
-  border: 2rpx solid rgba(212, 175, 55, 0.2);
-  border-top-color: #D4AF37;
+  border: 2rpx solid rgba(230, 198, 120, 0.2);
+  border-top-color: #E6C678;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 20rpx;
@@ -45,7 +45,7 @@ page {
   box-shadow: 0 0 30rpx rgba(0,0,0,0.5);
 }
 
-.status-orb-PENDING { background: radial-gradient(circle, #D4AF37, #B8860B); box-shadow: 0 0 40rpx rgba(212, 175, 55, 0.3); }
+.status-orb-PENDING { background: radial-gradient(circle, #E6C678, #8C6A2F); box-shadow: 0 0 40rpx rgba(230, 198, 120, 0.3); }
 .status-orb-PAID { background: radial-gradient(circle, #22C55E, #166534); box-shadow: 0 0 40rpx rgba(34, 197, 94, 0.3); }
 .status-orb-IN_PROGRESS { background: radial-gradient(circle, #3B82F6, #1D4ED8); box-shadow: 0 0 40rpx rgba(59, 130, 246, 0.3); }
 .status-orb-COMPLETED { background: radial-gradient(circle, #AAA, #333); }
@@ -84,9 +84,9 @@ page {
 
 .sec-indicator {
   width: 4rpx; height: 24rpx;
-  background: #D4AF37;
+  background: #E6C678;
   margin-right: 16rpx;
-  box-shadow: 0 0 10rpx #D4AF37;
+  box-shadow: 0 0 10rpx #E6C678;
 }
 
 .sec-title {
@@ -210,8 +210,8 @@ page {
   transition: all 0.3s;
 }
 
-.step-lux.completed .dot { background: #D4AF37; box-shadow: 0 0 10rpx #D4AF37; }
-.step-lux.current .dot { background: #D4AF37; transform: scale(1.5); box-shadow: 0 0 20rpx #D4AF37; }
+.step-lux.completed .dot { background: #E6C678; box-shadow: 0 0 10rpx #E6C678; }
+.step-lux.current .dot { background: #E6C678; transform: scale(1.5); box-shadow: 0 0 20rpx #E6C678; }
 
 .step-line {
   position: absolute;
@@ -223,7 +223,7 @@ page {
   z-index: 1;
 }
 
-.step-lux.completed .step-line { background: rgba(212, 175, 55, 0.1); }
+.step-lux.completed .step-line { background: rgba(230, 198, 120, 0.1); }
 
 .step-body .s-title {
   font-size: 26rpx;
@@ -264,6 +264,6 @@ page {
 }
 
 .btn-cancel-detail { border: 1rpx solid #222; color: #555; }
-.btn-pay-detail { background: #D4AF37; color: #000; box-shadow: 0 10rpx 20rpx rgba(212, 175, 55, 0.2); }
-.btn-contact-detail { border: 1rpx solid #D4AF37; color: #D4AF37; }
+.btn-pay-detail { background: #E6C678; color: #000; box-shadow: 0 10rpx 20rpx rgba(230, 198, 120, 0.2); }
+.btn-contact-detail { border: 1rpx solid #E6C678; color: #E6C678; }
 .btn-reorder-detail { background: rgba(255, 255, 255, 0.05); color: #BBB; }

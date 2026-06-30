@@ -22,6 +22,13 @@ export class TableController {
     return this.tableService.create(dto);
   }
 
+  @Post('waiting-list/join')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: '鍔犲叆鍊欒ˉ鎴愬姛' })
+  joinWaitingList(@Body('tableId') tableId: string) {
+    return this.tableService.joinWaitingList(tableId);
+  }
+
   @Get()
   @ApiOkResponse({ description: '桌位列表' })
   list(

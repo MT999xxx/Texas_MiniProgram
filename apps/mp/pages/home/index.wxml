@@ -1,73 +1,65 @@
-<view class="container home-redesign">
-  <!-- 0. 沉浸式背景层 (纯 CSS 实现) -->
-  <view class="hero-bg-lux"></view>
+<view class="home-page">
+  <image class="panther-hero" src="/images/setbar-panther-hero.jpg" mode="aspectFill" />
+  <view class="hero-shade"></view>
+  <view class="hero-noise"></view>
 
-  <!-- 1. 自定义顶部导航栏 (模拟) -->
-  <view class="custom-nav glass-panel">
-    <view class="nav-content">
-      <view class="brand-small">AAA CLUB</view>
-    </view>
-  </view>
-  
-  <view class="content-scroller">
-    <!-- 2. Hero 品牌区 -->
-    <view class="hero-section">
-      <view class="brand-logo-container">
-        <text class="logo-text shadow-lux">AAA</text>
-        <view class="logo-glow"></view>
+  <view class="home-content">
+    <view class="top-line">
+      <view class="brand-mark">
+        <text class="brand-name">Set baR</text>
+        <text class="brand-sub">德州酒廊 · 鸡尾酒吧</text>
       </view>
-      <view class="welcome-premium mt-lg">
-        <text class="w-top">WELCOME TO</text>
-        <view class="w-divider"></view>
-        <text class="w-bottom text-gold">三条A·皇家扑克俱乐部</text>
+      <view class="open-chip">
+        <view class="open-dot"></view>
+        <text>今晚营业</text>
       </view>
     </view>
 
-    <!-- 3. 公告/活动浮动栏 -->
-    <view class="floating-notices">
-      <view class="notice-pill glass-panel gold-border" bindtap="showNotice">
-        <text class="pill-icon">📢</text>
-        <text class="pill-text">俱乐部最新公告</text>
+    <view class="hero-copy">
+      <text class="hero-title">今晚，从 Set baR 开始</text>
+    </view>
+
+    <view class="primary-actions">
+      <view class="primary-action order-action" bindtap="goToMenu">
+        <image class="action-icon" src="/images/icons/order-gold.svg" mode="aspectFit" />
+        <view class="action-copy">
+          <text class="action-title">点单服务</text>
+          <text class="action-sub">酒水与小食</text>
+        </view>
       </view>
-      <view class="notice-pill glass-panel gold-border" bindtap="showActivity">
-        <text class="pill-icon">🎁</text>
-        <text class="pill-text">限定福利活动</text>
+      <view class="primary-action reserve-action" bindtap="goToReservation">
+        <image class="action-icon" src="/images/icons/reserve-gold.svg" mode="aspectFit" />
+        <view class="action-copy">
+          <text class="action-title">预约桌台</text>
+          <text class="action-sub">实时座位与规则</text>
+        </view>
       </view>
     </view>
 
-    <!-- 4. 核心功能卡片 (2列布局) -->
-    <view class="action-grid mt-xl">
-      <view class="lux-action-card glass-panel shadow-lux shimmer-effect" bindtap="goToMenu">
-        <view class="css-icon-container">
-          <view class="icon-shape-food"></view>
+    <view class="concierge-list">
+      <view class="concierge-item" bindtap="showNotice">
+        <image class="concierge-icon" src="/images/icons/notice-gold.svg" mode="aspectFit" />
+        <view class="concierge-copy">
+          <text class="concierge-title">最新公告</text>
+          <text class="concierge-sub">门店规则与活动更新</text>
         </view>
-        <text class="card-title">尊享点餐</text>
-        <view class="card-desc-box">
-          <text class="card-desc">美酒佳肴</text>
-          <text class="card-desc">席间即达</text>
-        </view>
-        <view class="card-accent"></view>
+        <text class="concierge-arrow">›</text>
       </view>
-
-      <view class="lux-action-card glass-panel shadow-lux shimmer-effect" bindtap="goToReservation">
-        <view class="css-icon-container">
-          <view class="icon-shape-table"></view>
+      <view class="concierge-item" bindtap="showActivity">
+        <image class="concierge-icon" src="/images/icons/special-gold.svg" mode="aspectFit" />
+        <view class="concierge-copy">
+          <text class="concierge-title">每日活动</text>
+          <text class="concierge-sub">最新活动与积分礼遇</text>
         </view>
-        <text class="card-title">席位预约</text>
-        <view class="card-desc-box">
-          <text class="card-desc">名仕汇聚</text>
-          <text class="card-desc">虚位以待</text>
-        </view>
-        <view class="card-accent"></view>
+        <text class="concierge-arrow">›</text>
       </view>
     </view>
 
-    <view style="height: 150rpx;"></view>
+    <view class="bottom-space"></view>
   </view>
 
   <tab-bar selected="0"></tab-bar>
 
-  <!-- 5. 全局弹窗 (使用全局 app.wxss 样式) -->
   <view class="modal-mask" wx:if="{{modalVisible}}">
     <view class="luxury-modal-home glass-panel gold-border" catchtap="stopBubble">
       <view class="modal-head-gold">{{modalTitle}}</view>
@@ -78,17 +70,15 @@
     </view>
   </view>
 
-  <!-- 6. 签到弹窗 -->
   <view class="modal-mask" wx:if="{{showCheckInPopup}}" catchtap="closeCheckInPopup">
     <view class="checkin-modal glass-panel" catchtap="stopBubble">
       <view class="checkin-close" bindtap="closeCheckInPopup">×</view>
-      
+
       <view class="checkin-header">
-        <text class="checkin-icon">💰</text>
-        <text class="checkin-title">签到得积分！</text>
+        <image class="checkin-icon-img" src="/images/icons/special-gold.svg" mode="aspectFit" />
+        <text class="checkin-title">每日签到</text>
       </view>
-      
-      <!-- 7天奖励网格 -->
+
       <view class="checkin-grid">
         <view class="checkin-day {{index < (checkInStatus.consecutiveDays % 7) || (checkInStatus.checkedInToday && index === ((checkInStatus.consecutiveDays - 1) % 7)) ? 'claimed' : ''}} {{!checkInStatus.checkedInToday && index === (checkInStatus.consecutiveDays % 7) ? 'today' : ''}}"
               wx:for="{{[220, 330, 440, 550, 660, 770, 880]}}"
@@ -98,8 +88,8 @@
           <text class="day-label">第{{index + 1}}天</text>
         </view>
       </view>
-      
-      <button class="checkin-btn {{checkInStatus.checkedInToday ? 'disabled' : ''}}" 
+
+      <button class="checkin-btn {{checkInStatus.checkedInToday ? 'disabled' : ''}}"
               bindtap="doCheckIn"
               disabled="{{checkInStatus.checkedInToday}}">
         {{checkInStatus.checkedInToday ? '今日已签到' : '签到'}}

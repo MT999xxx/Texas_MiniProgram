@@ -48,6 +48,13 @@ export class OrdersController {
     return this.ordersService.updateStatus(id, dto);
   }
 
+  @Patch(':id/remark')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: '澶囨敞鏇存柊鎴愬姛' })
+  updateRemark(@Param('id') id: string, @Body('remark') remark: string) {
+    return this.ordersService.updateRemark(id, remark);
+  }
+
   @Post(':id/pay-with-coins')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ description: '金币支付成功' })

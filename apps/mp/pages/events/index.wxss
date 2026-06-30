@@ -1,6 +1,6 @@
 /* Pages/events/index.wxss */
 page {
-  background-color: #080808;
+  background-color: #050506;
 }
 
 .container {
@@ -34,7 +34,7 @@ page {
 }
 
 .tab-item.active .tab-text {
-  color: #D4AF37;
+  color: #E6C678;
   font-weight: 700;
 }
 
@@ -45,8 +45,8 @@ page {
   transform: translateX(-50%);
   width: 24rpx;
   height: 2rpx;
-  background: #D4AF37;
-  box-shadow: 0 0 12rpx #D4AF37;
+  background: #E6C678;
+  box-shadow: 0 0 12rpx #E6C678;
 }
 
 /* 2. 活动流 */
@@ -91,7 +91,7 @@ page {
   border-radius: 40rpx;
   backdrop-filter: blur(10rpx);
 }
-.status-UPCOMING { background: rgba(212, 175, 55, 0.8); color: #000; }
+.status-UPCOMING { background: rgba(230, 198, 120, 0.8); color: #000; }
 .status-ONGOING { background: rgba(34, 197, 94, 0.8); }
 .status-ENDED { background: rgba(0, 0, 0, 0.61); color: #444; }
 
@@ -99,7 +99,7 @@ page {
   position: absolute;
   top: 24rpx; left: 24rpx;
   font-size: 14rpx;
-  color: #D4AF37;
+  color: #E6C678;
   letter-spacing: 4rpx;
   font-weight: 900;
   background: rgba(0,0,0,0.5);
@@ -136,7 +136,7 @@ page {
 
 .css-icon-clock-gold {
   width: 20rpx; height: 20rpx;
-  border: 2rpx solid #D4AF37;
+  border: 2rpx solid #E6C678;
   border-radius: 50%;
   position: relative;
 }
@@ -145,13 +145,13 @@ page {
   position: absolute;
   top: 3rpx; left: 8rpx;
   width: 2rpx; height: 8rpx;
-  background: #D4AF37;
+  background: #E6C678;
   transform: rotate(30deg);
 }
 
 .e-time-box text {
   font-size: 20rpx;
-  color: #D4AF37;
+  color: #E6C678;
   font-weight: 600;
 }
 
@@ -188,14 +188,14 @@ page {
 
 .css-icon-pin-gold {
   width: 16rpx; height: 20rpx;
-  border: 2rpx solid #D4AF37;
+  border: 2rpx solid #E6C678;
   border-radius: 50% 50% 50% 0;
   transform: rotate(-45deg);
 }
 
 .css-icon-users-gold {
   width: 20rpx; height: 16rpx;
-  border-bottom: 2rpx solid #D4AF37;
+  border-bottom: 2rpx solid #E6C678;
   position: relative;
 }
 .css-icon-users-gold::after {
@@ -203,7 +203,7 @@ page {
   position: absolute;
   top: -8rpx; left: 4rpx;
   width: 8rpx; height: 8rpx;
-  border: 2rpx solid #D4AF37;
+  border: 2rpx solid #E6C678;
   border-radius: 50%;
 }
 
@@ -221,8 +221,8 @@ page {
 
 .lux-progress-fill {
   height: 100%;
-  background: #D4AF37;
-  box-shadow: 0 0 10rpx #D4AF37;
+  background: #E6C678;
+  box-shadow: 0 0 10rpx #E6C678;
 }
 
 .meta-item-row {
@@ -244,15 +244,15 @@ page {
 
 .css-icon-coin-gold {
   width: 14rpx; height: 14rpx;
-  border: 2rpx solid #D4AF37;
+  border: 2rpx solid #E6C678;
   border-radius: 50%;
   position: relative;
 }
-.css-icon-coin-gold::after { content: "$"; font-size: 10rpx; color: #D4AF37; position: absolute; top: -2rpx; left: 2rpx; }
+.css-icon-coin-gold::after { content: "$"; font-size: 10rpx; color: #E6C678; position: absolute; top: -2rpx; left: 2rpx; }
 
 .css-icon-trophy-gold {
   width: 16rpx; height: 12rpx;
-  border: 2rpx solid #D4AF37;
+  border: 2rpx solid #E6C678;
   border-top: none;
   position: relative;
 }
@@ -261,7 +261,7 @@ page {
   position: absolute;
   top: -6rpx; left: 4rpx;
   width: 4rpx; height: 4rpx;
-  background: #D4AF37;
+  background: #E6C678;
 }
 
 /* 操作区 */
@@ -281,7 +281,7 @@ page {
 
 .css-icon-lock-gold {
   width: 12rpx; height: 10rpx;
-  border: 2rpx solid #D4AF37;
+  border: 2rpx solid #E6C678;
   border-top: none;
   position: relative;
 }
@@ -290,20 +290,20 @@ page {
   position: absolute;
   top: -6rpx; left: 2rpx;
   width: 4rpx; height: 6rpx;
-  border: 2rpx solid #D4AF37;
+  border: 2rpx solid #E6C678;
   border-bottom: none;
   border-radius: 2rpx 2rpx 0 0;
 }
 
 .level-restriction text {
   font-size: 16rpx;
-  color: #D4AF37;
+  color: #E6C678;
   font-weight: 800;
   letter-spacing: 2rpx;
 }
 
 .btn-lux-action {
-  background: #D4AF37;
+  background: #E6C678;
   color: #000;
   font-size: 22rpx;
   font-weight: 800;
@@ -338,8 +338,8 @@ page {
 
 .css-icon-stage-empty {
   width: 120rpx; height: 10rpx;
-  background: rgba(212, 175, 55, 0.1);
-  box-shadow: 0 20rpx 30rpx rgba(212, 175, 55, 0.05);
+  background: rgba(230, 198, 120, 0.1);
+  box-shadow: 0 20rpx 30rpx rgba(230, 198, 120, 0.05);
   margin-bottom: 60rpx;
 }
 
@@ -358,7 +358,7 @@ page {
 
 .loading-pulse-gold {
   width: 40rpx; height: 40rpx;
-  border: 2rpx solid #D4AF37;
+  border: 2rpx solid #E6C678;
   border-radius: 50%;
   animation: pulse 1.5s infinite;
 }

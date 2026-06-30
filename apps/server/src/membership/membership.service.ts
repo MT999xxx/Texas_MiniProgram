@@ -5,6 +5,7 @@ import { CreateLevelDto } from './dto/create-level.dto';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { MembershipLevelEntity } from './membership-level.entity';
 import { MemberEntity } from './member.entity';
+import { getCoinConsumptionBonusPoints } from '../coins/coin-rules';
 
 @Injectable()
 export class MembershipService {
@@ -72,9 +73,13 @@ export class MembershipService {
     if (!member) {
       throw new NotFoundException('Member not found');
     }
-    member.coins = Number(member.coins || 0) + delta;
+    const coinDelta = Number(delta || 0);
+    member.coins = Number(member.coins || 0) + coinDelta;
     if (member.coins < 0) {
       throw new NotFoundException('金币余额不足');
+    }
+    if (coinDelta < 0) {
+      member.points = Number(member.points || 0) + getCoinConsumptionBonusPoints(Math.abs(coinDelta));
     }
     return this.memberRepo.save(member);
   }

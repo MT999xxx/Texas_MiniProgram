@@ -1,6 +1,6 @@
 /* Pages/coupons/index.wxss */
 page {
-  background-color: #080808;
+  background-color: #050506;
 }
 
 .container {
@@ -34,7 +34,7 @@ page {
 }
 
 .tab-item.active .tab-text {
-  color: #D4AF37;
+  color: #E6C678;
   font-weight: 600;
 }
 
@@ -45,8 +45,8 @@ page {
   transform: translateX(-50%);
   width: 20rpx;
   height: 2rpx;
-  background: #D4AF37;
-  box-shadow: 0 0 10rpx #D4AF37;
+  background: #E6C678;
+  box-shadow: 0 0 10rpx #E6C678;
 }
 
 /* 2. 列表容器 */
@@ -71,8 +71,8 @@ page {
 .coupon-side-l {
   width: 200rpx;
   background: linear-gradient(135deg, #111, #000);
-  border: 1rpx solid rgba(212, 175, 55, 0.2);
-  border-right: 2rpx dashed rgba(212, 175, 55, 0.1);
+  border: 1rpx solid rgba(230, 198, 120, 0.2);
+  border-right: 2rpx dashed rgba(230, 198, 120, 0.1);
   border-radius: 20rpx 0 0 20rpx;
   display: flex;
   align-items: center;
@@ -92,9 +92,9 @@ page {
   margin-bottom: 8rpx;
 }
 
-.val-cur { font-size: 24rpx; color: #D4AF37; margin-right: 4rpx; }
+.val-cur { font-size: 24rpx; color: #E6C678; margin-right: 4rpx; }
 .val-num { font-size: 60rpx; font-weight: 800; line-height: 1; }
-.val-unit { font-size: 24rpx; color: #D4AF37; margin-left: 4rpx; }
+.val-unit { font-size: 24rpx; color: #E6C678; margin-left: 4rpx; }
 
 .side-label {
   font-size: 14rpx;
@@ -108,10 +108,10 @@ page {
   position: absolute;
   right: -10rpx;
   width: 10rpx; height: 10rpx;
-  background: #080808; /* 背景色 */
+  background: #050506; /* 背景色 */
 }
-.notch-top { top: -2rpx; border-radius: 0 0 0 10rpx; border-left: 1rpx solid rgba(212, 175, 55, 0.2); border-bottom: 1rpx solid rgba(212, 175, 55, 0.2); }
-.notch-bottom { bottom: -2rpx; border-radius: 10rpx 0 0 0; border-left: 1rpx solid rgba(212, 175, 55, 0.2); border-top: 1rpx solid rgba(212, 175, 55, 0.2); }
+.notch-top { top: -2rpx; border-radius: 0 0 0 10rpx; border-left: 1rpx solid rgba(230, 198, 120, 0.2); border-bottom: 1rpx solid rgba(230, 198, 120, 0.2); }
+.notch-bottom { bottom: -2rpx; border-radius: 10rpx 0 0 0; border-left: 1rpx solid rgba(230, 198, 120, 0.2); border-top: 1rpx solid rgba(230, 198, 120, 0.2); }
 
 /* 右侧：详情 */
 .coupon-side-r {
@@ -140,7 +140,7 @@ page {
 .v-level-tag {
   font-size: 14rpx;
   color: #000;
-  background: #D4AF37;
+  background: #E6C678;
   padding: 2rpx 10rpx;
   border-radius: 4rpx;
   font-weight: 900;
@@ -194,7 +194,7 @@ page {
 
 /* 按钮操作 */
 .btn-lux-claim {
-  background: #D4AF37;
+  background: #E6C678;
   color: #000;
   font-size: 20rpx;
   font-weight: 800;
@@ -204,9 +204,9 @@ page {
 }
 
 .btn-lux-use {
-  background: rgba(212, 175, 55, 0.05);
-  border: 1rpx solid #D4AF37;
-  color: #D4AF37;
+  background: rgba(230, 198, 120, 0.05);
+  border: 1rpx solid #E6C678;
+  color: #E6C678;
   font-size: 20rpx;
   padding: 12rpx 40rpx;
   border-radius: 40rpx;
@@ -233,7 +233,7 @@ page {
 
 .css-icon-ticket-empty {
   width: 100rpx; height: 60rpx;
-  border: 4rpx solid rgba(212, 175, 55, 0.1);
+  border: 4rpx solid rgba(230, 198, 120, 0.1);
   border-radius: 8rpx;
   margin-bottom: 40rpx;
   position: relative;
@@ -243,7 +243,7 @@ page {
   position: absolute;
   top: 15rpx; left: 20rpx;
   width: 60rpx; height: 30rpx;
-  border-top: 2rpx dashed rgba(212, 175, 55, 0.1);
+  border-top: 2rpx dashed rgba(230, 198, 120, 0.1);
 }
 
 .empty-text {
@@ -254,10 +254,151 @@ page {
 }
 
 .btn-goto-available {
-  background: linear-gradient(135deg, #D4AF37, #B8860B);
+  background: linear-gradient(135deg, #E6C678, #8C6A2F);
   color: #000;
   font-size: 26rpx;
   font-weight: 700;
   padding: 24rpx 60rpx;
   border-radius: 50rpx;
+}
+
+.modal-mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 99;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 32rpx;
+  box-sizing: border-box;
+}
+
+.redeem-modal {
+  width: 100%;
+  max-height: 82vh;
+  overflow-y: auto;
+  padding: 38rpx 32rpx 42rpx;
+  border-radius: 28rpx;
+  background: rgba(11, 10, 10, 0.96);
+  box-sizing: border-box;
+}
+
+.modal-title {
+  font-size: 34rpx;
+  color: #E6C678;
+  font-weight: 900;
+  text-align: center;
+}
+
+.modal-subtitle {
+  margin-top: 10rpx;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.48);
+  text-align: center;
+}
+
+.redeem-section-title {
+  margin: 34rpx 0 18rpx;
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.76);
+  font-weight: 700;
+}
+
+.redeem-option-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+.redeem-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx;
+  border-radius: 20rpx;
+  border: 1rpx solid rgba(230, 198, 120, 0.18);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.redeem-option.active {
+  border-color: #E6C678;
+  background: rgba(230, 198, 120, 0.12);
+  box-shadow: 0 0 24rpx rgba(230, 198, 120, 0.14);
+}
+
+.redeem-name {
+  font-size: 28rpx;
+  color: #fff;
+  font-weight: 800;
+}
+
+.redeem-desc {
+  margin-top: 8rpx;
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.redeem-count {
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  background: rgba(202, 72, 52, 0.28);
+  color: #F5D98A;
+  font-size: 20rpx;
+}
+
+.redeem-table-list {
+  white-space: nowrap;
+}
+
+.redeem-table {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 128rpx;
+  height: 62rpx;
+  margin-right: 16rpx;
+  padding: 0 22rpx;
+  border: 1rpx solid rgba(230, 198, 120, 0.18);
+  border-radius: 999rpx;
+  color: rgba(255, 255, 255, 0.68);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 24rpx;
+}
+
+.redeem-table.active {
+  color: #101010;
+  background: linear-gradient(135deg, #F3D989, #A98037);
+  border-color: transparent;
+}
+
+.modal-btns {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 38rpx;
+}
+
+.btn-cancel,
+.btn-confirm {
+  flex: 1;
+  height: 76rpx;
+  border-radius: 999rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26rpx;
+  font-weight: 800;
+}
+
+.btn-cancel {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.btn-confirm {
+  background: linear-gradient(135deg, #F3D989, #A98037);
+  color: #101010;
 }

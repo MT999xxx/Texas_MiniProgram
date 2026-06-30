@@ -25,11 +25,11 @@
     "pages/privacy/index"
   ],
   "window": {
-    "navigationBarBackgroundColor": "#120a0a",
-    "navigationBarTitleText": "三条A - 德州扑克主题酒吧",
+    "navigationBarBackgroundColor": "#050506",
+    "navigationBarTitleText": "Set baR",
     "navigationBarTextStyle": "white",
     "backgroundTextStyle": "light",
-    "backgroundColor": "#120a0a"
+    "backgroundColor": "#050506"
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json",

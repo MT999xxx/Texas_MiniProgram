@@ -10,6 +10,7 @@ import { TableEntity } from '../tables/table.entity';
 import { UserCouponEntity } from '../coupons/user-coupon.entity';
 import { MemberEntity } from '../membership/member.entity';
 import { CoinTransactionEntity } from '../coins/coin-transaction.entity';
+import { WineVoucherBatchEntity } from '../coins/wine-voucher-batch.entity';
 import { PaymentEntity } from '../payment/payment.entity';
 import { TableModule } from '../tables/table.module';
 import { ReservationModule } from '../reservation/reservation.module';
@@ -18,6 +19,7 @@ import { LoyaltyModule } from '../loyalty/loyalty.module';
 import { MenuModule } from '../menu/menu.module';
 import { CouponsModule } from '../coupons/coupons.module';
 import { PaymentModule } from '../payment/payment.module';
+import { AdminNotificationsModule } from '../notifications/admin-notifications.module';
 
 @Module({
   imports: [
@@ -30,6 +32,7 @@ import { PaymentModule } from '../payment/payment.module';
       UserCouponEntity,
       MemberEntity,
       CoinTransactionEntity,
+      WineVoucherBatchEntity,
       PaymentEntity,
     ]),
     TableModule,
@@ -39,6 +42,7 @@ import { PaymentModule } from '../payment/payment.module';
     MenuModule,
     CouponsModule,
     PaymentModule,
+    AdminNotificationsModule,
   ],
   providers: [OrdersService],
   controllers: [OrdersController],

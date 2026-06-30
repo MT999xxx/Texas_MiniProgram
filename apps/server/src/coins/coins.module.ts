@@ -6,7 +6,15 @@ import { WechatPayService } from './wechat-pay.service';
 import { CoinTransactionEntity } from './coin-transaction.entity';
 import { PointDepositEntity } from './point-deposit.entity';
 import { CheckInEntity } from './check-in.entity';
+import { WineVoucherBatchEntity } from './wine-voucher-batch.entity';
+import { WineVoucherRedeemOptionEntity } from './wine-voucher-redeem-option.entity';
+import { WineVoucherRedeemItemEntity } from './wine-voucher-redeem-item.entity';
+import { WineVoucherRedemptionEntity } from './wine-voucher-redemption.entity';
+import { WineVoucherOptionsController } from './wine-voucher-options.controller';
+import { WineVoucherOptionsService } from './wine-voucher-options.service';
 import { MemberEntity } from '../membership/member.entity';
+import { OrdersModule } from '../orders/orders.module';
+import { AdminNotificationsModule } from '../notifications/admin-notifications.module';
 
 @Module({
     imports: [
@@ -14,12 +22,18 @@ import { MemberEntity } from '../membership/member.entity';
             CoinTransactionEntity,
             PointDepositEntity,
             CheckInEntity,
+            WineVoucherBatchEntity,
+            WineVoucherRedeemOptionEntity,
+            WineVoucherRedeemItemEntity,
+            WineVoucherRedemptionEntity,
             MemberEntity,
         ]),
+        OrdersModule,
+        AdminNotificationsModule,
     ],
-    controllers: [CoinsController],
-    providers: [CoinsService, WechatPayService],
-    exports: [CoinsService, WechatPayService],
+    controllers: [CoinsController, WineVoucherOptionsController],
+    providers: [CoinsService, WechatPayService, WineVoucherOptionsService],
+    exports: [CoinsService, WechatPayService, WineVoucherOptionsService],
 })
 export class CoinsModule { }
 

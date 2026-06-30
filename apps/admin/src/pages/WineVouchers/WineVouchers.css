@@ -1,0 +1,26 @@
+.wine-voucher-page {
+    padding: 24px;
+}
+
+.voucher-option-name {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.voucher-option-desc {
+    margin-top: 4px;
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.voucher-items-title {
+    margin-bottom: 12px;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.voucher-item-row {
+    display: flex;
+    margin-bottom: 8px;
+}
+

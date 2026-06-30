@@ -12,9 +12,9 @@ dotenv.config();
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // 配置 CORS - 允许所有来源
+  // Enable CORS for admin and mini-program API requests.
   app.enableCors({
-    origin: true, // 允许所有来源
+    origin: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     credentials: true,
@@ -22,14 +22,14 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
-  // 静态文件服务 - 用于提供大图片资源
+  // Serve uploaded/static assets.
   app.useStaticAssets(join(process.cwd(), 'public'), {
     prefix: '/static/',
   });
 
   const config = new DocumentBuilder()
     .setTitle('Texas Poker Bar Mini Program API')
-    .setDescription('服务型小程序 + 管理后台接口')
+    .setDescription('Texas bar mini-program and admin API')
     .setVersion('0.1.0')
     .addBearerAuth()
     .build();

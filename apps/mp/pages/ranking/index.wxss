@@ -1,7 +1,8 @@
 /* pages/ranking/index.wxss */
 page {
-  background-color: #080808;
-  padding-bottom: 120rpx;
+  background-color: #050506;
+  --setbar-tabbar-space: calc(154rpx + env(safe-area-inset-bottom));
+  padding-bottom: calc(154rpx + env(safe-area-inset-bottom));
 }
 
 .container {
@@ -16,37 +17,46 @@ page {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   z-index: 0;
-  background: 
-    radial-gradient(circle at 50% -20%, rgba(212, 175, 55, 0.15) 0%, transparent 60%),
-    radial-gradient(circle at -10% 40%, rgba(212, 175, 55, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 110% 60%, rgba(26, 21, 10, 0.8) 0%, #050505 100%);
+  background:
+    linear-gradient(180deg, rgba(5, 5, 6, 0.3), #050506 72%),
+    url('/images/setbar-panther-hero.jpg');
+  background-size: cover;
+  background-position: 70% 12%;
+  opacity: 0.88;
 }
 
 .header-section {
-  padding: 20rpx 40rpx 10rpx;
+  padding: 54rpx 34rpx 22rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
 }
 
+.rank-hero-icon {
+  width: 54rpx;
+  height: 54rpx;
+  margin-bottom: 16rpx;
+  filter: drop-shadow(0 0 22rpx rgba(230, 198, 120, 0.3));
+}
+
 .store-label {
-  position: absolute;
-  left: 0; right: 0;
-  top: 30rpx;
   text-align: center;
-  font-size: 18rpx;
-  color: #666;
-  letter-spacing: 8rpx;
-  opacity: 0.8;
+  font-size: 16rpx;
+  color: #D64A3B;
+  letter-spacing: 5rpx;
+  font-weight: 800;
+  opacity: 0.96;
 }
 
 .page-title {
-  font-size: 52rpx;
+  font-size: 62rpx;
   font-weight: 900;
-  letter-spacing: 12rpx;
-  margin-top: 15rpx;
-  margin-bottom: 5rpx;
+  letter-spacing: 0;
+  margin-top: 6rpx;
+  margin-bottom: 10rpx;
+  color: #F8F5EC;
+  text-shadow: 0 18rpx 46rpx rgba(0,0,0,0.7);
 }
 
 .date-range {
@@ -61,12 +71,23 @@ page {
   width: 100%;
   display: flex;
   justify-content: center;
-  gap: 20rpx;
+  gap: 12rpx;
+  padding: 8rpx;
+  border-radius: 28rpx;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1rpx solid rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
+  backdrop-filter: blur(20rpx);
 }
 
 .tab-item {
   position: relative;
-  padding: 10rpx 14rpx;
+  padding: 14rpx 16rpx;
+  border-radius: 20rpx;
+}
+
+.tab-item.active {
+  background: rgba(214, 74, 59, 0.18);
 }
 
 .tab-text {
@@ -77,24 +98,23 @@ page {
 }
 
 .tab-item.active .tab-text {
-  color: #D4AF37;
+  color: #FFF3C8;
   font-weight: 600;
 }
 
 .tab-indicator {
-  position: absolute;
-  bottom: -4rpx;
+  bottom: 4rpx;
   left: 50%;
   transform: translateX(-50%);
   width: 20rpx;
   height: 2rpx;
-  background: #D4AF37;
-  box-shadow: 0 0 10rpx #D4AF37;
+  background: #D64A3B;
+  box-shadow: 0 0 10rpx rgba(214, 74, 59, 0.8);
 }
 
 /* --- 2. 排行榜列表区域 --- */
 .ranking-list-container {
-  padding: 10rpx 30rpx;
+  padding: 14rpx 28rpx;
 }
 
 .list-wrapper {
@@ -106,35 +126,36 @@ page {
 .ranking-item {
   display: flex;
   align-items: center;
-  padding: 34rpx 40rpx;
+  padding: 32rpx 30rpx;
   position: relative;
   overflow: hidden;
-  border-radius: 30rpx;
-  background: rgba(255, 255, 255, 0.015);
-  border: 1rpx solid rgba(255, 255, 255, 0.03);
+  border-radius: 28rpx;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1rpx solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18rpx);
 }
 
 .top-rank {
-  border: 1rpx solid rgba(212, 175, 55, 0.25);
-  background: rgba(212, 175, 55, 0.03) !important;
+  border: 1rpx solid rgba(230, 198, 120, 0.22);
+  background: linear-gradient(135deg, rgba(230, 198, 120, 0.12), rgba(255, 255, 255, 0.045)) !important;
 }
 
 .rank-1::after {
   content: "";
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.05), transparent);
+  background: linear-gradient(90deg, transparent, rgba(230, 198, 120, 0.05), transparent);
   animation: logoShimmer 3s infinite;
 }
 
 /* 排名勋章 */
 .rank-badge {
-  width: 60rpx;
+  width: 58rpx;
   height: 60rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 30rpx;
+  margin-right: 26rpx;
 }
 
 .rank-num-text {
@@ -144,14 +165,14 @@ page {
   color: #333;
 }
 
-.rank-1 .rank-num-text { color: #F9E498; font-size: 48rpx; }
+.rank-1 .rank-num-text { color: #FFF3C8; font-size: 48rpx; }
 .rank-2 .rank-num-text { color: #C0C0C0; }
 .rank-3 .rank-num-text { color: #CD7F32; }
 
 .rank-avatar {
   width: 90rpx;
   height: 90rpx;
-  border-radius: 50%;
+  border-radius: 28rpx;
   margin-right: 30rpx;
   background: #111;
 }
@@ -163,15 +184,15 @@ page {
 }
 
 .rank-name {
-  color: #EEE;
+  color: #F8F5EC;
   font-size: 30rpx;
   font-weight: 500;
   margin-bottom: 6rpx;
 }
 
 .rank-score {
-  color: #D4AF37;
-  font-size: 34rpx;
+  color: #E6C678;
+  font-size: 36rpx;
   font-weight: 700;
   font-family: 'SF Pro Text', sans-serif;
 }
@@ -189,15 +210,15 @@ page {
   padding: 8rpx 18rpx;
   border-radius: 20rpx;
   margin-left: 16rpx;
-  background: rgba(212, 175, 55, 0.1);
-  border: 1rpx solid rgba(212, 175, 55, 0.3);
+  background: rgba(230, 198, 120, 0.1);
+  border: 1rpx solid rgba(230, 198, 120, 0.3);
 }
 
 .rank-level-text {
   font-size: 20rpx;
   font-weight: 600;
   letter-spacing: 1rpx;
-  color: #D4AF37;
+  color: #E6C678;
   white-space: nowrap;
 }
 
@@ -228,7 +249,7 @@ page {
   color: #64B5F6;
 }
 
-/* V4 巅峰钻石 - 皇家紫色调 */
+/* V4 巅峰钻石 - 深紫夜场色调 */
 .rank-level-badge.level-V4 {
   background: linear-gradient(135deg, rgba(186, 104, 200, 0.15), rgba(171, 71, 188, 0.08));
   border: 1rpx solid rgba(186, 104, 200, 0.4);
@@ -240,10 +261,10 @@ page {
 /* V5 星耀黑金 - 至尊豪华版 */
 .rank-level-badge.level-V5 {
   background: linear-gradient(135deg, #0a0a0a 0%, #1a1508 50%, #0a0a0a 100%);
-  border: 1rpx solid rgba(212, 175, 55, 0.6);
+  border: 1rpx solid rgba(230, 198, 120, 0.6);
   box-shadow:
-    0 0 12rpx rgba(212, 175, 55, 0.3),
-    inset 0 0 8rpx rgba(212, 175, 55, 0.08);
+    0 0 12rpx rgba(230, 198, 120, 0.3),
+    inset 0 0 8rpx rgba(230, 198, 120, 0.08);
   padding: 10rpx 22rpx;
   position: relative;
   overflow: hidden;
@@ -260,7 +281,7 @@ page {
     90deg,
     transparent,
     rgba(249, 228, 152, 0.15),
-    rgba(212, 175, 55, 0.25),
+    rgba(230, 198, 120, 0.25),
     rgba(249, 228, 152, 0.15),
     transparent
   );
@@ -273,7 +294,7 @@ page {
 }
 
 .rank-level-badge.level-V5 .rank-level-text {
-  background: linear-gradient(135deg, #F9E498 0%, #D4AF37 40%, #F9E498 60%, #B8860B 100%);
+  background: linear-gradient(135deg, #FFF3C8 0%, #E6C678 40%, #FFF3C8 60%, #8C6A2F 100%);
   -webkit-background-clip: text;
   color: transparent;
   font-weight: 700;
@@ -281,7 +302,7 @@ page {
   letter-spacing: 2rpx;
 }
 
-/* VP 三条A合伙人 - 彩虹至尊版 */
+/* VP Set baR合伙人 - 彩虹至尊版 */
 .rank-level-badge.level-VP {
   position: relative;
   padding: 10rpx 22rpx;
@@ -359,7 +380,7 @@ page {
   position: absolute;
   right: -20rpx; top: -20rpx;
   width: 100rpx; height: 100rpx;
-  background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(230, 198, 120, 0.1) 0%, transparent 70%);
 }
 
 /* 空状态 */
@@ -373,8 +394,8 @@ page {
 .css-icon-shield {
   width: 80rpx;
   height: 100rpx;
-  background: rgba(212, 175, 55, 0.05);
-  border: 2rpx solid rgba(212, 175, 55, 0.2);
+  background: rgba(230, 198, 120, 0.05);
+  border: 2rpx solid rgba(230, 198, 120, 0.2);
   border-radius: 10rpx 10rpx 40rpx 40rpx;
   margin-bottom: 40rpx;
   position: relative;
@@ -394,14 +415,14 @@ page {
 /* 用户排名卡片 (悬浮) */
 .user-rank-card {
   position: fixed;
-  bottom: 150rpx;
-  left: 30rpx; right: 30rpx;
+  bottom: calc(146rpx + env(safe-area-inset-bottom));
+  left: 24rpx; right: 24rpx;
   padding: 34rpx 44rpx;
   z-index: 100;
-  border-radius: 44rpx;
-  background: rgba(15, 15, 15, 0.8) !important;
+  border-radius: 30rpx;
+  background: rgba(10, 10, 12, 0.9) !important;
   backdrop-filter: blur(40rpx) !important;
-  border: 1rpx solid rgba(212, 175, 55, 0.3) !important;
+  border: 1rpx solid rgba(230, 198, 120, 0.3) !important;
   box-shadow: 0 -10rpx 40rpx rgba(0,0,0,0.8);
 }
 
@@ -428,14 +449,14 @@ page {
 }
 
 .user-score {
-  color: #D4AF37;
+  color: #E6C678;
   font-size: 22rpx;
 }
 
 .rank-text {
   font-size: 40rpx;
   font-weight: 900;
-  color: #D4AF37;
+  color: #E6C678;
   font-style: italic;
   padding-left: 30rpx;
   border-left: 1rpx solid rgba(255, 255, 255, 0.05);

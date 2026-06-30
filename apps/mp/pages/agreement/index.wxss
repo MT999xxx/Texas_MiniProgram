@@ -45,7 +45,7 @@
 .footer {
   margin-top: 60rpx;
   padding-top: 40rpx;
-  border-top: 1rpx solid rgba(212, 175, 55, 0.2);
+  border-top: 1rpx solid rgba(230, 198, 120, 0.2);
   text-align: center;
 }
 

@@ -10,7 +10,7 @@
       <view class="status-orb status-orb-{{order.status}} shimmer-effect"></view>
       <view class="status-main">
         <text class="status-title text-gold-gradient">{{order.statusText}}</text>
-        <text class="status-desc">ORDER AT {{order.createdAtText}}</text>
+        <text class="status-desc">下单时间 {{order.createdAtText}}</text>
       </view>
       <view class="order-sn-tag">#{{order.orderNumber}}</view>
     </view>
@@ -35,7 +35,7 @@
             </view>
             <view class="item-price-box">
               <text class="qty">×{{item.quantity}}</text>
-              <text class="price text-gold">¥{{item.amount}}</text>
+              <text class="price text-gold">¥{{item.displayAmount}}</text>
             </view>
           </view>
         </view>
@@ -44,16 +44,16 @@
       <view class="cost-summary">
         <view class="cost-row">
           <text class="l">商品小计</text>
-          <text class="v">¥{{order.totalAmount}}</text>
+          <text class="v">¥{{order.displayOriginalAmount}}</text>
         </view>
-        <view wx:if="{{order.discount > 0}}" class="cost-row discount">
-          <text class="l">尊享折扣</text>
-          <text class="v">-¥{{order.discount}}</text>
+        <view wx:if="{{order.showDiscountAmount}}" class="cost-row discount">
+          <text class="l">{{order.discountLabel}}</text>
+          <text class="v">-¥{{order.displayDiscountAmount}}</text>
         </view>
         <view class="sum-divider"></view>
         <view class="cost-row grand-total">
           <text class="l">实付金额</text>
-          <text class="v text-gold-gradient">¥{{order.finalAmount || order.totalAmount}}</text>
+          <text class="v text-gold-gradient">¥{{order.displayPayAmount}}</text>
         </view>
       </view>
     </view>
@@ -81,6 +81,10 @@
         <view class="grid-item">
           <text class="l">订单编号</text>
           <text class="v copy-v">{{order.orderNumber}}</text>
+        </view>
+        <view wx:if="{{order.paymentMethodText}}" class="grid-item">
+          <text class="l">支付方式</text>
+          <text class="v">{{order.paymentMethodText}}</text>
         </view>
       </view>
     </view>

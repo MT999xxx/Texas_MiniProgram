@@ -15,6 +15,24 @@ export class CoinsController {
         return this.coinsService.getMemberBalance(memberId);
     }
 
+    @Get('recharge-packages')
+    @ApiOperation({ summary: '获取金币充值套餐' })
+    getCoinRechargePackages() {
+        return this.coinsService.getCoinRechargePackages();
+    }
+
+    @Get('wine-vouchers/packages')
+    @ApiOperation({ summary: '获取酒券购买列表' })
+    getWineVoucherPackages() {
+        return this.coinsService.getWineVoucherPackages();
+    }
+
+    @Post('wine-vouchers/purchase')
+    @ApiOperation({ summary: '金币购买酒券' })
+    purchaseWineVoucher(@Body() dto: { memberId: string; packageId: string }) {
+        return this.coinsService.purchaseWineVoucherPackage(dto.memberId, dto.packageId);
+    }
+
     @Post('recharge')
     @ApiOperation({ summary: '发起充值' })
     @ApiBearerAuth()
@@ -30,7 +48,7 @@ export class CoinsController {
     }
 
     @Post('exchange')
-    @ApiOperation({ summary: '积分兑换金币' })
+    @ApiOperation({ summary: '历史积分转金币接口' })
     @ApiBearerAuth()
     exchange(@Body() dto: ExchangeCoinsDto & { memberId: string }) {
         return this.coinsService.exchangePointsToCoins(dto.memberId, dto);
@@ -72,6 +90,12 @@ export class CoinsController {
     @ApiOperation({ summary: '获取用户存积分记录' })
     getMemberDeposits(@Param('memberId') memberId: string) {
         return this.coinsService.getMemberDeposits(memberId);
+    }
+
+    @Get('points/records/:memberId')
+    @ApiOperation({ summary: '获取用户存取分记录' })
+    getPointRecords(@Param('memberId') memberId: string) {
+        return this.coinsService.getPointRecords(memberId);
     }
 
     @Patch('points/deposits/:id/review')

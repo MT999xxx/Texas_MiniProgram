@@ -14,6 +14,7 @@ import { EventsModule } from '../events/events.module';
 import { PaymentModule } from '../payment/payment.module';
 import { UploadModule } from '../upload/upload.module';
 import { NoticesModule } from '../notices/notices.module';
+import { AdminNotificationsModule } from '../notifications/admin-notifications.module';
 import { StatisticsModule } from '../statistics/statistics.module';
 import { CoinsModule } from '../coins/coins.module';
 import { InviteModule } from '../invite/invite.module';
@@ -37,6 +38,7 @@ import { databaseConfig } from '../config/database.config';
     PaymentModule,
     UploadModule,
     NoticesModule,
+    AdminNotificationsModule,
     StatisticsModule,
     CoinsModule,
     InviteModule,

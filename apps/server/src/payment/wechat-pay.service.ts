@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { WechatPayConfigService } from './wechat-pay.config';
-import { createSign, randomBytes } from 'crypto';
+import { createSign, randomBytes, X509Certificate } from 'crypto';
 import axios from 'axios';
 
 export interface WechatPayOrderRequest {
@@ -123,27 +123,51 @@ export class WechatPayService {
       };
 
     } catch (error: any) {
-      this.logger.error('创建微信支付订单异常:', error?.response?.data || error.message);
-      return null;
+      const reason = this.formatWechatPayError(error);
+      this.logger.error(`创建微信支付订单异常: ${reason}`, error?.response?.data || error?.stack || error);
+      throw new BadRequestException(`创建微信支付订单失败：${reason}`);
     }
   }
 
   // 获取证书序列号
   private getCertSerialNo(certContent: string): string {
+    const configuredSerialNo = process.env.WECHAT_CERT_SERIAL_NO?.trim();
+    if (configuredSerialNo) {
+      return configuredSerialNo.replace(/:/g, '').toUpperCase();
+    }
+
     try {
-      // 简易方式：从证书中提取序列号
-      // 实际项目建议使用 node-forge 或 openssl 提取
-      const match = certContent.match(/-----BEGIN CERTIFICATE-----[\s\S]+?-----END CERTIFICATE-----/);
-      if (match) {
-        // 返回一个占位符，实际需要从证书提取真正的序列号
-        // 您需要在商户平台查看证书序列号并配置到环境变量
-        return process.env.WECHAT_CERT_SERIAL_NO || 'YOUR_CERT_SERIAL_NO';
+      const certificate = new X509Certificate(certContent);
+      const serialNo = certificate.serialNumber.replace(/:/g, '').toUpperCase();
+      if (serialNo) {
+        return serialNo;
       }
-      return '';
     } catch (error) {
       this.logger.error('获取证书序列号失败:', error);
-      return '';
     }
+
+    throw new Error('无法读取微信支付商户API证书序列号');
+  }
+
+  private formatWechatPayError(error: any): string {
+    const responseData = error?.response?.data;
+    if (responseData) {
+      const code = responseData.code || responseData.error_code;
+      const message = responseData.message || responseData.detail?.message || responseData.description;
+      if (code && message) {
+        return `${code}: ${message}`;
+      }
+      if (message) {
+        return String(message);
+      }
+      try {
+        return JSON.stringify(responseData);
+      } catch {
+        return String(responseData);
+      }
+    }
+
+    return error?.message || '未知错误';
   }
 
   // 创建模拟支付响应（用于测试）

@@ -63,6 +63,20 @@ export class TableService {
     await this.repo.remove(table);
   }
 
+  async joinWaitingList(tableId: string) {
+    const table = await this.repo.findOne({ where: { id: tableId } });
+    if (!table) {
+      throw new NotFoundException('Table not found');
+    }
+
+    return {
+      tableId: table.id,
+      tableName: table.name,
+      status: 'WAITING',
+      message: 'Joined waiting list',
+    };
+  }
+
   /**
    * 重置所有桌位状态为可用
    * 用于每日凌晨自动重置或管理员手动触发

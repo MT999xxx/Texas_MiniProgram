@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan, MoreThan } from 'typeorm';
 import { CouponEntity, CouponStatus } from './coupon.entity';
 import { UserCouponEntity, UserCouponStatus } from './user-coupon.entity';
+import { WineVoucherBatchEntity } from '../coins/wine-voucher-batch.entity';
+import { getEffectiveWineVoucherBatchExpiresAt } from '../coins/coin-rules';
 import { CreateCouponDto, ClaimCouponDto } from './dto/create-coupon.dto';
 import { MembershipService } from '../membership/membership.service';
 
@@ -13,6 +15,8 @@ export class CouponsService {
     private readonly couponRepo: Repository<CouponEntity>,
     @InjectRepository(UserCouponEntity)
     private readonly userCouponRepo: Repository<UserCouponEntity>,
+    @InjectRepository(WineVoucherBatchEntity)
+    private readonly wineVoucherBatchRepo: Repository<WineVoucherBatchEntity>,
     private readonly membershipService: MembershipService,
   ) { }
 
@@ -135,7 +139,7 @@ export class CouponsService {
   }
 
   // 获取用户的优惠券列表
-  async getUserCoupons(memberId: string, status?: UserCouponStatus): Promise<UserCouponEntity[]> {
+  async getUserCoupons(memberId: string, status?: UserCouponStatus): Promise<any[]> {
     const where: any = { memberId };
     if (status) {
       where.status = status;
@@ -144,11 +148,97 @@ export class CouponsService {
     // 自动更新过期优惠券状态
     await this.updateExpiredCoupons(memberId);
 
-    return this.userCouponRepo.find({
+    const userCoupons = await this.userCouponRepo.find({
       where,
       relations: ['coupon'],
       order: { createdAt: 'DESC' }
     });
+    const wineVouchers = await this.getWineVoucherCoupons(memberId, status);
+
+    return [...wineVouchers, ...userCoupons];
+  }
+
+  private async getWineVoucherCoupons(memberId: string, status?: UserCouponStatus) {
+    const now = new Date();
+    let batches: WineVoucherBatchEntity[] = [];
+    try {
+      batches = await this.wineVoucherBatchRepo.find({
+        where: { memberId },
+        order: { expiresAt: 'ASC', createdAt: 'DESC' },
+      });
+    } catch (error) {
+      return this.getLegacyWineVoucherCoupons(memberId, status);
+    }
+
+    const wineVouchers = batches
+      .flatMap((batch) => {
+        const remainingQuantity = Number(batch.remainingQuantity || 0);
+        const effectiveExpiresAt = getEffectiveWineVoucherBatchExpiresAt(batch);
+        const isExpired = effectiveExpiresAt <= now;
+        const batchStatus = remainingQuantity <= 0
+          ? UserCouponStatus.USED
+          : isExpired
+            ? UserCouponStatus.EXPIRED
+            : UserCouponStatus.AVAILABLE;
+        const displayCount = remainingQuantity > 0 ? remainingQuantity : 1;
+
+        return Array.from({ length: displayCount }, (_, index) => ({
+          id: `wine-voucher-${batch.id}-${remainingQuantity > 0 ? index + 1 : batchStatus.toLowerCase()}`,
+          kind: 'WINE_VOUCHER',
+          memberId,
+          status: batchStatus,
+          startTime: batch.createdAt,
+          endTime: effectiveExpiresAt,
+          remainingQuantity: remainingQuantity > 0 ? 1 : 0,
+          quantity: 1,
+          voucherBatchId: batch.id,
+          voucherPackageId: batch.sourceId,
+          coupon: {
+            id: `wine-voucher-coupon-${batch.id}-${remainingQuantity > 0 ? index + 1 : batchStatus.toLowerCase()}`,
+            name: batch.packageName || '酒券',
+            type: 'WINE_VOUCHER',
+            value: remainingQuantity > 0 ? 1 : 0,
+            description: '酒券15天有效，过期自动失效',
+            minMemberLevel: null,
+          },
+        }));
+      })
+      .filter((item) => !status || item.status === status);
+    return batches.length > 0 ? wineVouchers : this.getLegacyWineVoucherCoupons(memberId, status);
+  }
+
+  private async getLegacyWineVoucherCoupons(memberId: string, status?: UserCouponStatus) {
+    if (status && status !== UserCouponStatus.AVAILABLE) {
+      return [];
+    }
+
+    const member = await this.membershipService.findMemberById(memberId).catch(() => null);
+    const remainingQuantity = Number(member?.wineVouchers || 0);
+    if (remainingQuantity <= 0) {
+      return [];
+    }
+
+    const now = new Date();
+    const fallbackExpiresAt = new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000);
+    return [{
+      id: `legacy-wine-voucher-${memberId}`,
+      kind: 'WINE_VOUCHER',
+      memberId,
+      status: UserCouponStatus.AVAILABLE,
+      startTime: now,
+      endTime: fallbackExpiresAt,
+      remainingQuantity,
+      quantity: remainingQuantity,
+      voucherBatchId: null,
+      coupon: {
+        id: `legacy-wine-voucher-coupon-${memberId}`,
+        name: '酒券',
+        type: 'WINE_VOUCHER',
+        value: remainingQuantity,
+        description: '历史酒券，请尽快使用',
+        minMemberLevel: null,
+      },
+    }];
   }
 
   // 使用优惠券

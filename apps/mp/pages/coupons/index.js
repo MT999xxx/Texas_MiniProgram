@@ -1,5 +1,7 @@
-const { request } = require('../../utils/request');
+const request = require('../../utils/request');
 const authManager = require('../../utils/auth');
+const wineVoucherOptionsApi = require('../../api/wineVoucherOptions');
+const tableApi = require('../../api/table');
 
 Page({
   data: {
@@ -14,9 +16,19 @@ Page({
     coupons: [],
     loading: false,
     userInfo: null,
+    showRedeemPopup: false,
+    selectedWineVoucher: null,
+    redeemOptions: [],
+    tables: [],
+    selectedRedeemOptionId: '',
+    selectedTableId: '',
+    redeeming: false
   },
 
-  async onLoad() {
+  async onLoad(options = {}) {
+    if (options.tab) {
+      this.setCurrentTab(options.tab);
+    }
     await this.checkLogin();
     await this.loadCoupons();
   },
@@ -26,13 +38,20 @@ Page({
     await this.loadCoupons();
   },
 
-  // 下拉刷新
   async onPullDownRefresh() {
     await this.loadCoupons();
     wx.stopPullDownRefresh();
   },
 
-  // 检查登录状态
+  setCurrentTab(status) {
+    const target = this.data.tabs.find(t => t.status === status);
+    if (!target) return;
+    this.setData({
+      currentTab: target.status,
+      currentTabLabel: target.label
+    });
+  },
+
   async checkLogin() {
     const isLoggedIn = await authManager.checkLogin();
     if (!isLoggedIn) {
@@ -48,31 +67,25 @@ Page({
             });
           } else {
             wx.navigateBack({
-              fail: () => {
-                wx.switchTab({ url: '/pages/home/index' });
-              }
+              fail: () => wx.switchTab({ url: '/pages/home/index' })
             });
           }
         }
       });
-      return;
+      return false;
     }
 
     this.setData({ userInfo: authManager.userInfo });
+    return true;
   },
 
-  // 切换标签页
   switchTab(e) {
     const status = e.currentTarget.dataset.status;
     const currentTabLabel = this.data.tabs.find(t => t.status === status)?.label || '';
-    this.setData({
-      currentTab: status,
-      currentTabLabel
-    });
+    this.setData({ currentTab: status, currentTabLabel });
     this.loadCoupons();
   },
 
-  // 加载优惠券列表
   async loadCoupons() {
     if (!this.data.userInfo || !this.data.userInfo.id) {
       return;
@@ -84,105 +97,65 @@ Page({
       let coupons = [];
 
       if (this.data.currentTab === 'available') {
-        // 可领取优惠券
         coupons = await request({
           url: '/coupons/available',
           method: 'GET',
           data: { memberId: this.data.userInfo.id }
         });
 
-        // 处理可领取优惠券数据
         coupons = coupons.map(item => ({
           ...item,
           validityText: this.formatValidityPeriod(item),
           canClaim: this.canClaimCoupon(item),
           claimText: this.getClaimButtonText(item)
         }));
-
       } else {
-        // 我的优惠券
         coupons = await request({
           url: `/coupons/my-coupons/${this.data.userInfo.id}`,
           method: 'GET',
           data: { status: this.data.currentTab }
         });
 
-        // 处理我的优惠券数据
         coupons = coupons.map(item => ({
           ...item,
           statusText: this.getStatusText(item.status),
           validityText: this.formatCouponValidity(item),
-          usedAtText: item.usedAt ? this.formatDateTime(item.usedAt) : ''
+          usedAtText: item.usedAt ? this.formatDateTime(item.usedAt) : '',
+          actionText: item.kind === 'WINE_VOUCHER' ? '兑换' : '去使用'
         }));
       }
 
-      this.setData({
-        coupons,
-        loading: false
-      });
-
+      this.setData({ coupons, loading: false });
     } catch (error) {
       console.error('加载优惠券列表失败:', error);
       this.setData({ loading: false });
-      wx.showToast({
-        title: '加载失败',
-        icon: 'none'
-      });
+      wx.showToast({ title: error.message || '加载失败', icon: 'none' });
     }
   },
 
-  // 判断是否可以领取优惠券
   canClaimCoupon(coupon) {
     const now = new Date();
     const startTime = new Date(coupon.startTime);
     const endTime = new Date(coupon.endTime);
     const userLevel = this.data.userInfo?.level?.level || 1;
-
-    // 检查时间有效性
-    if (startTime > now || endTime < now) {
-      return false;
-    }
-
-    // 检查库存
-    if (coupon.claimedQuantity >= coupon.totalQuantity) {
-      return false;
-    }
-
-    // 检查会员等级
-    if (coupon.minMemberLevel && userLevel < coupon.minMemberLevel) {
-      return false;
-    }
-
+    if (startTime > now || endTime < now) return false;
+    if (coupon.claimedQuantity >= coupon.totalQuantity) return false;
+    if (coupon.minMemberLevel && userLevel < coupon.minMemberLevel) return false;
     return true;
   },
 
-  // 获取领取按钮文本
   getClaimButtonText(coupon) {
-    if (coupon.claimedQuantity >= coupon.totalQuantity) {
-      return '已领完';
-    }
-
+    if (coupon.claimedQuantity >= coupon.totalQuantity) return '已领完';
     const userLevel = this.data.userInfo?.level?.level || 1;
     if (coupon.minMemberLevel && userLevel < coupon.minMemberLevel) {
       return `需V${coupon.minMemberLevel}`;
     }
-
     const now = new Date();
-    const startTime = new Date(coupon.startTime);
-    const endTime = new Date(coupon.endTime);
-
-    if (startTime > now) {
-      return '未开始';
-    }
-
-    if (endTime < now) {
-      return '已过期';
-    }
-
+    if (new Date(coupon.startTime) > now) return '未开始';
+    if (new Date(coupon.endTime) < now) return '已过期';
     return '立即领取';
   },
 
-  // 获取状态文本
   getStatusText(status) {
     const statusMap = {
       AVAILABLE: '可使用',
@@ -192,37 +165,29 @@ Page({
     return statusMap[status] || status;
   },
 
-  // 格式化优惠券有效期
   formatValidityPeriod(coupon) {
-    const startDate = this.formatDate(coupon.startTime);
-    const endDate = this.formatDate(coupon.endTime);
-
     if (coupon.validDays) {
       return `领取后${coupon.validDays}天内有效`;
     }
-
-    return `${startDate} - ${endDate}`;
+    return `${this.formatDate(coupon.startTime)} - ${this.formatDate(coupon.endTime)}`;
   },
 
-  // 格式化用户优惠券有效期
   formatCouponValidity(userCoupon) {
-    const startDate = this.formatDate(userCoupon.startTime);
-    const endDate = this.formatDate(userCoupon.endTime);
-    return `${startDate} - ${endDate}`;
+    return `${this.formatDate(userCoupon.startTime)} - ${this.formatDate(userCoupon.endTime)}`;
   },
 
-  // 格式化日期
   formatDate(dateStr) {
     const date = new Date(dateStr);
+    if (Number.isNaN(date.getTime())) return '';
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}.${month}.${day}`;
   },
 
-  // 格式化日期时间
   formatDateTime(dateStr) {
     const date = new Date(dateStr);
+    if (Number.isNaN(date.getTime())) return '';
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -231,65 +196,31 @@ Page({
     return `${year}.${month}.${day} ${hours}:${minutes}`;
   },
 
-  // 领取优惠券
   async claimCoupon(e) {
     const id = e.currentTarget.dataset.id;
     const coupon = this.data.coupons.find(c => c.id === id);
-
-    if (!coupon || !coupon.canClaim) {
-      return;
-    }
+    if (!coupon || !coupon.canClaim) return;
 
     try {
-      wx.showLoading({ title: '领取中...' });
-
+      wx.showLoading({ title: '领取中' });
       await request({
         url: `/coupons/${id}/claim`,
         method: 'POST',
-        data: {
-          memberId: this.data.userInfo.id
-        }
+        data: { memberId: this.data.userInfo.id }
       });
-
       wx.hideLoading();
-      wx.showToast({
-        title: '领取成功',
-        icon: 'success'
-      });
-
-      // 刷新列表
-      setTimeout(() => {
-        this.loadCoupons();
-      }, 1000);
-
+      wx.showToast({ title: '领取成功', icon: 'success' });
+      setTimeout(() => this.loadCoupons(), 800);
     } catch (error) {
       wx.hideLoading();
-      console.error('领取优惠券失败:', error);
-
-      let errorMessage = '领取失败';
-      if (error.message.includes('已领完')) {
-        errorMessage = '优惠券已被领完';
-      } else if (error.message.includes('等级')) {
-        errorMessage = '会员等级不足';
-      } else if (error.message.includes('限领')) {
-        errorMessage = '已达领取上限';
-      }
-
-      wx.showToast({
-        title: errorMessage,
-        icon: 'none'
-      });
+      wx.showToast({ title: error.message || '领取失败', icon: 'none' });
     }
   },
 
-  // 使用优惠券
   useCoupon(e) {
     const id = e.currentTarget.dataset.id;
     const userCoupon = this.data.coupons.find(c => c.id === id);
-
-    if (!userCoupon || userCoupon.status !== 'AVAILABLE') {
-      return;
-    }
+    if (!userCoupon || userCoupon.status !== 'AVAILABLE') return;
 
     wx.showModal({
       title: '使用优惠券',
@@ -297,11 +228,9 @@ Page({
       confirmText: '去点餐',
       success: (res) => {
         if (res.confirm) {
-          // 跳转到菜单页面，携带优惠券信息
           wx.switchTab({
             url: '/pages/menu/index',
             success: () => {
-              // 通过 globalData 传递优惠券信息
               const app = getApp();
               app.globalData.selectedCoupon = userCoupon;
             }
@@ -311,12 +240,104 @@ Page({
     });
   },
 
-  // 前往可领取页面
-  gotoAvailable() {
+  openCouponUse(e) {
+    this.useCoupon(e);
+  },
+
+  async loadWineVoucherRedeemOptions() {
+    const [redeemOptions, tables] = await Promise.all([
+      wineVoucherOptionsApi.listActive(),
+      tableApi.getStatus()
+    ]);
+
     this.setData({
-      currentTab: 'available',
-      currentTabLabel: '可领取'
+      redeemOptions: redeemOptions || [],
+      tables: (tables || []).filter(table => table.isActive !== false)
     });
+  },
+
+  async redeemWineVoucher(e) {
+    const id = e.currentTarget.dataset.id;
+    const voucher = this.data.coupons.find(c => c.id === id);
+    if (!voucher || voucher.status !== 'AVAILABLE') return;
+
+    this.setData({
+      selectedWineVoucher: voucher,
+      selectedRedeemOptionId: '',
+      selectedTableId: '',
+      showRedeemPopup: true
+    });
+
+    try {
+      wx.showLoading({ title: '加载兑换项' });
+      await this.loadWineVoucherRedeemOptions();
+      wx.hideLoading();
+    } catch (error) {
+      wx.hideLoading();
+      wx.showToast({ title: error.message || '加载失败', icon: 'none' });
+    }
+  },
+
+  closeRedeemPopup() {
+    if (this.data.redeeming) return;
+    this.setData({ showRedeemPopup: false });
+  },
+
+  stopBubble() {},
+
+  selectRedeemOption(e) {
+    this.setData({ selectedRedeemOptionId: e.currentTarget.dataset.id });
+  },
+
+  selectRedeemTable(e) {
+    this.setData({ selectedTableId: e.currentTarget.dataset.id });
+  },
+
+  async confirmRedeemWineVoucher() {
+    if (this.data.redeeming) return;
+    if (!this.data.selectedRedeemOptionId) {
+      wx.showToast({ title: '请选择兑换酒品', icon: 'none' });
+      return;
+    }
+    if (!this.data.selectedTableId) {
+      wx.showToast({ title: '请选择桌位', icon: 'none' });
+      return;
+    }
+
+    this.setData({ redeeming: true });
+    wx.showLoading({ title: '兑换中' });
+
+    try {
+      const result = await wineVoucherOptionsApi.redeem(this.data.selectedRedeemOptionId, {
+        memberId: this.data.userInfo.id,
+        tableId: this.data.selectedTableId,
+        voucherBatchId: this.data.selectedWineVoucher?.voucherBatchId || undefined
+      });
+
+      wx.hideLoading();
+      this.setData({ redeeming: false, showRedeemPopup: false });
+      await this.loadCoupons();
+
+      wx.showModal({
+        title: '兑换成功',
+        content: '酒品订单已创建，后台会按桌位出品。',
+        confirmText: '查看订单',
+        cancelText: '返回',
+        success: (res) => {
+          if (res.confirm && result?.order?.id) {
+            wx.navigateTo({ url: `/pages/order-detail/index?id=${result.order.id}` });
+          }
+        }
+      });
+    } catch (error) {
+      wx.hideLoading();
+      this.setData({ redeeming: false });
+      wx.showToast({ title: error.message || '兑换失败', icon: 'none' });
+    }
+  },
+
+  gotoAvailable() {
+    this.setData({ currentTab: 'available', currentTabLabel: '可领取' });
     this.loadCoupons();
   }
 });

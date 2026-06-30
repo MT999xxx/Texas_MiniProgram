@@ -3,7 +3,7 @@
  */
 const request = require('../utils/request');
 
-// 积分兑换金币汇率：200积分 = 1金币
+// 历史积分转金币汇率：200积分 = 1金币
 const POINTS_PER_COIN = 200;
 
 /**
@@ -44,8 +44,24 @@ function confirmRecharge(orderId) {
  */
 function getRechargePackages() {
     return request({
-        url: '/payment/packages',
+        url: '/coins/recharge-packages',
         method: 'GET'
+    });
+}
+
+function getWineVoucherPackages() {
+    return request({
+        url: '/coins/wine-vouchers/packages',
+        method: 'GET'
+    });
+}
+
+function purchaseWineVoucher(memberId, packageId) {
+    return request({
+        url: '/coins/wine-vouchers/purchase',
+        method: 'POST',
+        data: { memberId, packageId },
+        silent: true
     });
 }
 
@@ -60,7 +76,7 @@ function getPaymentStatus(paymentId) {
 }
 
 /**
- * 积分兑换金币
+ * 历史积分转金币接口
  */
 function exchangeCoins(memberId, coins) {
     return request({
@@ -112,6 +128,13 @@ function getDeposits(memberId) {
     });
 }
 
+function getPointRecords(memberId) {
+    return request({
+        url: `/coins/points/records/${memberId}`,
+        method: 'GET'
+    });
+}
+
 /**
  * 获取签到状态
  */
@@ -132,18 +155,26 @@ function performCheckIn(memberId) {
     });
 }
 
+function purchaseMemberVoucherDisabled() {
+    return Promise.reject(new Error('请在点单服务中购买酒券'));
+}
+
 module.exports = {
     POINTS_PER_COIN,
     getBalance,
     createRecharge,
     confirmRecharge,
     getRechargePackages,
+    getWineVoucherPackages,
+    purchaseWineVoucher,
+    purchaseMemberVoucherDisabled,
     getPaymentStatus,
     exchangeCoins,
     depositPoints,
     withdrawPoints,
     getTransactions,
     getDeposits,
+    getPointRecords,
     getCheckInStatus,
     performCheckIn
 };

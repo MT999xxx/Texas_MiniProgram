@@ -16,6 +16,7 @@ import {
     SwapOutlined,
     MenuOutlined,
     TrophyOutlined,
+    GiftOutlined,
 } from '@ant-design/icons';
 import { Drawer, Button } from 'antd';
 import { useMediaQuery } from 'react-responsive';
@@ -58,6 +59,11 @@ export default function MainLayout() {
             key: '/menu',
             icon: <ShoppingOutlined />,
             label: '菜单管理',
+        },
+        {
+            key: '/wine-vouchers',
+            icon: <GiftOutlined />,
+            label: '酒券配置',
         },
         {
             key: '/members',

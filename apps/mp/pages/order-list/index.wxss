@@ -1,6 +1,6 @@
 /* Pages/order-list/index.wxss */
 page {
-  background-color: #080808;
+  background-color: #050506;
 }
 
 .container {
@@ -34,7 +34,7 @@ page {
 }
 
 .tab-item.active .tab-text {
-  color: #D4AF37;
+  color: #E6C678;
   font-weight: 600;
 }
 
@@ -45,8 +45,8 @@ page {
   transform: translateX(-50%);
   width: 20rpx;
   height: 2rpx;
-  background: #D4AF37;
-  box-shadow: 0 0 10rpx #D4AF37;
+  background: #E6C678;
+  box-shadow: 0 0 10rpx #E6C678;
 }
 
 /* 列表容器 */
@@ -74,8 +74,8 @@ page {
 .css-icon-order-empty {
   width: 100rpx;
   height: 120rpx;
-  background: rgba(212, 175, 55, 0.02);
-  border: 1rpx solid rgba(212, 175, 55, 0.1);
+  background: rgba(230, 198, 120, 0.02);
+  border: 1rpx solid rgba(230, 198, 120, 0.1);
   border-radius: 10rpx;
   margin-bottom: 50rpx;
   position: relative;
@@ -87,8 +87,8 @@ page {
   position: absolute;
   top: 30rpx; left: 20rpx; right: 20rpx;
   height: 2rpx;
-  background: rgba(212, 175, 55, 0.1);
-  box-shadow: 0 20rpx 0 rgba(212, 175, 55, 0.08), 0 40rpx 0 rgba(212, 175, 55, 0.05);
+  background: rgba(230, 198, 120, 0.1);
+  box-shadow: 0 20rpx 0 rgba(230, 198, 120, 0.08), 0 40rpx 0 rgba(230, 198, 120, 0.05);
 }
 
 .css-icon-order-empty::after {
@@ -96,7 +96,7 @@ page {
   position: absolute;
   top: -20rpx; right: -20rpx;
   width: 60rpx; height: 60rpx;
-  background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(230, 198, 120, 0.1) 0%, transparent 70%);
 }
 
 .empty-text {
@@ -107,7 +107,7 @@ page {
 }
 
 .btn-goto-menu {
-  background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+  background: linear-gradient(135deg, #E6C678 0%, #8C6A2F 100%);
   color: #000;
   border-radius: 40rpx;
   font-size: 26rpx;
@@ -162,29 +162,29 @@ page {
   letter-spacing: 2rpx;
 }
 
-.status-PENDING { 
+.status-PENDING {
   color: #000;
-  background: linear-gradient(135deg, #F9E498 0%, #D4AF37 100%);
-  box-shadow: 0 4rpx 10rpx rgba(212, 175, 55, 0.2);
+  background: linear-gradient(135deg, #FFF3C8 0%, #E6C678 100%);
+  box-shadow: 0 4rpx 10rpx rgba(230, 198, 120, 0.2);
 }
 
-.status-PAID, .status-SUCCESS { 
+.status-PAID, .status-SUCCESS {
   color: #FFF;
   background: linear-gradient(135deg, #22C55E 0%, #15803D 100%);
 }
 
-.status-IN_PROGRESS { 
+.status-IN_PROGRESS {
   color: #FFF;
   background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
 }
 
-.status-COMPLETED { 
+.status-COMPLETED {
   color: #BBB;
   background: rgba(255, 255, 255, 0.05);
   border: 1rpx solid rgba(255, 255, 255, 0.1);
 }
 
-.status-CANCELLED { 
+.status-CANCELLED {
   color: #666;
   background: rgba(255, 255, 255, 0.02);
 }
@@ -207,7 +207,7 @@ page {
 
 .loc-dot {
   width: 8rpx; height: 8rpx;
-  background: #D4AF37;
+  background: #E6C678;
   border-radius: 50%;
   margin-right: 12rpx;
 }
@@ -274,7 +274,7 @@ page {
 
 .currency {
   font-size: 20rpx;
-  color: #D4AF37;
+  color: #E6C678;
   margin-right: 4rpx;
 }
 
@@ -311,7 +311,7 @@ page {
 .btn-pay-lux {
   font-size: 24rpx;
   color: #000;
-  background: #D4AF37;
+  background: #E6C678;
   padding: 16rpx 40rpx;
   border-radius: 40rpx;
   font-weight: 700;

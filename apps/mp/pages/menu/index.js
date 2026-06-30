@@ -3,6 +3,21 @@ const menuApi = require('../../api/menu');
 const authManager = require('../../utils/auth');
 const PaymentUtils = require('../../utils/payment');
 
+const POINTS_PER_ORDER_YUAN = 50;
+const WINE_VOUCHER_BONUS_POINTS = 8000;
+
+function isWineVoucherCategory(category) {
+  const name = category && category.name ? category.name : '';
+  return name.includes('积分加油站') || name.includes('积分商城');
+}
+
+function calculateOrderBonusPoints(price, options = {}) {
+  if (options.isWineVoucher) {
+    return WINE_VOUCHER_BONUS_POINTS;
+  }
+  return Math.floor(Number(price || 0) * POINTS_PER_ORDER_YUAN);
+}
+
 Page({
   data: {
     categories: [],
@@ -91,6 +106,7 @@ Page({
 
       // 处理图片 URL，确保是完整路径
       const BASE_URL = 'https://dezhoubar.xyz';
+      const currentCategory = (this.data.categories || []).find(category => category.id === categoryId);
       const processedItems = (items || []).map(item => {
         let imageUrl = item.imageUrl || item.image || '';
 
@@ -102,7 +118,10 @@ Page({
 
         return {
           ...item,
-          imageUrl
+          imageUrl,
+          bonusPoints: calculateOrderBonusPoints(item.price, {
+            isWineVoucher: isWineVoucherCategory(currentCategory),
+          }),
         };
       });
 
@@ -118,11 +137,15 @@ Page({
 
       // Fallback Mock
       if (!this.data.goodsList.length) {
+        const fallbackItems = [
+          { id: 101, categoryId, name: '特调鸡尾酒', price: 68, description: '微醺时刻，独家特调', imageUrl: '/images/zhuomian2.jpg' },
+          { id: 102, categoryId, name: '炸薯条', price: 28, description: '外酥里嫩，经典搭配', imageUrl: '/images/zhuomian2.jpg' }
+        ].map(item => ({
+          ...item,
+          bonusPoints: calculateOrderBonusPoints(item.price),
+        }));
         this.setData({
-          goodsList: [
-            { id: 101, categoryId, name: '特调鸡尾酒', price: 68, description: '微醺时刻，独家特调', imageUrl: '/images/zhuomian2.png' },
-            { id: 102, categoryId, name: '炸薯条', price: 28, description: '外酥里嫩，经典搭配', imageUrl: '/images/zhuomian2.png' }
-          ]
+          goodsList: fallbackItems
         });
       }
     }

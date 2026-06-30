@@ -1,5 +1,4 @@
 <view class="container redesign-bg">
-  <!-- 1. 顶部金影标签 -->
   <view class="tabs">
     <view
       wx:for="{{tabs}}"
@@ -13,7 +12,6 @@
     </view>
   </view>
 
-  <!-- 2. 核心礼券列表 -->
   <view class="list-container">
     <view wx:if="{{loading}}" class="loading-lux-box">
       <view class="loading-shimmer-box"></view>
@@ -21,39 +19,37 @@
 
     <view wx:elif="{{coupons.length === 0}}" class="empty-lux-box">
       <view class="css-icon-ticket-empty"></view>
-      <text class="empty-text">尚无可用礼遇券</text>
+      <text class="empty-text">暂无可用礼遇券</text>
       <button wx:if="{{currentTab !== 'available'}}" class="btn-goto-available shimmer-effect" bindtap="gotoAvailable">探索礼遇</button>
     </view>
 
     <view wx:else class="coupon-list">
-      <!-- 统一券面结构 -->
-      <view 
-        wx:for="{{coupons}}" 
-        wx:key="id" 
+      <view
+        wx:for="{{coupons}}"
+        wx:key="id"
         class="coupon-lux {{currentTab === 'available' ? 'lux-claimable' : 'lux-owned'}} {{item.status === 'EXPIRED' || item.status === 'USED' ? 'lux-inactive' : ''}}"
       >
-        <!-- 左侧：面值/额度 -->
         <view class="coupon-side-l">
           <view class="side-content">
             <view class="val-box">
-              <text wx:if="{{(currentTab === 'available' ? item.type : item.coupon.type) === 'AMOUNT'}}" class="val-cur">¥</text>
-              <text class="val-num text-gold-gradient">{{currentTab === 'available' ? item.value : item.coupon.value}}</text>
+              <text wx:if="{{item.kind !== 'WINE_VOUCHER' && (currentTab === 'available' ? item.type : item.coupon.type) === 'AMOUNT'}}" class="val-cur">¥</text>
+              <text class="val-num text-gold-gradient">{{item.kind === 'WINE_VOUCHER' ? item.remainingQuantity : (currentTab === 'available' ? item.value : item.coupon.value)}}</text>
+              <text wx:if="{{item.kind === 'WINE_VOUCHER'}}" class="val-unit">张</text>
               <text wx:if="{{(currentTab === 'available' ? item.type : item.coupon.type) === 'DISCOUNT'}}" class="val-unit">折</text>
               <text wx:if="{{(currentTab === 'available' ? item.type : item.coupon.type) === 'PERCENTAGE'}}" class="val-unit">%</text>
             </view>
-            <text class="side-label">COUPON</text>
+            <text class="side-label">{{item.kind === 'WINE_VOUCHER' ? '酒券' : '礼券'}}</text>
           </view>
           <view class="notch-top"></view>
           <view class="notch-bottom"></view>
         </view>
 
-        <!-- 右侧：详情/操作 -->
         <view class="coupon-side-r glass-panel gold-border">
           <view class="r-header">
             <view class="name-group">
               <text class="c-name">{{currentTab === 'available' ? item.name : item.coupon.name}}</text>
               <view wx:if="{{(currentTab === 'available' ? item.minMemberLevel : item.coupon.minMemberLevel) > 1}}" class="v-level-tag">
-                V{{currentTab === 'available' ? item.minMemberLevel : item.coupon.minMemberLevel}} EXCLUSIVE
+                V{{currentTab === 'available' ? item.minMemberLevel : item.coupon.minMemberLevel}} 专属
               </view>
             </view>
             <view wx:if="{{currentTab !== 'available'}}" class="status-dot-badge status-{{item.status}}">
@@ -69,7 +65,6 @@
               <text>{{item.validityText}}</text>
             </view>
 
-            <!-- 操作区 -->
             <view class="action-area">
               <block wx:if="{{currentTab === 'available'}}">
                 <button
@@ -82,18 +77,68 @@
                 </button>
               </block>
               <block wx:else>
-                <button 
-                  wx:if="{{item.status === 'AVAILABLE'}}" 
-                  class="btn-lux-use" 
-                  bindtap="useCoupon" 
+                <button
+                  wx:if="{{item.status === 'AVAILABLE' && item.kind === 'WINE_VOUCHER'}}"
+                  class="btn-lux-use"
+                  bindtap="redeemWineVoucher"
                   data-id="{{item.id}}"
                 >
-                  立即使用
+                  兑换
+                </button>
+                <button
+                  wx:elif="{{item.status === 'AVAILABLE'}}"
+                  class="btn-lux-use"
+                  bindtap="openCouponUse"
+                  data-id="{{item.id}}"
+                >
+                  去使用
                 </button>
               </block>
             </view>
           </view>
         </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="modal-mask" wx:if="{{showRedeemPopup}}" bindtap="closeRedeemPopup">
+    <view class="redeem-modal glass-panel gold-border" catchtap="stopBubble">
+      <view class="modal-title">选择兑换酒品</view>
+      <view class="modal-subtitle">酒券兑换后会直接生成已支付订单</view>
+
+      <view class="redeem-section-title">酒品</view>
+      <view class="redeem-option-list">
+        <view
+          wx:for="{{redeemOptions}}"
+          wx:key="id"
+          class="redeem-option {{selectedRedeemOptionId === item.id ? 'active' : ''}}"
+          bindtap="selectRedeemOption"
+          data-id="{{item.id}}"
+        >
+          <view>
+            <view class="redeem-name">{{item.name}}</view>
+            <view class="redeem-desc">{{item.description || 'Set baR 酒券专属兑换'}}</view>
+          </view>
+          <view class="redeem-count">{{item.requiredVoucherCount || 1}}张</view>
+        </view>
+      </view>
+
+      <view class="redeem-section-title">送达桌位</view>
+      <scroll-view scroll-x class="redeem-table-list">
+        <view
+          wx:for="{{tables}}"
+          wx:key="id"
+          class="redeem-table {{selectedTableId === item.id ? 'active' : ''}}"
+          bindtap="selectRedeemTable"
+          data-id="{{item.id}}"
+        >
+          {{item.name}}
+        </view>
+      </scroll-view>
+
+      <view class="modal-btns">
+        <view class="btn-cancel" bindtap="closeRedeemPopup">返回</view>
+        <view class="btn-confirm" bindtap="confirmRedeemWineVoucher">确认兑换</view>
       </view>
     </view>
   </view>

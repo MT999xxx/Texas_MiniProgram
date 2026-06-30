@@ -1,6 +1,6 @@
 /* Pages/points/index.wxss */
 page {
-  background-color: #080808;
+  background-color: #050506;
 }
 
 .container {
@@ -63,7 +63,7 @@ page {
 .t-l { font-size: 14rpx; color: #222; font-weight: 800; letter-spacing: 2rpx; }
 .t-v { font-size: 32rpx; font-weight: 700; font-family: monospace; }
 .plus { color: #22C55E; }
-.minus { color: #D4AF37; }
+.minus { color: #E6C678; }
 
 .trend-divider {
   width: 1rpx; height: 30rpx;
@@ -99,7 +99,7 @@ page {
 /* CSS Icons */
 .css-icon-doc-gold {
   width: 24rpx; height: 30rpx;
-  border: 2rpx solid #D4AF37;
+  border: 2rpx solid #E6C678;
   border-radius: 4rpx;
   position: relative;
 }
@@ -108,13 +108,13 @@ page {
   position: absolute;
   top: 6rpx; left: 6rpx;
   width: 10rpx; height: 2rpx;
-  background: #D4AF37;
-  box-shadow: 0 6rpx 0 #D4AF37, 0 12rpx 0 #D4AF37;
+  background: #E6C678;
+  box-shadow: 0 6rpx 0 #E6C678, 0 12rpx 0 #E6C678;
 }
 
 .css-icon-gift-gold {
   width: 28rpx; height: 24rpx;
-  border: 2rpx solid #D4AF37;
+  border: 2rpx solid #E6C678;
   border-radius: 4rpx;
   position: relative;
   margin-top: 6rpx;
@@ -124,7 +124,7 @@ page {
   position: absolute;
   top: -8rpx; left: 11rpx;
   width: 2rpx; height: 32rpx;
-  background: #D4AF37;
+  background: #E6C678;
 }
 
 .css-icon-rank-gold {
@@ -133,8 +133,8 @@ page {
   align-items: flex-end;
   gap: 4rpx;
 }
-.css-icon-rank-gold::before { content: ""; width: 8rpx; height: 12rpx; background: #D4AF37; border-radius: 2rpx; }
-.css-icon-rank-gold::after { content: ""; width: 8rpx; height: 20rpx; background: #D4AF37; border-radius: 2rpx; box-shadow: -12rpx 8rpx 0 #D4AF37; }
+.css-icon-rank-gold::before { content: ""; width: 8rpx; height: 12rpx; background: #E6C678; border-radius: 2rpx; }
+.css-icon-rank-gold::after { content: ""; width: 8rpx; height: 20rpx; background: #E6C678; border-radius: 2rpx; box-shadow: -12rpx 8rpx 0 #E6C678; }
 
 /* 3. 流水详细 */
 .details-lux-sec {
@@ -149,7 +149,7 @@ page {
 
 .sec-indicator {
   width: 20rpx; height: 4rpx;
-  background: #D4AF37;
+  background: #E6C678;
   margin-right: 16rpx;
 }
 
@@ -176,7 +176,7 @@ page {
 }
 
 .f-tab.active {
-  background: #D4AF37;
+  background: #E6C678;
   color: #000;
   font-weight: 800;
 }
@@ -217,7 +217,7 @@ page {
 }
 
 .earned-v { color: #22C55E; }
-.spent-v { color: #D4AF37; }
+.spent-v { color: #E6C678; }
 
 .trans-status-tag {
   font-size: 14rpx;
@@ -257,7 +257,7 @@ page {
 
 .modal-lux-title {
   font-size: 24rpx;
-  color: #D4AF37;
+  color: #E6C678;
   letter-spacing: 4rpx;
   font-weight: 900;
 }
@@ -288,7 +288,7 @@ page {
 
 .rule-lux-header {
   font-size: 18rpx;
-  color: #D4AF37;
+  color: #E6C678;
   font-weight: 800;
   letter-spacing: 2rpx;
   margin-bottom: 20rpx;
@@ -332,7 +332,7 @@ page {
 }
 
 .btn-lux-exchange {
-  background: #D4AF37;
+  background: #E6C678;
   color: #000;
   font-size: 18rpx;
   font-weight: 800;
@@ -353,7 +353,7 @@ page {
 
 .css-icon-points-empty {
   width: 40rpx; height: 40rpx;
-  border: 2rpx solid rgba(212, 175, 55, 0.1);
+  border: 2rpx solid rgba(230, 198, 120, 0.1);
   border-radius: 50%;
   margin-bottom: 30rpx;
 }
@@ -373,7 +373,7 @@ page {
 
 .loading-pulse-gold {
   width: 20rpx; height: 20rpx;
-  border: 2rpx solid #D4AF37;
+  border: 2rpx solid #E6C678;
   border-radius: 50%;
   animation: pulse 1.5s infinite;
 }

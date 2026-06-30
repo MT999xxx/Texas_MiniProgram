@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import Reservations from './pages/Reservations';
 import Tables from './pages/Tables';
 import Menu from './pages/Menu';
+import WineVouchers from './pages/WineVouchers';
 import Members from './pages/Members';
 import Orders from './pages/Orders';
 import DepositReview from './pages/DepositReview';
@@ -46,6 +47,7 @@ function App() {
 
               {/* P2 - 菜单、会员、订单 */}
               <Route path="menu" element={<Menu />} />
+              <Route path="wine-vouchers" element={<WineVouchers />} />
               <Route path="members" element={<Members />} />
               <Route path="deposit-review" element={<DepositReview />} />
               <Route path="transactions" element={<Transactions />} />

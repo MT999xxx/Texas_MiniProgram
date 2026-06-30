@@ -6,16 +6,16 @@
     <!-- Branding Section -->
     <view class="logo-section">
       <view class="logo">
-        <text class="logo-text">AAA</text>
+        <text class="logo-text">Set baR</text>
       </view>
-      <text class="app-name">Triple A Club · Royal Poker</text>
+      <text class="app-name">德州酒廊 · 鸡尾酒吧</text>
     </view>
 
     <!-- Glassmorphism Card -->
     <view class="login-card glass-panel gold-border shadow-lux">
       <view class="card-header">
-        <text class="welcome-title">皇室极夜</text>
-        <text class="welcome-subtitle">开启您的尊享德州之旅</text>
+        <text class="welcome-title">欢迎回来</text>
+        <text class="welcome-subtitle">今晚，从 Set baR 开始</text>
       </view>
 
       <!-- Profile Section -->
@@ -27,17 +27,17 @@
           </button>
           <text class="setup-hint">设置您的会员头像</text>
         </view>
-        
+
         <view class="nickname-input-group glass-panel">
           <text class="nickname-label">昵称</text>
-          <input type="nickname" class="nickname-input" placeholder="输入您的名牌" 
-                 bindinput="onInputNickname" value="{{nickname}}" 
+          <input type="nickname" class="nickname-input" placeholder="输入您的名牌"
+                 bindinput="onInputNickname" value="{{nickname}}"
                  placeholder-class="lux-placeholder" maxlength="20" />
         </view>
       </view>
 
       <!-- Action Button -->
-      <button class="login-btn {{(!nickname) ? 'disabled' : ''}}" 
+      <button class="login-btn {{(!nickname) ? 'disabled' : ''}}"
               bindtap="onLoginClick" wx:if="{{!loading}}">
         <text class="btn-text">授权并开启</text>
       </button>
@@ -68,7 +68,7 @@
     </view>
 
     <view class="footer">
-      <text class="footer-text">© AAA CLUB · ROYAL NIGHT GOLD EDITION</text>
+      <text class="footer-text">© Set baR · 现代黑金酒廊</text>
     </view>
   </view>
 </view>
