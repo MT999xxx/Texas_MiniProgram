@@ -170,7 +170,7 @@
       </view>
       <view class="lux-rules">
         <text>• 赢得积分1:10存入账户</text>
-        <text>• 充值积分1:1存入账户</text>
+        <text>• 充值积分1:5存入账户</text>
       </view>
       <view class="modal-btns">
         <view class="btn-cancel" bindtap="hideDepositDialog">返回</view>
