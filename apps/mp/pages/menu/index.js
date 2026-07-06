@@ -11,7 +11,15 @@ function isWineVoucherCategory(category) {
   return name.includes('积分加油站') || name.includes('积分商城');
 }
 
+function isNoBonusWineVoucherItem(item) {
+  const name = item && item.name ? item.name : '';
+  return name.includes('周赛');
+}
+
 function calculateOrderBonusPoints(price, options = {}) {
+  if (options.isNoBonusWineVoucher) {
+    return 0;
+  }
   if (options.isWineVoucher) {
     return WINE_VOUCHER_BONUS_POINTS;
   }
@@ -121,6 +129,7 @@ Page({
           imageUrl,
           bonusPoints: calculateOrderBonusPoints(item.price, {
             isWineVoucher: isWineVoucherCategory(currentCategory),
+            isNoBonusWineVoucher: isNoBonusWineVoucherItem(item),
           }),
         };
       });

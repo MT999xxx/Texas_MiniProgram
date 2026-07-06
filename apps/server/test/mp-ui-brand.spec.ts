@@ -45,6 +45,16 @@ describe('Set baR customer UI brand contract', () => {
     expect(table).not.toContain('/images/table_bg.jpg');
   });
 
+  it('maps old table names to the new dining table labels', () => {
+    const tableJs = readMp('pages/table/index.js');
+
+    expect(tableJs).toContain('function normalizeTableDisplayName');
+    expect(tableJs).toContain("'高额桌': '高级餐桌'");
+    expect(tableJs).toContain("'低额桌': '中级餐桌'");
+    expect(tableJs).toContain('normalizeTableDisplayName(mainTable.name');
+    expect(tableJs).toContain('normalizeTableDisplayName(sideTable.name');
+  });
+
   it('uses the new local icon system for primary navigation', () => {
     const tabBar = readMp('components/tab-bar/index.js');
 
@@ -163,6 +173,15 @@ describe('Set baR customer UI brand contract', () => {
     expect(menuCss).toContain('.goods-bonus');
   });
 
+  it('hides bonus points for weekly wine vouchers in the ordering menu', () => {
+    const menuJs = readMp('pages/menu/index.js');
+
+    expect(menuJs).toContain('function isNoBonusWineVoucherItem');
+    expect(menuJs).toContain("name.includes('周赛')");
+    expect(menuJs).toContain('isNoBonusWineVoucher: isNoBonusWineVoucherItem(item)');
+    expect(menuJs).toContain('if (options.isNoBonusWineVoucher)');
+  });
+
   it('maps wine voucher payment in the admin order detail', () => {
     const orders = readAdmin('pages/Orders/index.tsx');
 
@@ -199,6 +218,17 @@ describe('Set baR customer UI brand contract', () => {
     expect(notificationCenter).toContain('localStorage.setItem');
     expect(notificationCenter).toContain('displayedPopupIds.current.add(popupKey)');
     expect(notificationCenter).not.toContain('displayedPopupIds.current.delete(freshOrder.id)');
+  });
+
+  it('plays a one-time admin sound for new orders and point withdrawals', () => {
+    const notificationCenter = readAdmin('components/NotificationCenter/index.tsx');
+
+    expect(notificationCenter).toContain('playAdminNotificationSound');
+    expect(notificationCenter).toContain('AudioContext');
+    expect(notificationCenter).toContain("item.type === 'ORDER'");
+    expect(notificationCenter).toContain("item.sourceType === 'point_withdraw'");
+    expect(notificationCenter).toContain('displayedSoundIds');
+    expect(notificationCenter).toContain('persistDisplayedSoundIds');
   });
 
   it('docks the custom tab bar and reserves safe-area space on tab pages', () => {

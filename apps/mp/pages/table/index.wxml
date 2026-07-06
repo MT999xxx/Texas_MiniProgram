@@ -2,7 +2,6 @@
 
   <image class="table-page-bg" src="/images/setbar-panther-hero.jpg" mode="aspectFill" />
 
-  <!-- 1. 顶部导航栏 -->
   <view class="header-bar">
     <view class="table-brand">
       <text class="store-name">实时桌台</text>
@@ -11,9 +10,7 @@
     <view class="rule-btn" bindtap="showRules">预约规则</view>
   </view>
 
-  <!-- 2. 主赛事桌区域 -->
   <view class="table-section">
-    <!-- 标题行 -->
     <view class="section-header">
       <view class="title-group">
         <text class="main-title">{{mainTable.name}}</text>
@@ -25,7 +22,6 @@
       </view>
     </view>
 
-    <!-- 信息展示 (毛玻璃卡片) -->
     <view class="info-card glass-panel gold-border shadow-lux">
       <view class="info-item">
         <text class="label">基础积分</text>
@@ -38,11 +34,9 @@
       </view>
     </view>
 
-    <!-- 牌桌视图 (重构椭圆布局) -->
     <view class="poker-table-container shadow-lux">
       <image class="table-bg" src="/images/setbar-poker-table.jpg" mode="aspectFit" />
 
-      <!-- 9个座位 -->
       <block wx:for="{{seats}}" wx:key="id">
         <view class="seat seat-{{item.seatNum}} {{item.status}}"
               bindtap="handleSeatClick"
@@ -56,7 +50,6 @@
             <image class="avatar empty-avatar" src="/images/icons/seat-muted.svg" />
           </block>
 
-          <!-- 已预约/游戏中 -->
           <block wx:else>
             <image class="avatar" src="{{item.avatar || '/images/huiyuan2.jpg'}}"
                    binderror="onAvatarError" data-seatindex="{{index}}" data-tabletype="main" />
@@ -67,7 +60,6 @@
     </view>
   </view>
 
-  <!-- 3. 副赛事桌区域 -->
   <view class="table-section sub-section">
     <view class="section-header">
       <view class="title-group">
@@ -119,7 +111,6 @@
 
   <tab-bar selected="1"></tab-bar>
 
-  <!-- 4. 预约规则弹窗 -->
   <view class="modal-mask" wx:if="{{showRulesPopup}}" bindtap="hideRules">
     <view class="luxury-modal glass-panel gold-border" catchtap="stopBubble">
       <view class="modal-head">预约规则与礼仪</view>

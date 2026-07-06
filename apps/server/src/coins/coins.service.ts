@@ -8,6 +8,7 @@ import { WineVoucherBatchEntity } from './wine-voucher-batch.entity';
 import { MemberEntity } from '../membership/member.entity';
 import { RechargeCoinsDto, ExchangeCoinsDto, DepositPointsDto, WithdrawPointsDto, ReviewDepositDto } from './dto/coins.dto';
 import { WechatPayService } from './wechat-pay.service';
+import { AdminNotificationsService } from '../notifications/admin-notifications.service';
 import {
     COIN_RECHARGE_PACKAGES,
     WINE_VOUCHER_PACKAGES,
@@ -35,6 +36,7 @@ export class CoinsService {
         @InjectRepository(MemberEntity)
         private readonly memberRepo: Repository<MemberEntity>,
         private readonly wechatPayService: WechatPayService,
+        private readonly adminNotificationsService?: AdminNotificationsService,
     ) { }
 
     /**
@@ -340,11 +342,14 @@ export class CoinsService {
             status: CoinTransactionStatus.SUCCESS,
             remark: `取出${dto.points}积分`,
         });
-        await this.transactionRepo.save(transaction);
+        const savedTransaction = await this.transactionRepo.save(transaction);
 
         // 扣减积分
         member.points -= dto.points;
         await this.memberRepo.save(member);
+        await this.adminNotificationsService
+            ?.createPointWithdrawNotification(member, dto.points, savedTransaction)
+            .catch(() => undefined);
 
         return {
             success: true,

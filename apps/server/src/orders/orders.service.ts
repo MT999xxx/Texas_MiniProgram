@@ -20,10 +20,11 @@ import { CoinTransactionEntity, CoinTransactionType, CoinTransactionStatus } fro
 import { WineVoucherBatchEntity } from '../coins/wine-voucher-batch.entity';
 import { WineVoucherRedemptionEntity } from '../coins/wine-voucher-redemption.entity';
 import {
-  WINE_VOUCHER_PURCHASE_BONUS_POINTS,
   getCoinConsumptionBonusPoints,
   getEffectiveWineVoucherBatchExpiresAt,
   getWineVoucherExpiresAt,
+  getWineVoucherMenuItemBonusPoints,
+  isWineVoucherGrantableMenuItem,
   isWineVoucherMenuItem,
 } from '../coins/coin-rules';
 import { WechatPayService } from '../payment/wechat-pay.service';
@@ -589,31 +590,37 @@ export class OrdersService {
     });
     if (!fullOrder?.member) return;
 
-    const voucherQuantity = (fullOrder.items || [])
-      .filter((item) => item.menuItem && isWineVoucherMenuItem(item.menuItem as any))
-      .reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+    const voucherItems = (fullOrder.items || [])
+      .filter((item) => item.menuItem && isWineVoucherGrantableMenuItem(item.menuItem as any));
+    const voucherQuantity = voucherItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
 
     if (voucherQuantity <= 0) return;
 
     const expiresAt = getWineVoucherExpiresAt();
     const memberId = fullOrder.member.id;
-    const voucherBatches = Array.from({ length: voucherQuantity }, () => this.wineVoucherBatchRepo.create({
-      memberId,
-      sourceType: 'menu_order',
-      sourceId: fullOrder.id,
-      packageName: '点单酒券',
-      quantity: 1,
-      remainingQuantity: 1,
-      bonusPoints: WINE_VOUCHER_PURCHASE_BONUS_POINTS,
-      expiresAt,
-      remark: `订单${fullOrder.orderNumber}购买酒券`,
-    }));
+    const voucherBatches = voucherItems.flatMap((item) => {
+      const quantity = Number(item.quantity || 0);
+      const bonusPoints = getWineVoucherMenuItemBonusPoints(item.menuItem as any);
+      return Array.from({ length: quantity }, () => this.wineVoucherBatchRepo.create({
+        memberId,
+        sourceType: 'menu_order',
+        sourceId: fullOrder.id,
+        packageName: item.menuItem?.name || '点单酒券',
+        quantity: 1,
+        remainingQuantity: 1,
+        bonusPoints,
+        expiresAt,
+        remark: `订单${fullOrder.orderNumber}购买酒券`,
+      }));
+    });
     await this.wineVoucherBatchRepo.save(voucherBatches);
 
     const member = await this.memberRepo.findOne({ where: { id: memberId } });
     if (!member) return;
     member.wineVouchers = Number(member.wineVouchers || 0) + voucherQuantity;
-    member.points = Number(member.points || 0) + WINE_VOUCHER_PURCHASE_BONUS_POINTS * voucherQuantity;
+    member.points = Number(member.points || 0) + voucherBatches.reduce((sum, batch) => (
+      sum + Number(batch.bonusPoints || 0)
+    ), 0);
     await this.memberRepo.save(member);
   }
 

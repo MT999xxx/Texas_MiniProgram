@@ -85,6 +85,25 @@ export function getCoinConsumptionBonusPoints(coins: number): number {
   return Math.floor(Number(coins || 0) * POINTS_PER_CONSUMED_COIN);
 }
 
+export function isNoBonusWineVoucherMenuItem(item: { name?: string }): boolean {
+  const itemName = item.name || '';
+  return itemName.includes('周赛');
+}
+
+export function getWineVoucherMenuItemBonusPoints(item: { name?: string; category?: { name?: string } }): number {
+  if (!isWineVoucherMenuItem(item)) {
+    return 0;
+  }
+  if (isNoBonusWineVoucherMenuItem(item)) {
+    return 0;
+  }
+  return WINE_VOUCHER_PURCHASE_BONUS_POINTS;
+}
+
+export function isWineVoucherGrantableMenuItem(item: { name?: string; category?: { name?: string } }): boolean {
+  return isWineVoucherMenuItem(item) && !isNoBonusWineVoucherMenuItem(item);
+}
+
 export function isWineVoucherMenuItem(item: { name?: string; category?: { name?: string } }): boolean {
   const categoryName = item.category?.name || '';
   const itemName = item.name || '';

@@ -27,6 +27,24 @@ export class AdminNotificationsService {
     }));
   }
 
+  async createPointWithdrawNotification(
+    member: { id?: string; nickname?: string; phone?: string } | undefined,
+    points: number,
+    transaction: { id?: string } | undefined,
+    manager?: EntityManager,
+  ) {
+    const repo = manager?.getRepository(AdminNotificationEntity) || this.notificationRepo;
+    const memberName = member?.nickname || member?.phone || '顾客';
+
+    return repo.save(repo.create({
+      type: AdminNotificationType.WARNING,
+      title: '取分申请',
+      content: `${memberName} 提交取分 ${points} 积分`,
+      sourceType: 'point_withdraw',
+      sourceId: transaction?.id || member?.id,
+    }));
+  }
+
   list(status: 'all' | 'unread' = 'all', limit = 50) {
     const take = Math.min(Math.max(Number(limit) || 50, 1), 100);
     return this.notificationRepo.find({
@@ -56,4 +74,3 @@ export class AdminNotificationsService {
     return { success: true };
   }
 }
-

@@ -12,11 +12,17 @@ import { adminNotificationsApi, AdminNotification } from '../../api/adminNotific
 import './NotificationCenter.css';
 
 const SHOWN_POPUP_STORAGE_KEY = 'setbar-admin-shown-popup-notification-ids';
+const SHOWN_SOUND_STORAGE_KEY = 'setbar-admin-shown-sound-notification-ids';
 const MAX_STORED_POPUP_IDS = 200;
+const MAX_STORED_SOUND_IDS = 200;
 
-function loadDisplayedPopupIds() {
+type WindowWithWebkitAudio = Window & typeof globalThis & {
+    webkitAudioContext?: typeof AudioContext;
+};
+
+function loadStoredIds(storageKey: string) {
     try {
-        const raw = window.localStorage.getItem(SHOWN_POPUP_STORAGE_KEY);
+        const raw = window.localStorage.getItem(storageKey);
         const ids = raw ? JSON.parse(raw) : [];
         if (!Array.isArray(ids)) return new Set<string>();
         return new Set(ids.filter((id): id is string => typeof id === 'string'));
@@ -25,13 +31,29 @@ function loadDisplayedPopupIds() {
     }
 }
 
-function persistDisplayedPopupIds(ids: Set<string>) {
+function persistStoredIds(storageKey: string, ids: Set<string>, maxCount: number) {
     try {
-        const values = Array.from(ids).slice(-MAX_STORED_POPUP_IDS);
-        window.localStorage.setItem(SHOWN_POPUP_STORAGE_KEY, JSON.stringify(values));
+        const values = Array.from(ids).slice(-maxCount);
+        window.localStorage.setItem(storageKey, JSON.stringify(values));
     } catch {
         // Storage may be unavailable in private/incognito contexts; in-memory dedupe still works.
     }
+}
+
+function loadDisplayedPopupIds() {
+    return loadStoredIds(SHOWN_POPUP_STORAGE_KEY);
+}
+
+function loadDisplayedSoundIds() {
+    return loadStoredIds(SHOWN_SOUND_STORAGE_KEY);
+}
+
+function persistDisplayedPopupIds(ids: Set<string>) {
+    persistStoredIds(SHOWN_POPUP_STORAGE_KEY, ids, MAX_STORED_POPUP_IDS);
+}
+
+function persistDisplayedSoundIds(ids: Set<string>) {
+    persistStoredIds(SHOWN_SOUND_STORAGE_KEY, ids, MAX_STORED_SOUND_IDS);
 }
 
 function getPopupDedupeKey(item: AdminNotification) {
@@ -41,11 +63,44 @@ function getPopupDedupeKey(item: AdminNotification) {
     return item.id;
 }
 
+function isSoundAlertNotification(item: AdminNotification) {
+    return item.type === 'ORDER' || item.sourceType === 'point_withdraw';
+}
+
+function playAdminNotificationSound(item: AdminNotification) {
+    try {
+        const AudioContextCtor = window.AudioContext || (window as WindowWithWebkitAudio).webkitAudioContext;
+        if (!AudioContextCtor) return;
+
+        const audioContext = new AudioContextCtor();
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        const now = audioContext.currentTime;
+
+        oscillator.type = item.sourceType === 'point_withdraw' ? 'triangle' : 'sine';
+        oscillator.frequency.setValueAtTime(item.sourceType === 'point_withdraw' ? 740 : 880, now);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.16, now + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
+
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
+        oscillator.start(now);
+        oscillator.stop(now + 0.34);
+        oscillator.onended = () => {
+            audioContext.close().catch(() => undefined);
+        };
+    } catch {
+        // Browser autoplay/audio restrictions should not break the admin notification poll.
+    }
+}
+
 export default function NotificationCenter() {
     const [notifications, setNotifications] = useState<AdminNotification[]>([]);
     const [open, setOpen] = useState(false);
     const [popupApi, contextHolder] = notification.useNotification();
     const displayedPopupIds = useRef(loadDisplayedPopupIds());
+    const displayedSoundIds = useRef(loadDisplayedSoundIds());
     const navigate = useNavigate();
 
     const unreadCount = notifications.filter(n => !n.readAt).length;
@@ -86,6 +141,19 @@ export default function NotificationCenter() {
             !item.readAt &&
             !displayedPopupIds.current.has(getPopupDedupeKey(item))
         );
+
+        const freshSoundAlert = data.find(item =>
+            isSoundAlertNotification(item) &&
+            !item.readAt &&
+            !displayedSoundIds.current.has(getPopupDedupeKey(item))
+        );
+
+        if (freshSoundAlert) {
+            const soundKey = getPopupDedupeKey(freshSoundAlert);
+            displayedSoundIds.current.add(soundKey);
+            persistDisplayedSoundIds(displayedSoundIds.current);
+            playAdminNotificationSound(freshSoundAlert);
+        }
 
         if (freshOrder) {
             const popupKey = getPopupDedupeKey(freshOrder);

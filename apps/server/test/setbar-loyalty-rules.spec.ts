@@ -5,6 +5,8 @@ import {
   WINE_VOUCHER_PACKAGES,
   WINE_VOUCHER_PURCHASE_BONUS_POINTS,
   WINE_VOUCHER_VALID_DAYS,
+  getWineVoucherMenuItemBonusPoints,
+  isWineVoucherGrantableMenuItem,
   getCoinRechargePackage,
   getWineVoucherPackage,
 } from '../src/coins/coin-rules';
@@ -18,6 +20,7 @@ import { PaymentMethod, PaymentStatus, PaymentType } from '../src/payment/paymen
 import { WineVoucherOptionsService } from '../src/coins/wine-voucher-options.service';
 import { CoinsService } from '../src/coins/coins.service';
 import { LoyaltyService } from '../src/loyalty/loyalty.service';
+import { AdminNotificationsService } from '../src/notifications/admin-notifications.service';
 
 describe('Set baR loyalty and voucher rules', () => {
   it('uses the updated coin recharge packages', () => {
@@ -416,6 +419,71 @@ describe('Set baR loyalty and voucher rules', () => {
     );
   });
 
+  it('does not grant points or wine vouchers for weekly wine voucher menu orders', async () => {
+    expect(getWineVoucherMenuItemBonusPoints({
+      name: '周赛酒卷',
+      category: { name: '积分加油站' },
+    })).toBe(0);
+    expect(getWineVoucherMenuItemBonusPoints({
+      name: '周赛卷',
+      category: { name: '积分加油站' },
+    })).toBe(0);
+    expect(getWineVoucherMenuItemBonusPoints({
+      name: '酒券套餐',
+      category: { name: '积分加油站' },
+    })).toBe(8000);
+    expect(isWineVoucherGrantableMenuItem({ name: '周赛酒卷' })).toBe(false);
+    expect(isWineVoucherGrantableMenuItem({ name: '周赛卷', category: { name: '积分加油站' } })).toBe(false);
+    expect(isWineVoucherGrantableMenuItem({ name: '酒券套餐' })).toBe(true);
+
+    const member = { id: 'member-1', points: 0, wineVouchers: 0 };
+    const order = {
+      id: 'order-1',
+      orderNumber: 'TXP001',
+      member: { id: 'member-1' },
+      items: [
+        {
+          quantity: 1,
+          menuItem: {
+            id: 'menu-weekly',
+            name: '周赛酒卷',
+            category: { name: '积分加油站' },
+          },
+        },
+      ],
+    };
+    const orderRepo = {
+      findOne: jest.fn().mockResolvedValue(order),
+    };
+    const memberRepo = {
+      findOne: jest.fn().mockResolvedValue(member),
+      save: jest.fn(async (entity) => entity),
+    };
+    const wineVoucherBatchRepo = {
+      create: jest.fn((entity) => entity),
+      save: jest.fn(async (entity) => entity),
+    };
+    const service = new PaymentService(
+      {} as any,
+      {} as any,
+      {} as any,
+      memberRepo as any,
+      orderRepo as any,
+      {} as any,
+      {} as any,
+      wineVoucherBatchRepo as any,
+      {} as any,
+    );
+
+    await (service as any).grantWineVoucherBenefitsForOrder('order-1');
+
+    expect(member.wineVouchers).toBe(0);
+    expect(member.points).toBe(0);
+    expect(wineVoucherBatchRepo.create).not.toHaveBeenCalled();
+    expect(wineVoucherBatchRepo.save).not.toHaveBeenCalled();
+    expect(memberRepo.save).not.toHaveBeenCalled();
+  });
+
   it('wechat order payment awards loyalty points after marking the order paid', async () => {
     const order = {
       id: 'order-1',
@@ -644,6 +712,70 @@ describe('Set baR loyalty and voucher rules', () => {
         statusText: '待审核',
       }),
     ]);
+  });
+
+  it('creates an admin notification when a member withdraws points', async () => {
+    const member = { id: 'member-1', nickname: '大鱼黑鲨', points: 9000 };
+    const transaction = {
+      id: 'withdraw-1',
+      memberId: 'member-1',
+      type: CoinTransactionType.WITHDRAW,
+      pointsUsed: 1200,
+    };
+    const transactionRepo = {
+      create: jest.fn((entity) => ({ ...transaction, ...entity })),
+      save: jest.fn(async (entity) => entity),
+    };
+    const memberRepo = {
+      findOne: jest.fn().mockResolvedValue(member),
+      save: jest.fn(async (entity) => entity),
+    };
+    const adminNotificationsService = {
+      createPointWithdrawNotification: jest.fn().mockResolvedValue(undefined),
+    };
+
+    const service = new (CoinsService as any)(
+      transactionRepo,
+      {} as any,
+      {} as any,
+      {} as any,
+      memberRepo,
+      {} as any,
+      adminNotificationsService,
+    );
+
+    await service.withdrawPoints('member-1', { points: 1200 });
+
+    expect(member.points).toBe(7800);
+    expect(adminNotificationsService.createPointWithdrawNotification).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'member-1', nickname: '大鱼黑鲨' }),
+      1200,
+      expect.objectContaining({ id: 'withdraw-1' }),
+    );
+  });
+
+  it('formats point withdraw admin notification content for sound alerts', async () => {
+    const notificationRepo = {
+      create: jest.fn((entity) => entity),
+      save: jest.fn(async (entity) => ({ id: 'notification-1', ...entity })),
+    };
+    const service = new AdminNotificationsService(notificationRepo as any);
+
+    await (service as any).createPointWithdrawNotification(
+      { id: 'member-1', nickname: '大鱼黑鲨' },
+      1200,
+      { id: 'withdraw-1' },
+    );
+
+    expect(notificationRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'WARNING',
+        title: '取分申请',
+        content: '大鱼黑鲨 提交取分 1200 积分',
+        sourceType: 'point_withdraw',
+        sourceId: 'withdraw-1',
+      }),
+    );
   });
 
   it('awards 50x points when admin deducts member coins', async () => {
@@ -1195,6 +1327,87 @@ describe('Set baR loyalty and voucher rules', () => {
         voucherBatchId: undefined,
         optionId: 'option-1',
         orderId: 'order-1',
+        voucherCount: 1,
+      }),
+    );
+  });
+
+  it('redeems a selected single wine voucher batch even when the option has a package filter', async () => {
+    const option = {
+      id: 'option-1',
+      name: '长岛冰茶',
+      isActive: true,
+      requiredVoucherCount: 1,
+      voucherPackageId: 'monthly-free-flow',
+      items: [{ menuItemId: 'menu-1', quantity: 1, specType: 'single' }],
+    };
+    const selectedBatch = {
+      id: 'batch-1',
+      memberId: 'member-1',
+      sourceId: 'menu-order-voucher',
+      remainingQuantity: 1,
+      createdAt: new Date(),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    };
+    const member = { id: 'member-1', wineVouchers: 1 };
+    const optionRepo = {
+      findOne: jest.fn().mockResolvedValue(option),
+    };
+    const batchRepo = {
+      find: jest.fn().mockResolvedValue([selectedBatch]),
+      save: jest.fn(async (entity) => entity),
+    };
+    const memberRepo = {
+      findOne: jest.fn().mockResolvedValue(member),
+      save: jest.fn(async (entity) => entity),
+    };
+    const redemptionRepo = {
+      create: jest.fn((entity) => entity),
+      save: jest.fn(async (entity) => ({ id: 'redemption-1', ...entity })),
+    };
+    const manager = {
+      getRepository: jest.fn((entity) => {
+        if (entity.name === 'WineVoucherRedeemOptionEntity') return optionRepo;
+        if (entity.name === 'WineVoucherBatchEntity') return batchRepo;
+        if (entity.name === 'MemberEntity') return memberRepo;
+        if (entity.name === 'WineVoucherRedemptionEntity') return redemptionRepo;
+        throw new Error(`Unexpected repository ${entity.name}`);
+      }),
+    };
+    const dataSource = {
+      transaction: jest.fn(async (callback) => callback(manager)),
+    };
+    const ordersService = {
+      createWineVoucherRedemptionOrder: jest.fn().mockResolvedValue({ id: 'order-1' }),
+    };
+    const adminNotificationsService = {
+      createOrderNotification: jest.fn().mockResolvedValue(undefined),
+    };
+    const service = new WineVoucherOptionsService(
+      dataSource as any,
+      {} as any,
+      {} as any,
+      ordersService as any,
+      adminNotificationsService as any,
+    );
+
+    const result = await service.redeem('option-1', {
+      memberId: 'member-1',
+      tableId: 'table-1',
+      voucherBatchId: 'batch-1',
+    });
+
+    expect(result.order.id).toBe('order-1');
+    expect(selectedBatch.remainingQuantity).toBe(0);
+    expect(member.wineVouchers).toBe(0);
+    expect(batchRepo.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.not.objectContaining({ sourceId: 'monthly-free-flow' }),
+      }),
+    );
+    expect(redemptionRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        voucherBatchId: 'batch-1',
         voucherCount: 1,
       }),
     );

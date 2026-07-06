@@ -3,6 +3,16 @@ const app = getApp();
 const tableApi = require('../../api/table');
 const authManager = require('../../utils/auth');
 
+const TABLE_DISPLAY_NAME_MAP = {
+    '高额桌': '高级餐桌',
+    '低额桌': '中级餐桌'
+};
+
+function normalizeTableDisplayName(name, fallback) {
+    const rawName = name || fallback;
+    return TABLE_DISPLAY_NAME_MAP[rawName] || rawName;
+}
+
 Page({
     data: {
         // 本地圆桌背景图片
@@ -153,7 +163,7 @@ Page({
                 this.setData({
                     mainTable: mainTable ? {
                         id: mainTable.id,
-                        name: mainTable.name || '主赛事桌',
+                        name: normalizeTableDisplayName(mainTable.name, '主赛事桌'),
                         status: mainTable.status === 'AVAILABLE' ? '可预约' : '进行中',
                         occupied: 0, // 暂时没有实时人数，使用模拟或0
                         total: mainTable.capacity || 9,
@@ -161,7 +171,7 @@ Page({
                     } : this.data.mainTable,
                     subTable: sideTable ? {
                         id: sideTable.id,
-                        name: sideTable.name || '副赛事桌',
+                        name: normalizeTableDisplayName(sideTable.name, '副赛事桌'),
                         status: sideTable.status === 'AVAILABLE' ? '可预约' : '进行中',
                         occupied: 0,
                         total: sideTable.capacity || 9,

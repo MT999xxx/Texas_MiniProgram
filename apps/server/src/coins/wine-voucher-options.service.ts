@@ -97,12 +97,13 @@ export class WineVoucherOptionsService {
       if (!member) throw new NotFoundException('会员不存在');
 
       const now = new Date();
+      const batchWhere = {
+        ...(dto.voucherBatchId ? { id: dto.voucherBatchId } : {}),
+        memberId: dto.memberId,
+        ...(!dto.voucherBatchId && option.voucherPackageId ? { sourceId: option.voucherPackageId } : {}),
+      };
       const candidateBatches = await batchRepo.find({
-        where: {
-          ...(dto.voucherBatchId ? { id: dto.voucherBatchId } : {}),
-          memberId: dto.memberId,
-          ...(option.voucherPackageId ? { sourceId: option.voucherPackageId } : {}),
-        },
+        where: batchWhere,
         order: { expiresAt: 'ASC', createdAt: 'ASC' },
       });
       const batches = candidateBatches.filter(
