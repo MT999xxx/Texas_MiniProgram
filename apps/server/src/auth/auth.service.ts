@@ -55,6 +55,8 @@ export class AuthService {
         points: 0,
         level: defaultLevel || undefined,
         levelCode: defaultLevel?.code,
+        membershipRewardLevel: 1,
+        membershipRewardInitialized: true,
       });
 
       await this.memberRepo.save(member);

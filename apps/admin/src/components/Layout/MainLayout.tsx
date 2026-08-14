@@ -71,6 +71,11 @@ export default function MainLayout() {
             label: '会员管理',
         },
         {
+            key: '/membership-rewards',
+            icon: <GiftOutlined />,
+            label: '等级奖励',
+        },
+        {
             key: '/deposit-review',
             icon: <AuditOutlined />,
             label: '积分审核',

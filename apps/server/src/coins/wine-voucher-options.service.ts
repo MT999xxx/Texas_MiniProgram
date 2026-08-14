@@ -109,17 +109,23 @@ export class WineVoucherOptionsService {
       const batches = candidateBatches.filter(
         (batch) => getEffectiveWineVoucherBatchExpiresAt(batch) >= now,
       );
+      const allMemberBatches = !dto.voucherBatchId && option.voucherPackageId
+        ? await batchRepo.find({ where: { memberId: dto.memberId } })
+        : candidateBatches;
 
       const requiredCount = Number(option.requiredVoucherCount || 1);
       const batchAvailableCount = batches.reduce((sum, batch) => (
         sum + Math.max(0, Number(batch.remainingQuantity || 0))
       ), 0);
-      const canUseLegacyVoucherCount = !dto.voucherBatchId && !option.voucherPackageId;
+      const canUseLegacyVoucherCount = !dto.voucherBatchId;
+      const representedBatchCount = allMemberBatches.reduce((sum, batch) => (
+        sum + Math.max(0, Number(batch.remainingQuantity || 0))
+      ), 0);
       const legacyVoucherCount = canUseLegacyVoucherCount
-        ? Math.max(0, Number(member.wineVouchers || 0))
+        ? Math.max(0, Number(member.wineVouchers || 0) - representedBatchCount)
         : 0;
       const availableCount = canUseLegacyVoucherCount
-        ? (batchAvailableCount > 0 ? batchAvailableCount : legacyVoucherCount)
+        ? batchAvailableCount + legacyVoucherCount
         : batchAvailableCount;
 
       if (availableCount < requiredCount) {

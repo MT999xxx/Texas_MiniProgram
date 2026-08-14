@@ -3,8 +3,12 @@ import fs from 'fs';
 import path from 'path';
 import {
   WINE_VOUCHER_PACKAGES,
+  DAILY_REBUY_WINE_VOUCHER_BONUS_POINTS,
+  MONTHLY_REBUY_WINE_VOUCHER_BONUS_POINTS,
+  WEEKLY_REBUY_WINE_VOUCHER_BONUS_POINTS,
   WINE_VOUCHER_PURCHASE_BONUS_POINTS,
   WINE_VOUCHER_VALID_DAYS,
+  getWineVoucherMenuItemBenefits,
   getWineVoucherMenuItemBonusPoints,
   isWineVoucherGrantableMenuItem,
   getCoinRechargePackage,
@@ -16,6 +20,7 @@ import { CouponsService } from '../src/coupons/coupons.service';
 import { UserCouponStatus } from '../src/coupons/user-coupon.entity';
 import { MembershipService } from '../src/membership/membership.service';
 import { PaymentService } from '../src/payment/payment.service';
+import { WechatPayService } from '../src/payment/wechat-pay.service';
 import { PaymentMethod, PaymentStatus, PaymentType } from '../src/payment/payment.entity';
 import { WineVoucherOptionsService } from '../src/coins/wine-voucher-options.service';
 import { CoinsService } from '../src/coins/coins.service';
@@ -24,10 +29,10 @@ import { AdminNotificationsService } from '../src/notifications/admin-notificati
 
 describe('Set baR loyalty and voucher rules', () => {
   it('uses the updated coin recharge packages', () => {
-    expect(getCoinRechargePackage(500)).toMatchObject({ amount: 500, coins: 60, bonusPoints: 30000 });
-    expect(getCoinRechargePackage(1000)).toMatchObject({ amount: 1000, coins: 150, bonusPoints: 80000 });
-    expect(getCoinRechargePackage(2000)).toMatchObject({ amount: 2000, coins: 400, bonusPoints: 200000 });
-    expect(getCoinRechargePackage(5000)).toMatchObject({ amount: 5000, coins: 1000, bonusPoints: 600000 });
+    expect(getCoinRechargePackage(500)).toMatchObject({ amount: 500, baseCoins: 500, bonusCoins: 60, coins: 560, bonusPoints: 30000 });
+    expect(getCoinRechargePackage(1000)).toMatchObject({ amount: 1000, baseCoins: 1000, bonusCoins: 150, coins: 1150, bonusPoints: 80000 });
+    expect(getCoinRechargePackage(2000)).toMatchObject({ amount: 2000, baseCoins: 2000, bonusCoins: 400, coins: 2400, bonusPoints: 200000 });
+    expect(getCoinRechargePackage(5000)).toMatchObject({ amount: 5000, baseCoins: 5000, bonusCoins: 1000, coins: 6000, bonusPoints: 600000 });
     expect(getCoinRechargePackage(3000)).toBeNull();
   });
 
@@ -41,6 +46,40 @@ describe('Set baR loyalty and voucher rules', () => {
       bonusPoints: 8000,
       validDays: 15,
     });
+  });
+
+  it('grants 10000 points for each daily rebuy voucher', () => {
+    expect(DAILY_REBUY_WINE_VOUCHER_BONUS_POINTS).toBe(10000);
+    expect(getWineVoucherMenuItemBonusPoints({
+      name: '日常赛补码酒券',
+      category: { name: '积分加油站' },
+    })).toBe(10000);
+    expect(getWineVoucherMenuItemBonusPoints({
+      name: '日常赛买入酒券',
+      category: { name: '积分加油站' },
+    })).toBe(8000);
+  });
+
+  it('applies the configured tournament wine voucher benefits', () => {
+    const category = { name: '积分加油站' };
+    const cases = [
+      { name: '月赛买入酒券', bonusPoints: 0, voucherCount: 0 },
+      { name: '月赛补码酒券', bonusPoints: 15000, voucherCount: 1 },
+      { name: '周赛买入酒券', bonusPoints: 0, voucherCount: 0 },
+      { name: '周赛补码酒券', bonusPoints: 10000, voucherCount: 1 },
+      { name: 'SNG买入酒券', bonusPoints: 0, voucherCount: 0 },
+      { name: '日常赛补码酒券', bonusPoints: 10000, voucherCount: 1 },
+    ];
+
+    expect(MONTHLY_REBUY_WINE_VOUCHER_BONUS_POINTS).toBe(15000);
+    expect(WEEKLY_REBUY_WINE_VOUCHER_BONUS_POINTS).toBe(10000);
+    for (const item of cases) {
+      expect(getWineVoucherMenuItemBenefits({ name: item.name, category })).toEqual({
+        bonusPoints: item.bonusPoints,
+        voucherCount: item.voucherCount,
+      });
+      expect(isWineVoucherGrantableMenuItem({ name: item.name, category })).toBe(item.voucherCount > 0);
+    }
   });
 
   it('awards 50x points when an order is paid with coins', async () => {
@@ -177,14 +216,14 @@ describe('Set baR loyalty and voucher rules', () => {
     expect(loyaltyRepo.create).not.toHaveBeenCalled();
   });
 
-  it('does not stack coin-spend points on wine voucher menu orders', async () => {
+  it('does not grant points or vouchers for coin-paid monthly buy-in orders', async () => {
     const wineVoucherItem = {
       id: 'order-item-1',
       quantity: 3,
       amount: 234,
       menuItem: {
         id: 'menu-1',
-        name: '月赛畅饮券',
+        name: '月赛买入酒券',
         category: { name: '积分加油站' },
       },
     };
@@ -243,8 +282,9 @@ describe('Set baR loyalty and voucher rules', () => {
     await service.payWithCoins('order-1', 'member-1');
 
     expect(member.coins).toBe(66);
-    expect(member.points).toBe(24000);
-    expect(member.wineVouchers).toBe(3);
+    expect(member.points).toBe(0);
+    expect(member.wineVouchers).toBe(0);
+    expect(wineVoucherBatchRepo.create).not.toHaveBeenCalled();
   });
 
   it('direct wine voucher package purchase grants only the fixed 8000 points', async () => {
@@ -358,7 +398,7 @@ describe('Set baR loyalty and voucher rules', () => {
     }
   });
 
-  it('wechat-paid wine voucher menu orders grant 8000 points for each voucher', async () => {
+  it('wechat-paid monthly rebuy orders grant 15000 points and one voucher per item', async () => {
     const member = { id: 'member-1', points: 0, wineVouchers: 0 };
     const order = {
       id: 'order-1',
@@ -369,7 +409,7 @@ describe('Set baR loyalty and voucher rules', () => {
           quantity: 3,
           menuItem: {
             id: 'menu-1',
-            name: '月赛畅饮券',
+            name: '月赛补码酒券',
             category: { name: '积分加油站' },
           },
         },
@@ -401,13 +441,13 @@ describe('Set baR loyalty and voucher rules', () => {
     await (service as any).grantWineVoucherBenefitsForOrder('order-1');
 
     expect(member.wineVouchers).toBe(3);
-    expect(member.points).toBe(24000);
+    expect(member.points).toBe(45000);
     expect(wineVoucherBatchRepo.create).toHaveBeenCalledTimes(3);
     expect(wineVoucherBatchRepo.create).toHaveBeenCalledWith(
       expect.objectContaining({
         quantity: 1,
         remainingQuantity: 1,
-        bonusPoints: 8000,
+        bonusPoints: 15000,
       }),
     );
     expect(wineVoucherBatchRepo.save).toHaveBeenCalledWith(
@@ -429,11 +469,19 @@ describe('Set baR loyalty and voucher rules', () => {
       category: { name: '积分加油站' },
     })).toBe(0);
     expect(getWineVoucherMenuItemBonusPoints({
+      name: '周赛补码酒券',
+      category: { name: '积分加油站' },
+    })).toBe(10000);
+    expect(getWineVoucherMenuItemBonusPoints({
       name: '酒券套餐',
       category: { name: '积分加油站' },
     })).toBe(8000);
     expect(isWineVoucherGrantableMenuItem({ name: '周赛酒卷' })).toBe(false);
     expect(isWineVoucherGrantableMenuItem({ name: '周赛卷', category: { name: '积分加油站' } })).toBe(false);
+    expect(isWineVoucherGrantableMenuItem({
+      name: '周赛补码酒券',
+      category: { name: '积分加油站' },
+    })).toBe(true);
     expect(isWineVoucherGrantableMenuItem({ name: '酒券套餐' })).toBe(true);
 
     const member = { id: 'member-1', points: 0, wineVouchers: 0 };
@@ -807,6 +855,48 @@ describe('Set baR loyalty and voucher rules', () => {
     expect(member.points).toBe(20);
   });
 
+  it('creates independently redeemable batches when admin adds wine vouchers', async () => {
+    const member = { id: 'member-1', wineVouchers: 1 };
+    const memberTxRepo = {
+      findOne: jest.fn().mockResolvedValue(member),
+      save: jest.fn(async (entity) => entity),
+    };
+    const batchTxRepo = {
+      create: jest.fn((entity) => entity),
+      save: jest.fn(async (entity) => entity),
+    };
+    const manager = {
+      getRepository: jest.fn((entity) => (
+        entity.name === 'MemberEntity' ? memberTxRepo : batchTxRepo
+      )),
+    };
+    const memberRepo = {
+      manager: {
+        transaction: jest.fn(async (callback) => callback(manager)),
+      },
+    };
+    const service = new MembershipService({} as any, memberRepo as any);
+
+    await service.adjustWineVouchers('member-1', 2);
+
+    expect(member.wineVouchers).toBe(3);
+    expect(batchTxRepo.create).toHaveBeenCalledTimes(2);
+    expect(batchTxRepo.save).toHaveBeenCalledWith([
+      expect.objectContaining({
+        sourceType: 'admin',
+        quantity: 1,
+        remainingQuantity: 1,
+        bonusPoints: 0,
+      }),
+      expect.objectContaining({
+        sourceType: 'admin',
+        quantity: 1,
+        remainingQuantity: 1,
+        bonusPoints: 0,
+      }),
+    ]);
+  });
+
   it('settles coin recharge with both coins and bonus points', async () => {
     const member = { id: 'member-1', coins: 5, points: 100 };
     const coinTransactionRepo = {
@@ -840,13 +930,13 @@ describe('Set baR loyalty and voucher rules', () => {
       member: { id: 'member-1' },
     });
 
-    expect(member.coins).toBe(65);
+    expect(member.coins).toBe(565);
     expect(member.points).toBe(30100);
     expect(coinTransactionRepo.create).toHaveBeenCalledWith(
       expect.objectContaining({
         memberId: 'member-1',
         type: CoinTransactionType.RECHARGE,
-        amount: 60,
+        amount: 560,
         pointsUsed: 30000,
         paymentAmount: 500,
         transactionId: 'COIN_001',
@@ -855,7 +945,87 @@ describe('Set baR loyalty and voucher rules', () => {
     );
   });
 
-  it('repairs a successful coin recharge that already added coins but missed bonus points', async () => {
+  it.each([
+    { amountInCents: 50000, expectedCoins: 560, expectedPoints: 30000 },
+    { amountInCents: 100000, expectedCoins: 1150, expectedPoints: 80000 },
+    { amountInCents: 200000, expectedCoins: 2400, expectedPoints: 200000 },
+    { amountInCents: 500000, expectedCoins: 6000, expectedPoints: 600000 },
+  ])(
+    'automatically credits $expectedCoins coins and $expectedPoints points after a successful recharge',
+    async ({ amountInCents, expectedCoins, expectedPoints }) => {
+      const member = { id: 'member-1', coins: 0, points: 0 };
+      const coinTransactionRepo = {
+        findOne: jest.fn().mockResolvedValue(null),
+        create: jest.fn((entity) => entity),
+        save: jest.fn(async (entity) => entity),
+      };
+      const memberRepo = {
+        findOne: jest.fn().mockResolvedValue(member),
+        save: jest.fn(async (entity) => entity),
+      };
+      const service = new PaymentService(
+        {} as any,
+        {} as any,
+        {} as any,
+        memberRepo as any,
+        {} as any,
+        {} as any,
+        coinTransactionRepo as any,
+        {} as any,
+        {} as any,
+      );
+
+      await (service as any).handleRechargePaymentSuccess({
+        id: `payment-${amountInCents}`,
+        paymentOrderNo: `COIN_${amountInCents}`,
+        type: PaymentType.RECHARGE,
+        method: PaymentMethod.WECHAT_PAY,
+        status: PaymentStatus.SUCCESS,
+        amount: amountInCents,
+        member: { id: 'member-1' },
+      });
+
+      expect(member.coins).toBe(expectedCoins);
+      expect(member.points).toBe(expectedPoints);
+      expect(memberRepo.save).toHaveBeenCalledWith(member);
+    },
+  );
+
+  it('decrypts an official WeChat Pay API v3 callback resource', () => {
+    const { createCipheriv } = require('crypto');
+    const apiV3Key = '12345678901234567890123456789012';
+    const nonce = '123456789012';
+    const associatedData = 'transaction';
+    const payload = {
+      out_trade_no: 'COIN_001',
+      transaction_id: 'wx-transaction-1',
+      trade_state: 'SUCCESS',
+    };
+    const cipher = createCipheriv(
+      'aes-256-gcm',
+      Buffer.from(apiV3Key, 'utf8'),
+      Buffer.from(nonce, 'utf8'),
+    );
+    cipher.setAAD(Buffer.from(associatedData, 'utf8'));
+    const ciphertext = Buffer.concat([
+      cipher.update(JSON.stringify(payload), 'utf8'),
+      cipher.final(),
+      cipher.getAuthTag(),
+    ]).toString('base64');
+    const service = new WechatPayService({
+      validateConfig: jest.fn().mockReturnValue(true),
+      getConfig: jest.fn().mockReturnValue({ apiV3Key }),
+    } as any);
+
+    expect(service.decryptCallback({
+      algorithm: 'AEAD_AES_256_GCM',
+      ciphertext,
+      nonce,
+      associated_data: associatedData,
+    })).toEqual(payload);
+  });
+
+  it('repairs a successful legacy recharge that missed base coins and bonus points', async () => {
     const member = { id: 'member-1', coins: 60, points: 0 };
     const existingTransaction = {
       memberId: 'member-1',
@@ -897,19 +1067,20 @@ describe('Set baR loyalty and voucher rules', () => {
       member: { id: 'member-1' },
     });
 
-    expect(member.coins).toBe(60);
+    expect(member.coins).toBe(560);
     expect(member.points).toBe(30000);
     expect(existingTransaction.pointsUsed).toBe(30000);
+    expect(existingTransaction.amount).toBe(560);
     expect(existingTransaction.paymentAmount).toBe(500);
     expect(coinTransactionRepo.save).toHaveBeenCalledWith(existingTransaction);
   });
 
   it('does not grant recharge bonus points again after the bonus marker is recorded', async () => {
-    const member = { id: 'member-1', coins: 60, points: 30000 };
+    const member = { id: 'member-1', coins: 560, points: 30000 };
     const existingTransaction = {
       memberId: 'member-1',
       type: CoinTransactionType.RECHARGE,
-      amount: 60,
+      amount: 560,
       paymentAmount: 500,
       transactionId: 'COIN_001',
       status: CoinTransactionStatus.SUCCESS,
@@ -1010,7 +1181,7 @@ describe('Set baR loyalty and voucher rules', () => {
     const result = await service.getPaymentStatus('payment-1');
 
     expect(result.status).toBe(PaymentStatus.SUCCESS);
-    expect(member.coins).toBe(150);
+    expect(member.coins).toBe(1150);
     expect(member.points).toBe(80000);
   });
 
@@ -1052,7 +1223,7 @@ describe('Set baR loyalty and voucher rules', () => {
     const result = await service.getPaymentStatus('payment-1');
 
     expect(result.status).toBe(PaymentStatus.SUCCESS);
-    expect(member.coins).toBe(400);
+    expect(member.coins).toBe(2400);
     expect(member.points).toBe(200000);
   });
 
@@ -1099,7 +1270,7 @@ describe('Set baR loyalty and voucher rules', () => {
 
     await service.handleWechatPayCallback('COIN_001', 'wx-transaction-1');
 
-    expect(member.coins).toBe(1000);
+    expect(member.coins).toBe(6000);
     expect(member.points).toBe(600000);
   });
 
@@ -1150,7 +1321,7 @@ describe('Set baR loyalty and voucher rules', () => {
     ]);
   });
 
-  it('does not fall back to legacy wine voucher count once batch records exist', async () => {
+  it('includes historical admin voucher balance when batch records do not cover it', async () => {
     const userCouponRepo = {
       update: jest.fn(),
       find: jest.fn().mockResolvedValue([]),
@@ -1180,8 +1351,16 @@ describe('Set baR loyalty and voucher rules', () => {
 
     const result = await service.getUserCoupons('member-1', UserCouponStatus.AVAILABLE);
 
-    expect(result).toEqual([]);
-    expect(membershipService.findMemberById).not.toHaveBeenCalled();
+    expect(result).toEqual([
+      expect.objectContaining({
+        id: 'legacy-wine-voucher-member-1',
+        kind: 'WINE_VOUCHER',
+        status: UserCouponStatus.AVAILABLE,
+        remainingQuantity: 2,
+        displayQuantity: 2,
+      }),
+    ]);
+    expect(membershipService.findMemberById).toHaveBeenCalledWith('member-1');
   });
 
   it('normalizes old short wine voucher expiry to the required 15-day window', async () => {
@@ -1221,6 +1400,45 @@ describe('Set baR loyalty and voucher rules', () => {
     expect(result[0].endTime.getTime()).toBe(createdAt.getTime() + WINE_VOUCHER_VALID_DAYS * 24 * 60 * 60 * 1000);
   });
 
+  it('splits partially consumed voucher batches into available and used entries', async () => {
+    const userCouponRepo = {
+      update: jest.fn(),
+      find: jest.fn().mockResolvedValue([]),
+    };
+    const wineVoucherBatchRepo = {
+      find: jest.fn().mockResolvedValue([{
+        id: 'batch-partial',
+        memberId: 'member-1',
+        packageName: '点单酒券',
+        remainingQuantity: 2,
+        quantity: 3,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        createdAt: new Date(),
+      }]),
+    };
+    const membershipService = {
+      findMemberById: jest.fn().mockResolvedValue({ id: 'member-1', wineVouchers: 2 }),
+    };
+    const service = new (CouponsService as any)(
+      {} as any,
+      userCouponRepo as any,
+      wineVoucherBatchRepo as any,
+      membershipService as any,
+    );
+
+    const available = await service.getUserCoupons('member-1', UserCouponStatus.AVAILABLE);
+    const used = await service.getUserCoupons('member-1', UserCouponStatus.USED);
+
+    expect(available).toHaveLength(2);
+    expect(available.every((item: any) => item.displayQuantity === 1)).toBe(true);
+    expect(used).toHaveLength(1);
+    expect(used[0]).toMatchObject({
+      status: UserCouponStatus.USED,
+      displayQuantity: 1,
+      remainingQuantity: 0,
+    });
+  });
+
   it('falls back to legacy wine voucher count if voucher batches cannot be queried', async () => {
     const userCouponRepo = {
       update: jest.fn(),
@@ -1255,13 +1473,13 @@ describe('Set baR loyalty and voucher rules', () => {
     ]);
   });
 
-  it('redeems general wine voucher options against legacy member voucher count', async () => {
+  it('redeems package-filtered options against historical admin voucher balance', async () => {
     const option = {
       id: 'option-1',
       name: '长岛冰茶',
       isActive: true,
       requiredVoucherCount: 1,
-      voucherPackageId: null,
+      voucherPackageId: 'monthly-free-flow',
       items: [{ menuItemId: 'menu-1', quantity: 1, specType: 'single' }],
     };
     const member = { id: 'member-1', wineVouchers: 1 };
@@ -1421,5 +1639,36 @@ describe('Set baR loyalty and voucher rules', () => {
     expect(ordersService).toContain('WineVoucherRedemptionEntity');
     expect(adminOrders).toContain('wine_voucher');
     expect(adminOrders).toContain('\u9152\u5238\u652f\u4ed8');
+  });
+
+  it('resolves a WeChat user identifier to the real member before check-in', async () => {
+    const member = { id: 'member-uuid', userId: 'openid-1', points: 100 };
+    const checkInRepo = {
+      findOne: jest.fn().mockResolvedValue(null),
+      create: jest.fn((entity) => entity),
+      save: jest.fn(async (entity) => entity),
+    };
+    const memberRepo = {
+      findOne: jest.fn().mockResolvedValue(member),
+      save: jest.fn(async (entity) => entity),
+    };
+    const service = new CoinsService(
+      {} as any,
+      {} as any,
+      checkInRepo as any,
+      {} as any,
+      memberRepo as any,
+      {} as any,
+    );
+
+    const result = await service.performCheckIn('openid-1');
+
+    expect(memberRepo.findOne).toHaveBeenCalledWith({
+      where: [{ id: 'openid-1' }, { userId: 'openid-1' }],
+    });
+    expect(checkInRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({ memberId: 'member-uuid' }),
+    );
+    expect(result.totalPoints).toBe(320);
   });
 });

@@ -1,116 +1,67 @@
-/**
- * 会员等级权益页面
- * 展示四个会员等级及其对应福利
- */
+const authManager = require('../../utils/auth');
+const coinsApi = require('../../api/coins');
+
+const LEVELS = [
+  { id: 1, code: 'V1', name: '尊荣白银', threshold: 0, reward: '暂无升级奖励', icon: '/images/membership/v1.jpg', accent: '#c8cbd0' },
+  { id: 2, code: 'V2', name: '奢华黄金', threshold: 1000, reward: '赠送 10,000 积分', icon: '/images/membership/v2.jpg', accent: '#e3bd64' },
+  { id: 3, code: 'V3', name: '高贵铂金', threshold: 3000, reward: '赠送 20,000 积分', icon: '/images/membership/v3.jpg', accent: '#d7e4ef' },
+  { id: 4, code: 'V4', name: '巅峰钻石', threshold: 10000, reward: '赠送 30,000 积分、1 张酒券', icon: '/images/membership/v4.jpg', accent: '#b9d9f5' },
+  { id: 5, code: 'V5', name: '星耀黑金', threshold: 20000, reward: '赠送 40,000 积分、100 金币、1 张酒券', icon: '/images/membership/v5.jpg', accent: '#e6c678' },
+  { id: 6, code: 'V6', name: '传奇大师', threshold: 30000, reward: '赠送 50,000 积分、100 金币、2 张酒券', icon: '/images/membership/v6.jpg', accent: '#d85d55' },
+  { id: 7, code: 'V7', name: '耀金尊客', threshold: 40000, reward: '赠送 60,000 积分、100 金币、3 张酒券、1 张月赛门票', icon: '/images/membership/v7.jpg', accent: '#f0c75e' },
+  { id: 8, code: 'V8', name: '至尊领主', threshold: 50000, reward: '赠送 70,000 积分、200 金币、5 张酒券、1 张月赛门票', icon: '/images/membership/v8.jpg', accent: '#4d78c9' },
+  { id: 9, code: 'V9', name: '典藏尊主', threshold: 60000, reward: '赠送 80,000 积分、300 金币、6 张酒券、1 张月赛门票', icon: '/images/membership/v9.jpg', accent: '#4ca87a' },
+  { id: 10, code: 'V10', name: '最强尊主', threshold: 70000, reward: '赠送 100,000 积分、300 金币、8 张酒券、1 张月赛门票', icon: '/images/membership/v10.jpg', accent: '#c84d42' },
+];
+
 Page({
-    data: {
-        currentLevel: 0, // 当前选中的等级索引
-        memberLevels: [
-            {
-                id: 1,
-                name: '尊荣白银',
-                requirement: '充值500元',
-                status: '已解锁',
-                progress: '',
-                color: '#7a7a7a',
-                darkText: true,
-                bgGradient: 'linear-gradient(135deg, #ffffff 0%, #e6e6e6 100%)',
-                benefits: []
-            },
-            {
-                id: 2,
-                name: '奢华黄金',
-                requirement: '充值1000元',
-                status: '未解锁',
-                progress: '成长值还需 500',
-                color: '#2e4d2e',
-                darkText: true,
-                bgGradient: 'linear-gradient(135deg, #e0f2e0 0%, #c4e3c4 100%)',
-                benefits: []
-            },
-            {
-                id: 3,
-                name: '高贵铂金',
-                requirement: '充值3000元',
-                status: '未解锁',
-                progress: '成长值还需 1000',
-                color: '#2e3a4d',
-                darkText: true,
-                bgGradient: 'linear-gradient(135deg, #e0f0f2 0%, #c4dee3 100%)',
-                benefits: []
-            },
-            {
-                id: 4,
-                name: '巅峰钻石',
-                requirement: '充值8000元',
-                status: '未解锁',
-                progress: '成长值还需 5000',
-                color: '#4d2e4d',
-                darkText: true,
-                bgGradient: 'linear-gradient(135deg, #f2e0f2 0%, #e3c4e3 100%)',
-                benefits: []
-            },
-            {
-                id: 5,
-                name: '星耀黑金',
-                requirement: '充值20000元',
-                status: '未解锁',
-                progress: '成长值还需 12000',
-                color: '#1a1a1a',
-                darkText: false,
-                bgGradient: 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
-                benefits: []
-            },
-            {
-                id: 6,
-                name: 'Set baR合伙人',
-                requirement: '邀请制',
-                status: '尊享邀请',
-                progress: '',
-                color: '#7c4dff',
-                darkText: true,
-                bgGradient: 'linear-gradient(135deg, #e6f0ff 0%, #ffffff 30%, #e0c8ff 70%, #c49aff 100%)',
-                benefits: []
-            }
-        ]
-    },
+  data: {
+    currentLevel: 0,
+    actualLevel: 1,
+    memberLevels: LEVELS.map((item, index) => ({
+      ...item,
+      status: index === 0 ? '当前起点' : '未解锁',
+    })),
+  },
 
-    onLoad() {
-        // 可从后端获取用户当前等级
-    },
+  onLoad() {
+    authManager.loadAuth();
+    const user = authManager.getUserInfo();
+    const memberId = user?.memberId || user?.id;
+    if (!memberId) return;
+    coinsApi.getBalance(memberId)
+      .then((balance) => this.applyMemberProgress(balance))
+      .catch(() => undefined);
+  },
 
-    /**
-     * 切换等级卡片
-     */
-    onSwiperChange(e) {
-        this.setData({
-            currentLevel: e.detail.current
-        });
-    },
+  applyMemberProgress(balance) {
+    const actualLevel = Math.min(10, Math.max(1, parseInt(String(balance.levelCode || 'V1').replace('V', ''), 10) || 1));
+    const memberLevels = LEVELS.map((item) => ({
+      ...item,
+      status: item.id < actualLevel ? '已解锁' : item.id === actualLevel ? '当前等级' : '未解锁',
+    }));
+    this.setData({
+      actualLevel,
+      currentLevel: actualLevel - 1,
+      memberLevels,
+    });
+  },
 
-    /**
-     * 点击等级指示器
-     */
-    onIndicatorTap(e) {
-        const index = e.currentTarget.dataset.index;
-        this.setData({
-            currentLevel: index
-        });
-    },
+  onSwiperChange(e) {
+    this.setData({ currentLevel: e.detail.current });
+  },
 
-    /**
-     * 立即充值
-     */
-    goRecharge() {
-        wx.navigateTo({
-            url: '/pages/member/index'
-        });
-    },
+  onIndicatorTap(e) {
+    this.setData({ currentLevel: Number(e.currentTarget.dataset.index) });
+  },
 
-    /**
-     * 返回
-     */
-    goBack() {
-        wx.navigateBack();
-    }
+  goRecharge() {
+    wx.navigateBack({
+      fail: () => wx.switchTab({ url: '/pages/member/index' }),
+    });
+  },
+
+  goBack() {
+    wx.navigateBack();
+  },
 });

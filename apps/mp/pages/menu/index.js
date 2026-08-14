@@ -5,6 +5,9 @@ const PaymentUtils = require('../../utils/payment');
 
 const POINTS_PER_ORDER_YUAN = 50;
 const WINE_VOUCHER_BONUS_POINTS = 8000;
+const MONTHLY_REBUY_WINE_VOUCHER_BONUS_POINTS = 15000;
+const WEEKLY_REBUY_WINE_VOUCHER_BONUS_POINTS = 10000;
+const DAILY_REBUY_WINE_VOUCHER_BONUS_POINTS = 10000;
 
 function isWineVoucherCategory(category) {
   const name = category && category.name ? category.name : '';
@@ -12,8 +15,27 @@ function isWineVoucherCategory(category) {
 }
 
 function isNoBonusWineVoucherItem(item) {
+  return getWineVoucherItemBonusPoints(item) === 0;
+}
+
+function getWineVoucherItemBonusPoints(item) {
   const name = item && item.name ? item.name : '';
-  return name.includes('周赛');
+  const normalizedName = name.toLowerCase();
+  const isRebuy = name.includes('补码');
+
+  if (name.includes('月赛')) {
+    return isRebuy ? MONTHLY_REBUY_WINE_VOUCHER_BONUS_POINTS : 0;
+  }
+  if (name.includes('周赛')) {
+    return isRebuy ? WEEKLY_REBUY_WINE_VOUCHER_BONUS_POINTS : 0;
+  }
+  if (normalizedName.includes('sng')) {
+    return 0;
+  }
+  if (name.includes('日常赛') && isRebuy) {
+    return DAILY_REBUY_WINE_VOUCHER_BONUS_POINTS;
+  }
+  return WINE_VOUCHER_BONUS_POINTS;
 }
 
 function calculateOrderBonusPoints(price, options = {}) {
@@ -21,7 +43,7 @@ function calculateOrderBonusPoints(price, options = {}) {
     return 0;
   }
   if (options.isWineVoucher) {
-    return WINE_VOUCHER_BONUS_POINTS;
+    return Number(options.wineVoucherBonusPoints || WINE_VOUCHER_BONUS_POINTS);
   }
   return Math.floor(Number(price || 0) * POINTS_PER_ORDER_YUAN);
 }
@@ -130,6 +152,7 @@ Page({
           bonusPoints: calculateOrderBonusPoints(item.price, {
             isWineVoucher: isWineVoucherCategory(currentCategory),
             isNoBonusWineVoucher: isNoBonusWineVoucherItem(item),
+            wineVoucherBonusPoints: getWineVoucherItemBonusPoints(item),
           }),
         };
       });

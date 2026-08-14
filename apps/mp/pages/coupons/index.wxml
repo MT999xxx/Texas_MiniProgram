@@ -33,7 +33,7 @@
           <view class="side-content">
             <view class="val-box">
               <text wx:if="{{item.kind !== 'WINE_VOUCHER' && (currentTab === 'available' ? item.type : item.coupon.type) === 'AMOUNT'}}" class="val-cur">¥</text>
-              <text class="val-num text-gold-gradient">{{item.kind === 'WINE_VOUCHER' ? item.remainingQuantity : (currentTab === 'available' ? item.value : item.coupon.value)}}</text>
+              <text class="val-num text-gold-gradient">{{item.kind === 'WINE_VOUCHER' ? item.displayQuantity : (currentTab === 'available' ? item.value : item.coupon.value)}}</text>
               <text wx:if="{{item.kind === 'WINE_VOUCHER'}}" class="val-unit">张</text>
               <text wx:if="{{(currentTab === 'available' ? item.type : item.coupon.type) === 'DISCOUNT'}}" class="val-unit">折</text>
               <text wx:if="{{(currentTab === 'available' ? item.type : item.coupon.type) === 'PERCENTAGE'}}" class="val-unit">%</text>
@@ -106,39 +106,43 @@
       <view class="modal-title">选择兑换酒品</view>
       <view class="modal-subtitle">酒券兑换后会直接生成已支付订单</view>
 
-      <view class="redeem-section-title">酒品</view>
-      <view class="redeem-option-list">
-        <view
-          wx:for="{{redeemOptions}}"
-          wx:key="id"
-          class="redeem-option {{selectedRedeemOptionId === item.id ? 'active' : ''}}"
-          bindtap="selectRedeemOption"
-          data-id="{{item.id}}"
-        >
-          <view>
-            <view class="redeem-name">{{item.name}}</view>
-            <view class="redeem-desc">{{item.description || 'Set baR 酒券专属兑换'}}</view>
+      <scroll-view scroll-y class="redeem-option-scroll">
+        <view class="redeem-section-title redeem-option-title">酒品</view>
+        <view class="redeem-option-list">
+          <view
+            wx:for="{{redeemOptions}}"
+            wx:key="id"
+            class="redeem-option {{selectedRedeemOptionId === item.id ? 'active' : ''}}"
+            bindtap="selectRedeemOption"
+            data-id="{{item.id}}"
+          >
+            <view>
+              <view class="redeem-name">{{item.name}}</view>
+              <view class="redeem-desc">{{item.description || 'Set baR 酒券专属兑换'}}</view>
+            </view>
+            <view class="redeem-count">{{item.requiredVoucherCount || 1}}张</view>
           </view>
-          <view class="redeem-count">{{item.requiredVoucherCount || 1}}张</view>
-        </view>
-      </view>
-
-      <view class="redeem-section-title">送达桌位</view>
-      <scroll-view scroll-x class="redeem-table-list">
-        <view
-          wx:for="{{tables}}"
-          wx:key="id"
-          class="redeem-table {{selectedTableId === item.id ? 'active' : ''}}"
-          bindtap="selectRedeemTable"
-          data-id="{{item.id}}"
-        >
-          {{item.name}}
         </view>
       </scroll-view>
 
-      <view class="modal-btns">
-        <view class="btn-cancel" bindtap="closeRedeemPopup">返回</view>
-        <view class="btn-confirm" bindtap="confirmRedeemWineVoucher">确认兑换</view>
+      <view class="redeem-action-panel">
+        <view class="redeem-section-title redeem-table-title">送达桌位</view>
+        <scroll-view scroll-x class="redeem-table-list">
+          <view
+            wx:for="{{tables}}"
+            wx:key="id"
+            class="redeem-table {{selectedTableId === item.id ? 'active' : ''}}"
+            bindtap="selectRedeemTable"
+            data-id="{{item.id}}"
+          >
+            {{item.name}}
+          </view>
+        </scroll-view>
+
+        <view class="modal-btns">
+          <view class="btn-cancel" bindtap="closeRedeemPopup">返回</view>
+          <view class="btn-confirm" bindtap="confirmRedeemWineVoucher">确认兑换</view>
+        </view>
       </view>
     </view>
   </view>

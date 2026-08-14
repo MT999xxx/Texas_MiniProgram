@@ -76,9 +76,18 @@ export class PaymentController {
   @ApiHeader({ name: 'Wechatpay-Nonce', description: '微信支付随机串' })
   async handleWechatPayCallback(@Body() body: any) {
     try {
-      // 简化版回调处理
-      const paymentOrderNo = body.out_trade_no;
-      const transactionId = body.transaction_id;
+      const callbackData = body.resource
+        ? this.paymentService.decryptWechatPayCallback(body.resource)
+        : body;
+      if (callbackData.trade_state && callbackData.trade_state !== 'SUCCESS') {
+        return { code: 'SUCCESS', message: '非支付成功通知，无需入账' };
+      }
+
+      const paymentOrderNo = callbackData.out_trade_no;
+      const transactionId = callbackData.transaction_id;
+      if (!paymentOrderNo || !transactionId) {
+        throw new Error('微信支付回调缺少订单号或交易号');
+      }
 
       await this.paymentService.handleWechatPayCallback(paymentOrderNo, transactionId);
 

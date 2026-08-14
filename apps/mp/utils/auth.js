@@ -3,6 +3,12 @@ const authManager = {
   token: null,
   userInfo: null,
 
+  isProductionApi() {
+    const app = getApp();
+    const apiBase = app?.globalData?.apiBase || '';
+    return /^https:\/\//i.test(apiBase);
+  },
+
   // 设置用户信息
   setAuth(token, userInfo) {
     this.token = token;
@@ -80,10 +86,15 @@ const authManager = {
 
         return response.user;
       } catch (apiError) {
-        console.warn('后端API调用失败，使用模拟登录:', apiError);
+        console.warn('后端API调用失败:', apiError);
         console.log('API Error Details:', apiError.message || apiError);
 
-        // Fallback: 使用模拟登录（开发环境）
+        // 线上环境不能生成无法对应数据库会员的模拟账号。
+        if (this.isProductionApi()) {
+          throw apiError;
+        }
+
+        // Fallback: 仅供本地开发环境演示。
         const mockUser = {
           id: 'mock_' + Date.now(),
           name: userInfo.nickName || '微信用户',
@@ -114,10 +125,25 @@ const authManager = {
   async checkLogin() {
     // 先检查本地存储
     if (this.loadAuth()) {
-      // 如果是模拟Token，直接认为有效（仅用于本地开发演示）
+      const cachedUser = this.userInfo;
+
+      // 历史线上版本可能缓存了模拟账号，自动重新换取真实会员。
       if (this.token && this.token.startsWith('mock_token_')) {
-        console.log('检测到模拟Token，跳过后端验证');
-        return true;
+        if (!this.isProductionApi()) {
+          console.log('检测到本地模拟Token，跳过后端验证');
+          return true;
+        }
+        this.clearAuth();
+        try {
+          await this.wxLogin({
+            nickName: cachedUser?.nickName || cachedUser?.nickname || cachedUser?.name,
+            avatarUrl: cachedUser?.avatarUrl || cachedUser?.avatar,
+          });
+          return true;
+        } catch (error) {
+          console.error('自动修复模拟登录失败:', error);
+          return false;
+        }
       }
 
       try {
@@ -139,10 +165,19 @@ const authManager = {
         const statusCode = error.statusCode || error.status;
 
         if (statusCode === 401 || statusCode === 403) {
-          // token明确无效，清除登录信息
-          console.log('Token已过期或无效，需要重新登录');
+          // token明确无效，静默换取新token并恢复真实会员。
+          console.log('Token已过期或无效，尝试重新登录');
           this.clearAuth();
-          return false;
+          try {
+            await this.wxLogin({
+              nickName: cachedUser?.nickName || cachedUser?.nickname || cachedUser?.name,
+              avatarUrl: cachedUser?.avatarUrl || cachedUser?.avatar,
+            });
+            return true;
+          } catch (loginError) {
+            console.error('自动重新登录失败:', loginError);
+            return false;
+          }
         }
 
         // 网络错误或其他错误，保持登录状态（使用本地缓存的用户信息）

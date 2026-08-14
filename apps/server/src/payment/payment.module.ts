@@ -12,6 +12,8 @@ import { NotificationService } from './notification.service';
 import { CoinTransactionEntity } from '../coins/coin-transaction.entity';
 import { WineVoucherBatchEntity } from '../coins/wine-voucher-batch.entity';
 import { LoyaltyModule } from '../loyalty/loyalty.module';
+import { PrintJobsModule } from '../print-jobs/print-jobs.module';
+import { MembershipModule } from '../membership/membership.module';
 
 @Module({
   imports: [
@@ -26,6 +28,8 @@ import { LoyaltyModule } from '../loyalty/loyalty.module';
       WineVoucherBatchEntity,
     ]),
     LoyaltyModule,
+    PrintJobsModule,
+    MembershipModule,
   ],
   controllers: [PaymentController],
   providers: [

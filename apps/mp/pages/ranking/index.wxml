@@ -51,7 +51,11 @@
 
           <!-- 会员级别徽章 -->
           <view class="rank-level-badge level-{{item.levelCode}}" wx:if="{{item.levelName}}">
-            <text class="rank-level-text">{{item.levelName}}</text>
+            <image class="rank-level-icon" src="{{item.levelIcon}}" mode="aspectFill" />
+            <view class="rank-level-copy">
+              <text class="rank-level-code">{{item.levelCode}}</text>
+              <text class="rank-level-text">{{item.levelName}}</text>
+            </view>
           </view>
 
           <!-- 装饰 -->

@@ -19,6 +19,7 @@ import { StatisticsModule } from '../statistics/statistics.module';
 import { CoinsModule } from '../coins/coins.module';
 import { InviteModule } from '../invite/invite.module';
 import { SettingsModule } from '../settings/settings.module';
+import { PrintJobsModule } from '../print-jobs/print-jobs.module';
 import { databaseConfig } from '../config/database.config';
 
 @Module({
@@ -43,6 +44,7 @@ import { databaseConfig } from '../config/database.config';
     CoinsModule,
     InviteModule,
     SettingsModule,
+    PrintJobsModule,
   ],
 })
 export class AppModule { }

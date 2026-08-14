@@ -20,12 +20,18 @@
   <view class="luxury-card glass-panel gold-border shadow-lux level-theme-v{{memberInfo.levelNum || 1}}">
     <view class="card-top" bindtap="goToMemberLevel">
       <view class="level-box">
-        <text class="level-v">V</text>
-        <text class="level-num">{{memberInfo.levelNum || 1}}</text>
-        <text class="level-title">{{memberInfo.levelName || '尊荣白银'}}</text>
+        <image class="member-level-emblem" src="{{memberInfo.levelIcon}}" mode="aspectFill" />
+        <view class="level-copy">
+          <view class="level-code-row">
+            <text class="level-v">V</text>
+            <text class="level-num">{{memberInfo.levelNum || 1}}</text>
+          </view>
+          <text class="level-title">{{memberInfo.levelName || '尊荣白银'}}</text>
+        </view>
       </view>
       <view class="growth-box">
-        <text class="growth-text">距下一等级 {{memberInfo.nextLevelDiff}} 成长值</text>
+        <text class="growth-text" wx:if="{{!memberInfo.isMaxLevel}}">距下一等级还需充值 ¥{{memberInfo.nextLevelDiff}}</text>
+        <text class="growth-text" wx:else>已达最高会员等级</text>
         <view class="growth-bar">
           <view class="growth-inner" style="width: {{memberInfo.growthPercent || 20}}%"></view>
         </view>

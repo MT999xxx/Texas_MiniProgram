@@ -12,7 +12,7 @@ export class MembershipLevelEntity {
   @Column({ length: 48 })
   name!: string;
 
-  @ApiProperty({ description: '积分门槛' })
+  @ApiProperty({ description: '累计充值门槛（元）' })
   @Column({ type: 'int' })
   threshold!: number;
 

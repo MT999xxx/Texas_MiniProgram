@@ -5,11 +5,17 @@ import { CreateLevelDto } from './dto/create-level.dto';
 import { CreateMemberDto } from './dto/create-member.dto';
 import { AdjustPointsDto } from './dto/adjust-points.dto';
 import { UpdateLevelDto } from './dto/update-level.dto';
+import { UpdateMembershipRewardDto } from './dto/update-membership-reward.dto';
+import { MembershipRewardGrantStatus } from './membership-reward-grant.entity';
+import { MembershipRewardService } from './membership-reward.service';
 
 @ApiTags('Membership')
 @Controller('membership')
 export class MembershipController {
-  constructor(private readonly membershipService: MembershipService) { }
+  constructor(
+    private readonly membershipService: MembershipService,
+    private readonly membershipRewardService: MembershipRewardService,
+  ) { }
 
   @Post('levels')
   @ApiCreatedResponse({ description: '创建会员等级成功' })
@@ -56,7 +62,8 @@ export class MembershipController {
         points: 1280,
         level: {
           level: 1,
-          name: '普通会员',
+          code: 'V1',
+          name: '尊荣白银',
           minPoints: 0,
           nextLevelPoints: 500
         },
@@ -75,7 +82,8 @@ export class MembershipController {
         points: 0,
         level: {
           level: 1,
-          name: '普通会员',
+          code: 'V1',
+          name: '尊荣白银',
           minPoints: 0,
           nextLevelPoints: 500
         }
@@ -115,5 +123,24 @@ export class MembershipController {
   @ApiBadRequestResponse({ description: '会员或等级不存在' })
   updateMemberLevel(@Param('id') id: string, @Body() dto: UpdateLevelDto) {
     return this.membershipService.updateMemberLevel(id, dto.levelCode ?? null);
+  }
+
+  @Get('rewards')
+  @ApiOkResponse({ description: '等级奖励发放记录' })
+  listRewards(@Query('status') status?: MembershipRewardGrantStatus) {
+    return this.membershipRewardService.listRewards(status);
+  }
+
+  @Patch('rewards/:id')
+  @ApiOkResponse({ description: '等级奖励修改成功' })
+  updateReward(@Param('id') id: string, @Body() dto: UpdateMembershipRewardDto) {
+    return this.membershipRewardService.updateReward(id, dto);
+  }
+
+  @Post('rewards/:id/issue')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ description: '等级奖励发放成功' })
+  issueReward(@Param('id') id: string) {
+    return this.membershipRewardService.issueReward(id);
   }
 }

@@ -8,6 +8,14 @@ const readMp = (file: string) => fs.readFileSync(path.join(mpRoot, file), 'utf8'
 const readAdmin = (file: string) => fs.readFileSync(path.join(adminRoot, file), 'utf8');
 
 describe('Set baR customer UI brand contract', () => {
+  it('repairs stale production login instead of persisting mock members', () => {
+    const auth = readMp('utils/auth.js');
+
+    expect(auth).toContain('isProductionApi()');
+    expect(auth).toContain('throw apiError');
+    expect(auth).toContain('自动修复模拟登录失败');
+  });
+
   it('uses Set baR in primary customer-facing entry points', () => {
     const files = [
       'app.json',
@@ -157,8 +165,38 @@ describe('Set baR customer UI brand contract', () => {
 
     expect(couponsJs).toContain('loadWineVoucherRedeemOptions');
     expect(couponsJs).toContain('redeemWineVoucher');
+    expect(couponsJs).not.toContain('voucherBatchId: this.data.selectedWineVoucher');
     expect(couponsWxml).toContain('bindtap="redeemWineVoucher"');
     expect(couponsWxml).not.toContain('bindtap="useCoupon"');
+  });
+
+  it('shows full voucher validity time and remembers the selected delivery table', () => {
+    const couponsJs = readMp('pages/coupons/index.js');
+    const couponsWxml = readMp('pages/coupons/index.wxml');
+    const couponsCss = readMp('pages/coupons/index.wxss');
+
+    expect(couponsJs).toContain('开始 ${this.formatDateTime(userCoupon.startTime)}');
+    expect(couponsJs).toContain('到期 ${this.formatDateTime(userCoupon.endTime)}');
+    expect(couponsJs).toContain('REDEEM_TABLE_STORAGE_KEY');
+    expect(couponsJs).toContain('wx.setStorageSync(REDEEM_TABLE_STORAGE_KEY');
+    expect(couponsCss).toContain('white-space: pre-line');
+    expect(couponsWxml).toContain('scroll-y class="redeem-option-scroll"');
+    expect(couponsWxml).toContain('class="redeem-action-panel"');
+    expect(couponsCss).toContain('.redeem-action-panel');
+    expect(couponsCss).toContain('flex-shrink: 0');
+  });
+
+  it('shows location and wifi status on the home page', () => {
+    const appJson = JSON.parse(readMp('app.json'));
+    const homeJs = readMp('pages/home/index.js');
+    const homeWxml = readMp('pages/home/index.wxml');
+
+    expect(appJson.requiredPrivateInfos).toContain('getLocation');
+    expect(appJson.permission?.['scope.userLocation']?.desc).toBeTruthy();
+    expect(homeJs).toContain('wx.getLocation');
+    expect(homeJs).toContain('wx.getConnectedWifi');
+    expect(homeWxml).toContain('{{locationText}}');
+    expect(homeWxml).toContain('{{wifiText}}');
   });
 
   it('shows item bonus points on menu cards using the 50x order rule', () => {
@@ -173,13 +211,24 @@ describe('Set baR customer UI brand contract', () => {
     expect(menuCss).toContain('.goods-bonus');
   });
 
-  it('hides bonus points for weekly wine vouchers in the ordering menu', () => {
+  it('shows tournament voucher bonus points only for rebuy products', () => {
     const menuJs = readMp('pages/menu/index.js');
 
-    expect(menuJs).toContain('function isNoBonusWineVoucherItem');
+    expect(menuJs).toContain('const MONTHLY_REBUY_WINE_VOUCHER_BONUS_POINTS = 15000');
+    expect(menuJs).toContain('const WEEKLY_REBUY_WINE_VOUCHER_BONUS_POINTS = 10000');
+    expect(menuJs).toContain("name.includes('月赛')");
     expect(menuJs).toContain("name.includes('周赛')");
-    expect(menuJs).toContain('isNoBonusWineVoucher: isNoBonusWineVoucherItem(item)');
-    expect(menuJs).toContain('if (options.isNoBonusWineVoucher)');
+    expect(menuJs).toContain("normalizedName.includes('sng')");
+    expect(menuJs).toContain('return isRebuy ? MONTHLY_REBUY_WINE_VOUCHER_BONUS_POINTS : 0');
+    expect(menuJs).toContain('return isRebuy ? WEEKLY_REBUY_WINE_VOUCHER_BONUS_POINTS : 0');
+  });
+
+  it('shows 10000 bonus points for the daily rebuy voucher', () => {
+    const menuJs = readMp('pages/menu/index.js');
+
+    expect(menuJs).toContain('const DAILY_REBUY_WINE_VOUCHER_BONUS_POINTS = 10000');
+    expect(menuJs).toContain("name.includes('日常赛') && isRebuy");
+    expect(menuJs).toContain('wineVoucherBonusPoints: getWineVoucherItemBonusPoints(item)');
   });
 
   it('maps wine voucher payment in the admin order detail', () => {
@@ -285,7 +334,43 @@ describe('Set baR customer UI brand contract', () => {
     expect(memberJs).toContain('PaymentUtils.pollPaymentStatus(paymentId');
     expect(memberJs).toContain('if (result.isPaid)');
     expect(memberJs).toContain('入账确认中');
+    expect(memberJs).toContain('到账560金币（赠60）· 赠送30000积分');
+    expect(memberJs).toContain('到账1150金币（赠150）· 赠送80000积分');
+    expect(memberJs).toContain('到账2400金币（赠400）· 赠送200000积分');
+    expect(memberJs).toContain('到账6000金币（赠1000）· 赠送600000积分');
     expect(memberJs).not.toContain('即使查询失败也显示成功');
+  });
+
+  it('shows V1 through V10 membership rewards with local generated badges', () => {
+    const levelJs = readMp('pages/member-level/index.js');
+    const levelWxml = readMp('pages/member-level/index.wxml');
+
+    expect(levelJs).toContain("code: 'V10'");
+    expect(levelJs).toContain("name: '最强尊主'");
+    expect(levelJs).toContain('threshold: 70000');
+    expect(levelJs).toContain('/images/membership/v1.jpg');
+    expect(levelJs).toContain('/images/membership/v10.jpg');
+    expect(levelWxml).not.toContain('累计充值');
+    expect(levelJs).not.toContain('累计充值');
+    expect(levelWxml).toContain('class="level-indicators"');
+    expect(levelWxml).toContain('管理员确认后到账');
+  });
+
+  it('uses the new V1 through V10 identity on member center and ranking', () => {
+    const levelMap = readMp('utils/membership-levels.js');
+    const memberJs = readMp('pages/member/index.js');
+    const memberWxml = readMp('pages/member/index.wxml');
+    const rankingJs = readMp('pages/ranking/index.js');
+    const rankingWxml = readMp('pages/ranking/index.wxml');
+
+    expect(levelMap).toContain("code: 'V1', level: 1, name: '尊荣白银'");
+    expect(levelMap).toContain("code: 'V10', level: 10, name: '最强尊主'");
+    expect(memberJs).toContain('getMembershipLevel(res.levelCode)');
+    expect(memberJs).not.toContain("'memberInfo.levelName': res.levelName");
+    expect(memberWxml).toContain('memberInfo.levelIcon');
+    expect(rankingJs).toContain('getMembershipLevel(item.levelCode)');
+    expect(rankingWxml).toContain('item.levelIcon');
+    expect(rankingWxml).toContain('item.levelCode');
   });
 
   it('does not treat uncertain payment status as a successful paid result', () => {

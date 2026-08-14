@@ -20,6 +20,7 @@ import { MenuModule } from '../menu/menu.module';
 import { CouponsModule } from '../coupons/coupons.module';
 import { PaymentModule } from '../payment/payment.module';
 import { AdminNotificationsModule } from '../notifications/admin-notifications.module';
+import { PrintJobsModule } from '../print-jobs/print-jobs.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { AdminNotificationsModule } from '../notifications/admin-notifications.m
     CouponsModule,
     PaymentModule,
     AdminNotificationsModule,
+    PrintJobsModule,
   ],
   providers: [OrdersService],
   controllers: [OrdersController],

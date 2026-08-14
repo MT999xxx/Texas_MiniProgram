@@ -1,0 +1,42 @@
+.membership-rewards-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.reward-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.reward-page-header h2 {
+  margin: 0 0 6px;
+  color: var(--color-text-primary, #f5f5f5);
+}
+
+.reward-page-header p,
+.reward-secondary {
+  margin: 0;
+  color: var(--color-text-secondary, rgba(255, 255, 255, 0.55));
+  font-size: 12px;
+}
+
+.reward-summary .ant-card-body {
+  padding: 18px;
+}
+
+.reward-filter {
+  margin-bottom: 18px;
+}
+
+@media (max-width: 768px) {
+  .reward-page-header {
+    align-items: center;
+  }
+
+  .reward-page-header p {
+    display: none;
+  }
+}

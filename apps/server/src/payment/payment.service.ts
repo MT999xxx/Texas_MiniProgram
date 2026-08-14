@@ -12,10 +12,11 @@ import {
   COIN_RECHARGE_PACKAGES,
   getCoinRechargePackageFromCents,
   getWineVoucherExpiresAt,
-  getWineVoucherMenuItemBonusPoints,
-  isWineVoucherGrantableMenuItem,
+  getWineVoucherMenuItemBenefits,
 } from '../coins/coin-rules';
 import { LoyaltyService } from '../loyalty/loyalty.service';
+import { PrintJobsService } from '../print-jobs/print-jobs.service';
+import { MembershipRewardService } from '../membership/membership-reward.service';
 
 @Injectable()
 export class PaymentService {
@@ -41,6 +42,10 @@ export class PaymentService {
     private wechatPayService: WechatPayService,
     @Optional()
     private readonly loyaltyService?: LoyaltyService,
+    @Optional()
+    private readonly printJobsService?: PrintJobsService,
+    @Optional()
+    private readonly membershipRewardService?: MembershipRewardService,
   ) { }
 
   // ========== 创建支付 ==========
@@ -321,6 +326,15 @@ export class PaymentService {
     return { code: 'SUCCESS', message: 'OK' };
   }
 
+  decryptWechatPayCallback(resource: {
+    algorithm?: string;
+    ciphertext: string;
+    nonce: string;
+    associated_data?: string;
+  }) {
+    return this.wechatPayService.decryptCallback(resource);
+  }
+
   // 处理支付成功
   private async handlePaymentSuccess(payment: PaymentEntity) {
     switch (payment.type) {
@@ -397,6 +411,7 @@ export class PaymentService {
     // 更新订单状态
     payment.order.status = OrderStatus.PAID;
     payment.order.paidAt = new Date();
+    payment.order.paymentMethod = 'wechat_pay';
     const savedOrder = await this.orderRepo.save(payment.order);
     const rewardOrder = await this.orderRepo.findOne({
       where: { id: savedOrder.id },
@@ -407,6 +422,9 @@ export class PaymentService {
       await this.loyaltyService?.awardPointsForOrder(rewardOrder);
     }
     await this.grantWineVoucherBenefitsForOrder(savedOrder.id);
+    await this.printJobsService?.enqueueOrder(savedOrder.id).catch((error: any) => {
+      this.logger.error(`创建订单打印任务失败: ${savedOrder.id}`, error?.stack || error);
+    });
 
     this.logger.log(`订单支付成功: ${savedOrder.id}`);
   }
@@ -439,7 +457,8 @@ export class PaymentService {
     if (existingTx) {
       this.logger.warn(`充值已处理过（幂等检查）: paymentOrderNo=${payment.paymentOrderNo}`);
       if (payment.paymentOrderNo.startsWith('COIN_')) {
-        await this.repairCoinRechargeBonusPoints(payment, existingTx);
+        await this.repairCoinRechargeSettlement(payment, existingTx);
+        await this.syncMembershipAfterRecharge(existingTx.memberId);
       }
       return;
     }
@@ -482,6 +501,8 @@ export class PaymentService {
       });
       await this.coinTransactionRepo.save(tx);
 
+      await this.syncMembershipAfterRecharge(member.id);
+
       this.logger.log(`金币充值成功: 用户${member.id} 获得${coins}金币 + ${bonusPoints}积分，当前余额: ${member.coins}金币, ${member.points}积分`);
       return;
     }
@@ -502,7 +523,7 @@ export class PaymentService {
     this.logger.log(`充值成功: 用户${rechargeRecord.member.id} 应获得${totalPoints}积分`);
   }
 
-  private async repairCoinRechargeBonusPoints(payment: PaymentEntity, existingTx: CoinTransactionEntity) {
+  private async repairCoinRechargeSettlement(payment: PaymentEntity, existingTx: CoinTransactionEntity) {
     const rechargePackage = getCoinRechargePackageFromCents(Number(payment.amount));
     if (!rechargePackage) {
       this.logger.error(`无效金币充值金额: ${payment.amount}`);
@@ -512,7 +533,10 @@ export class PaymentService {
     const expectedBonusPoints = Number(rechargePackage.bonusPoints || 0);
     const recordedBonusPoints = Number(existingTx.pointsUsed || 0);
     const missingBonusPoints = Math.max(expectedBonusPoints - recordedBonusPoints, 0);
-    if (missingBonusPoints <= 0) {
+    const expectedCoins = Number(rechargePackage.coins || 0);
+    const recordedCoins = Number(existingTx.amount || 0);
+    const missingCoins = Math.max(expectedCoins - recordedCoins, 0);
+    if (missingBonusPoints <= 0 && missingCoins <= 0) {
       return;
     }
 
@@ -528,15 +552,29 @@ export class PaymentService {
       return;
     }
 
+    member.coins = Number(member.coins || 0) + missingCoins;
     member.points = Number(member.points || 0) + missingBonusPoints;
     await this.memberRepo.save(member);
 
+    existingTx.amount = expectedCoins;
     existingTx.pointsUsed = expectedBonusPoints;
     existingTx.paymentAmount = existingTx.paymentAmount ?? rechargePackage.amount;
-    existingTx.remark = existingTx.remark || `金币充值 ${rechargePackage.coins}金币，赠送${expectedBonusPoints}积分`;
+    existingTx.remark = `金币充值 ${rechargePackage.baseCoins}金币，赠送${rechargePackage.bonusCoins}金币和${expectedBonusPoints}积分，共到账${expectedCoins}金币`;
     await this.coinTransactionRepo.save(existingTx);
 
-    this.logger.log(`金币充值补积分成功: 用户${memberId} 补发${missingBonusPoints}积分`);
+    this.logger.log(`金币充值补结算成功: 用户${memberId} 补发${missingCoins}金币 + ${missingBonusPoints}积分`);
+  }
+
+  private async syncMembershipAfterRecharge(memberId: string) {
+    if (!this.membershipRewardService) return;
+    try {
+      await this.membershipRewardService.syncMembershipAfterRecharge(memberId);
+    } catch (error) {
+      this.logger.error(
+        `充值成功后同步会员等级失败: memberId=${memberId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
   }
 
   private async grantWineVoucherBenefitsForOrder(orderId: string) {
@@ -547,15 +585,21 @@ export class PaymentService {
     if (!order?.member) return;
 
     const voucherItems = (order.items || [])
-      .filter((item) => item.menuItem && isWineVoucherGrantableMenuItem(item.menuItem as any));
-    const voucherQuantity = voucherItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+      .filter((item) => item.menuItem)
+      .map((item) => ({
+        item,
+        benefits: getWineVoucherMenuItemBenefits(item.menuItem as any),
+      }))
+      .filter(({ benefits }) => benefits.voucherCount > 0);
+    const voucherQuantity = voucherItems.reduce((sum, { item, benefits }) => (
+      sum + Number(item.quantity || 0) * benefits.voucherCount
+    ), 0);
     if (voucherQuantity <= 0) return;
 
     const expiresAt = getWineVoucherExpiresAt();
     const memberId = order.member.id;
-    const voucherBatches = voucherItems.flatMap((item) => {
-      const quantity = Number(item.quantity || 0);
-      const bonusPoints = getWineVoucherMenuItemBonusPoints(item.menuItem as any);
+    const voucherBatches = voucherItems.flatMap(({ item, benefits }) => {
+      const quantity = Number(item.quantity || 0) * benefits.voucherCount;
       return Array.from({ length: quantity }, () => this.wineVoucherBatchRepo.create({
         memberId,
         sourceType: 'menu_order',
@@ -563,7 +607,7 @@ export class PaymentService {
         packageName: item.menuItem?.name || '点单酒券',
         quantity: 1,
         remainingQuantity: 1,
-        bonusPoints,
+        bonusPoints: benefits.bonusPoints,
         expiresAt,
         remark: `订单${order.orderNumber}购买酒券`,
       }));
@@ -656,7 +700,7 @@ export class PaymentService {
       points: item.bonusPoints,
       bonusPoints: item.bonusPoints,
       coins: item.coins,
-      description: `得${item.coins}金币，赠送${item.bonusPoints}积分`,
+      description: `到账${item.coins}金币（含赠送${item.bonusCoins}金币），赠送${item.bonusPoints}积分`,
       isEnabled: true,
       sortOrder: index + 1,
     }));

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException, Optional } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, In, Repository } from 'typeorm';
 import { OrderEntity, OrderStatus } from './order.entity';
@@ -23,13 +23,13 @@ import {
   getCoinConsumptionBonusPoints,
   getEffectiveWineVoucherBatchExpiresAt,
   getWineVoucherExpiresAt,
-  getWineVoucherMenuItemBonusPoints,
-  isWineVoucherGrantableMenuItem,
+  getWineVoucherMenuItemBenefits,
   isWineVoucherMenuItem,
 } from '../coins/coin-rules';
 import { WechatPayService } from '../payment/wechat-pay.service';
 import { PaymentEntity, PaymentStatus } from '../payment/payment.entity';
 import { AdminNotificationsService } from '../notifications/admin-notifications.service';
+import { PrintJobsService } from '../print-jobs/print-jobs.service';
 
 type WineVoucherRedemptionOrderInput = {
   memberId: string;
@@ -41,6 +41,8 @@ type WineVoucherRedemptionOrderInput = {
 
 @Injectable()
 export class OrdersService {
+  private readonly logger = new Logger(OrdersService.name);
+
   constructor(
     @InjectRepository(OrderEntity)
     private readonly orderRepo: Repository<OrderEntity>,
@@ -71,6 +73,8 @@ export class OrdersService {
     private readonly wechatPayService: WechatPayService,
     @Optional()
     private readonly adminNotificationsService?: AdminNotificationsService,
+    @Optional()
+    private readonly printJobsService?: PrintJobsService,
   ) { }
 
   async create(dto: CreateOrderDto) {
@@ -285,6 +289,7 @@ export class OrdersService {
     const saved = await orderRepo.save(order);
     await this.redisService.getClient().set(`order:${saved.id}:status`, saved.status);
     await this.redisService.getClient().set(`table:${table.id}:lastOrder`, saved.id);
+    await this.enqueueReceipt(saved.id, manager);
     return saved;
   }
 
@@ -352,7 +357,13 @@ export class OrdersService {
     const saved = await this.orderRepo.save(order);
     await this.redisService.getClient().set(`order:${saved.id}:status`, saved.status);
     if (dto.status === OrderStatus.PAID) {
+      if (!saved.paidAt) {
+        saved.paidAt = new Date();
+        saved.paymentMethod = saved.paymentMethod || 'backend_confirm';
+        await this.orderRepo.save(saved);
+      }
       await this.loyaltyService.awardPointsForOrder(saved);
+      await this.enqueueReceipt(saved.id);
     } else if (dto.status === OrderStatus.CANCELLED && prevStatus !== OrderStatus.CANCELLED) {
       // 退款/取消时回补库存；只在状态首次变为 CANCELLED 时执行
       await this.restockItems(order);
@@ -379,6 +390,14 @@ export class OrdersService {
       }
     }
     await this.menuRepo.save(Array.from(menuMap.values()));
+  }
+
+  private async enqueueReceipt(orderId: string, manager?: EntityManager): Promise<void> {
+    try {
+      await this.printJobsService?.enqueueOrder(orderId, manager);
+    } catch (error: any) {
+      this.logger.error(`创建订单打印任务失败: ${orderId}`, error?.stack || error);
+    }
   }
 
   // 生成订单号
@@ -413,6 +432,7 @@ export class OrdersService {
       await this.loyaltyService.awardPointsForOrder(saved);
     }
 
+    await this.enqueueReceipt(saved.id);
     return saved;
   }
 
@@ -489,6 +509,7 @@ export class OrdersService {
 
     await this.grantWineVoucherBenefitsForOrder(saved);
 
+    await this.enqueueReceipt(saved.id);
     return saved;
   }
 
@@ -545,6 +566,9 @@ export class OrdersService {
       await this.loyaltyService.awardPointsForOrder(saved);
       await this.grantWineVoucherBenefitsForOrder(saved);
     }
+    if (saved.status === OrderStatus.PAID) {
+      await this.enqueueReceipt(saved.id);
+    }
     return { remainingAmount: newTotal, order: saved };
   }
 
@@ -558,7 +582,12 @@ export class OrdersService {
     const batchTotal = batches
       .filter((batch) => getEffectiveWineVoucherBatchExpiresAt(batch) >= now)
       .reduce((sum, batch) => sum + Math.max(0, Number(batch.remainingQuantity || 0)), 0);
-    return batchTotal > 0 ? batchTotal : legacyCount;
+    const representedBatchTotal = batches.reduce(
+      (sum, batch) => sum + Math.max(0, Number(batch.remainingQuantity || 0)),
+      0,
+    );
+    const legacyRemainder = Math.max(0, legacyCount - representedBatchTotal);
+    return batchTotal + legacyRemainder;
   }
 
   private async consumeWineVoucherBatches(memberId: string, quantity: number): Promise<void> {
@@ -591,16 +620,22 @@ export class OrdersService {
     if (!fullOrder?.member) return;
 
     const voucherItems = (fullOrder.items || [])
-      .filter((item) => item.menuItem && isWineVoucherGrantableMenuItem(item.menuItem as any));
-    const voucherQuantity = voucherItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+      .filter((item) => item.menuItem)
+      .map((item) => ({
+        item,
+        benefits: getWineVoucherMenuItemBenefits(item.menuItem as any),
+      }))
+      .filter(({ benefits }) => benefits.voucherCount > 0);
+    const voucherQuantity = voucherItems.reduce((sum, { item, benefits }) => (
+      sum + Number(item.quantity || 0) * benefits.voucherCount
+    ), 0);
 
     if (voucherQuantity <= 0) return;
 
     const expiresAt = getWineVoucherExpiresAt();
     const memberId = fullOrder.member.id;
-    const voucherBatches = voucherItems.flatMap((item) => {
-      const quantity = Number(item.quantity || 0);
-      const bonusPoints = getWineVoucherMenuItemBonusPoints(item.menuItem as any);
+    const voucherBatches = voucherItems.flatMap(({ item, benefits }) => {
+      const quantity = Number(item.quantity || 0) * benefits.voucherCount;
       return Array.from({ length: quantity }, () => this.wineVoucherBatchRepo.create({
         memberId,
         sourceType: 'menu_order',
@@ -608,7 +643,7 @@ export class OrdersService {
         packageName: item.menuItem?.name || '点单酒券',
         quantity: 1,
         remainingQuantity: 1,
-        bonusPoints,
+        bonusPoints: benefits.bonusPoints,
         expiresAt,
         remark: `订单${fullOrder.orderNumber}购买酒券`,
       }));

@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { WechatPayConfigService } from './wechat-pay.config';
-import { createSign, randomBytes, X509Certificate } from 'crypto';
+import { createDecipheriv, createSign, randomBytes, X509Certificate } from 'crypto';
 import axios from 'axios';
 
 export interface WechatPayOrderRequest {
@@ -337,19 +337,49 @@ export class WechatPayService {
   }
 
   // 解密回调数据
-  decryptCallback(encryptedData: any): any {
+  decryptCallback(resource: {
+    algorithm?: string;
+    ciphertext: string;
+    nonce: string;
+    associated_data?: string;
+  }): any {
     if (!this.isAvailable()) {
       // 测试环境返回模拟数据
       return {
-        out_trade_no: encryptedData.out_trade_no || 'mock_trade_no',
+        out_trade_no: (resource as any).out_trade_no || 'mock_trade_no',
         trade_state: 'SUCCESS',
         transaction_id: 'mock_transaction_id',
         amount: { total: 100 },
       };
     }
 
-    // TODO: 实现真实的数据解密
-    return encryptedData;
+    if (resource.algorithm && resource.algorithm !== 'AEAD_AES_256_GCM') {
+      throw new BadRequestException(`不支持的微信支付回调算法: ${resource.algorithm}`);
+    }
+
+    try {
+      const apiV3Key = this.configService.getConfig().apiV3Key;
+      if (Buffer.byteLength(apiV3Key, 'utf8') !== 32) {
+        throw new Error('APIv3密钥必须为32位');
+      }
+
+      const ciphertext = Buffer.from(resource.ciphertext, 'base64');
+      const authTag = ciphertext.subarray(ciphertext.length - 16);
+      const encrypted = ciphertext.subarray(0, ciphertext.length - 16);
+      const decipher = createDecipheriv(
+        'aes-256-gcm',
+        Buffer.from(apiV3Key, 'utf8'),
+        Buffer.from(resource.nonce, 'utf8'),
+      );
+      decipher.setAuthTag(authTag);
+      decipher.setAAD(Buffer.from(resource.associated_data || '', 'utf8'));
+
+      const plaintext = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+      return JSON.parse(plaintext.toString('utf8'));
+    } catch (error: any) {
+      this.logger.error('解密微信支付回调失败', error?.stack || error);
+      throw new BadRequestException('微信支付回调解密失败');
+    }
   }
 
   // 生成随机字符串

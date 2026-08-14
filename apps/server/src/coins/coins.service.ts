@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CoinTransactionEntity, CoinTransactionType, CoinTransactionStatus } from './coin-transaction.entity';
@@ -18,6 +18,8 @@ import {
     getWineVoucherExpiresAt,
     getWineVoucherPackage,
 } from './coin-rules';
+import { MembershipRewardService } from '../membership/membership-reward.service';
+import { getStoredMembershipLevelRule, MEMBERSHIP_LEVEL_RULES } from '../membership/membership-level-rules';
 
 // 历史积分转金币汇率：200积分 = 1金币
 const POINTS_PER_COIN = 200;
@@ -37,6 +39,8 @@ export class CoinsService {
         private readonly memberRepo: Repository<MemberEntity>,
         private readonly wechatPayService: WechatPayService,
         private readonly adminNotificationsService?: AdminNotificationsService,
+        @Optional()
+        private readonly membershipRewardService?: MembershipRewardService,
     ) { }
 
     /**
@@ -51,6 +55,15 @@ export class CoinsService {
             throw new NotFoundException('会员不存在');
         }
         const voucherSummary = await this.getWineVoucherSummary(memberId, Number(member.wineVouchers || 0));
+        const storedLevel = getStoredMembershipLevelRule(member.levelCode);
+        const currentLevel = storedLevel || {
+            code: member.levelCode || 'V1',
+            level: 0,
+            name: member.level?.name || (member.levelCode === 'VP' ? '三条A合伙人' : '尊荣白银'),
+        };
+        const nextLevel = storedLevel
+            ? MEMBERSHIP_LEVEL_RULES.find((rule) => rule.level === storedLevel.level + 1)
+            : undefined;
         return {
             coins: member.coins,
             points: member.points,
@@ -61,8 +74,13 @@ export class CoinsService {
             wineVoucherExpiryReminder: voucherSummary.expiringSoon > 0
                 ? `有${voucherSummary.expiringSoon}张酒券将在24小时内过期，请尽快使用`
                 : '',
-            levelCode: member.levelCode || 'V1',
-            levelName: member.level?.name || '尊荣白银',
+            levelCode: currentLevel.code,
+            levelName: currentLevel.name,
+            totalRechargeAmount: Number(member.totalRechargeAmount || 0),
+            monthlyTickets: Number(member.monthlyTickets || 0),
+            nextLevelCode: nextLevel?.code || null,
+            nextLevelName: nextLevel?.name || null,
+            nextLevelThreshold: nextLevel?.threshold || null,
         };
     }
 
@@ -126,6 +144,7 @@ export class CoinsService {
         }
 
         if (transaction.status === CoinTransactionStatus.SUCCESS) {
+            await this.membershipRewardService?.syncMembershipAfterRecharge(transaction.memberId);
             return { success: true, message: '订单已处理' };
         }
 
@@ -143,6 +162,8 @@ export class CoinsService {
         if (bonusPoints > 0) {
             await this.memberRepo.increment({ id: transaction.memberId }, 'points', bonusPoints);
         }
+
+        await this.membershipRewardService?.syncMembershipAfterRecharge(transaction.memberId);
 
         return { success: true, message: '充值成功', bonusPoints };
     }
@@ -240,12 +261,17 @@ export class CoinsService {
             getEffectiveWineVoucherBatchExpiresAt(batch) >= now
         ));
         const batchTotal = active.reduce((sum, batch) => sum + Number(batch.remainingQuantity || 0), 0);
+        const representedBatchTotal = batches.reduce(
+            (sum, batch) => sum + Math.max(0, Number(batch.remainingQuantity || 0)),
+            0,
+        );
+        const legacyRemainder = Math.max(0, legacyCount - representedBatchTotal);
         const expiringSoon = active
             .filter((batch) => getEffectiveWineVoucherBatchExpiresAt(batch) <= soon)
             .reduce((sum, batch) => sum + Number(batch.remainingQuantity || 0), 0);
 
         return {
-            total: batchTotal > 0 ? batchTotal : legacyCount,
+            total: batchTotal + legacyRemainder,
             expiringSoon,
             earliestExpiresAt: active[0] ? getEffectiveWineVoucherBatchExpiresAt(active[0]) : null,
         };
@@ -511,17 +537,19 @@ export class CoinsService {
      * 获取签到状态
      */
     async getCheckInStatus(memberId: string) {
+        const member = await this.findMemberForCheckIn(memberId);
+        const resolvedMemberId = member.id;
         const today = new Date().toISOString().split('T')[0];
         const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
         // 查询今日是否已签到
         const todayRecord = await this.checkInRepo.findOne({
-            where: { memberId, checkInDate: today },
+            where: { memberId: resolvedMemberId, checkInDate: today },
         });
 
         // 查询昨日签到记录（用于判断连续天数）
         const yesterdayRecord = await this.checkInRepo.findOne({
-            where: { memberId, checkInDate: yesterday },
+            where: { memberId: resolvedMemberId, checkInDate: yesterday },
         });
 
         const consecutiveDays = yesterdayRecord ? yesterdayRecord.consecutiveDays : 0;
@@ -544,16 +572,14 @@ export class CoinsService {
      * 执行签到
      */
     async performCheckIn(memberId: string) {
-        const member = await this.memberRepo.findOne({ where: { id: memberId } });
-        if (!member) {
-            throw new NotFoundException('会员不存在');
-        }
+        const member = await this.findMemberForCheckIn(memberId);
+        const resolvedMemberId = member.id;
 
         const today = new Date().toISOString().split('T')[0];
 
         // 检查今日是否已签到
         const existing = await this.checkInRepo.findOne({
-            where: { memberId, checkInDate: today },
+            where: { memberId: resolvedMemberId, checkInDate: today },
         });
         if (existing) {
             throw new BadRequestException('今日已签到');
@@ -562,7 +588,7 @@ export class CoinsService {
         // 查询昨日签到记录
         const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
         const yesterdayRecord = await this.checkInRepo.findOne({
-            where: { memberId, checkInDate: yesterday },
+            where: { memberId: resolvedMemberId, checkInDate: yesterday },
         });
 
         // 计算连续天数（断签则重置为1）
@@ -571,7 +597,7 @@ export class CoinsService {
 
         // 创建签到记录
         const checkIn = this.checkInRepo.create({
-            memberId,
+            memberId: resolvedMemberId,
             checkInDate: today,
             consecutiveDays,
             pointsEarned,
@@ -588,5 +614,18 @@ export class CoinsService {
             consecutiveDays,
             totalPoints: member.points,
         };
+    }
+
+    private async findMemberForCheckIn(identifier: string) {
+        const member = await this.memberRepo.findOne({
+            where: [
+                { id: identifier },
+                { userId: identifier },
+            ],
+        });
+        if (!member) {
+            throw new NotFoundException('会员不存在，请重新登录');
+        }
+        return member;
     }
 }

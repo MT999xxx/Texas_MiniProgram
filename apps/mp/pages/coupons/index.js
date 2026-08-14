@@ -2,6 +2,7 @@ const request = require('../../utils/request');
 const authManager = require('../../utils/auth');
 const wineVoucherOptionsApi = require('../../api/wineVoucherOptions');
 const tableApi = require('../../api/table');
+const REDEEM_TABLE_STORAGE_KEY = 'setbar_redeem_table_id';
 
 Page({
   data: {
@@ -173,7 +174,7 @@ Page({
   },
 
   formatCouponValidity(userCoupon) {
-    return `${this.formatDate(userCoupon.startTime)} - ${this.formatDate(userCoupon.endTime)}`;
+    return `开始 ${this.formatDateTime(userCoupon.startTime)}\n到期 ${this.formatDateTime(userCoupon.endTime)}`;
   },
 
   formatDate(dateStr) {
@@ -250,9 +251,16 @@ Page({
       tableApi.getStatus()
     ]);
 
+    const activeTables = (tables || []).filter(table => table.isActive !== false);
+    const savedTableId = wx.getStorageSync(REDEEM_TABLE_STORAGE_KEY);
+    const selectedTableId = activeTables.some(table => table.id === savedTableId)
+      ? savedTableId
+      : '';
+
     this.setData({
       redeemOptions: redeemOptions || [],
-      tables: (tables || []).filter(table => table.isActive !== false)
+      tables: activeTables,
+      selectedTableId
     });
   },
 
@@ -264,7 +272,6 @@ Page({
     this.setData({
       selectedWineVoucher: voucher,
       selectedRedeemOptionId: '',
-      selectedTableId: '',
       showRedeemPopup: true
     });
 
@@ -290,7 +297,9 @@ Page({
   },
 
   selectRedeemTable(e) {
-    this.setData({ selectedTableId: e.currentTarget.dataset.id });
+    const selectedTableId = e.currentTarget.dataset.id;
+    wx.setStorageSync(REDEEM_TABLE_STORAGE_KEY, selectedTableId);
+    this.setData({ selectedTableId });
   },
 
   async confirmRedeemWineVoucher() {
@@ -310,8 +319,7 @@ Page({
     try {
       const result = await wineVoucherOptionsApi.redeem(this.data.selectedRedeemOptionId, {
         memberId: this.data.userInfo.id,
-        tableId: this.data.selectedTableId,
-        voucherBatchId: this.data.selectedWineVoucher?.voucherBatchId || undefined
+        tableId: this.data.selectedTableId
       });
 
       wx.hideLoading();

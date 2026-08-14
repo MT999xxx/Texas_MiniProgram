@@ -179,6 +179,7 @@ page {
 
 .rank-info {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
 }
@@ -188,6 +189,9 @@ page {
   font-size: 30rpx;
   font-weight: 500;
   margin-bottom: 6rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .rank-score {
@@ -207,20 +211,56 @@ page {
 /* 会员级别徽章 - 基础样式 */
 .rank-level-badge {
   flex-shrink: 0;
-  padding: 8rpx 18rpx;
-  border-radius: 20rpx;
-  margin-left: 16rpx;
+  width: 154rpx;
+  min-height: 58rpx;
+  padding: 7rpx 10rpx;
+  border-radius: 16rpx;
+  margin-left: 12rpx;
   background: rgba(230, 198, 120, 0.1);
   border: 1rpx solid rgba(230, 198, 120, 0.3);
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.rank-level-icon {
+  width: 42rpx;
+  height: 42rpx;
+  flex-shrink: 0;
+  border-radius: 10rpx;
+  margin-right: 8rpx;
+}
+
+.rank-level-copy {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.rank-level-code {
+  color: #f3d982;
+  font-size: 18rpx;
+  font-weight: 800;
+  line-height: 1.1;
 }
 
 .rank-level-text {
-  font-size: 20rpx;
+  font-size: 17rpx;
   font-weight: 600;
-  letter-spacing: 1rpx;
+  letter-spacing: 0;
   color: #E6C678;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
+.rank-level-badge.level-V6 { border-color: rgba(216, 93, 85, 0.58); background: rgba(95, 25, 24, 0.24); }
+.rank-level-badge.level-V7 { border-color: rgba(240, 199, 94, 0.62); background: rgba(105, 78, 18, 0.22); }
+.rank-level-badge.level-V8 { border-color: rgba(77, 120, 201, 0.62); background: rgba(31, 55, 103, 0.28); }
+.rank-level-badge.level-V9 { border-color: rgba(76, 168, 122, 0.62); background: rgba(22, 75, 50, 0.25); }
+.rank-level-badge.level-V10 { border-color: rgba(200, 77, 66, 0.68); background: rgba(95, 23, 20, 0.3); }
 
 /* V1 尊荣白银 - 银白色调 */
 .rank-level-badge.level-V1 {
@@ -265,7 +305,6 @@ page {
   box-shadow:
     0 0 12rpx rgba(230, 198, 120, 0.3),
     inset 0 0 8rpx rgba(230, 198, 120, 0.08);
-  padding: 10rpx 22rpx;
   position: relative;
   overflow: hidden;
 }
@@ -297,9 +336,38 @@ page {
   background: linear-gradient(135deg, #FFF3C8 0%, #E6C678 40%, #FFF3C8 60%, #8C6A2F 100%);
   -webkit-background-clip: text;
   color: transparent;
-  font-weight: 700;
-  font-size: 22rpx;
-  letter-spacing: 2rpx;
+  font-weight: 600;
+  font-size: 17rpx;
+  letter-spacing: 0;
+}
+
+/* V1-V10 use identical badge typography and spacing; color remains level-specific. */
+.rank-level-badge.level-V1,
+.rank-level-badge.level-V2,
+.rank-level-badge.level-V3,
+.rank-level-badge.level-V4,
+.rank-level-badge.level-V5,
+.rank-level-badge.level-V6,
+.rank-level-badge.level-V7,
+.rank-level-badge.level-V8,
+.rank-level-badge.level-V9,
+.rank-level-badge.level-V10 {
+  padding: 7rpx 10rpx;
+}
+
+.rank-level-badge.level-V1 .rank-level-text,
+.rank-level-badge.level-V2 .rank-level-text,
+.rank-level-badge.level-V3 .rank-level-text,
+.rank-level-badge.level-V4 .rank-level-text,
+.rank-level-badge.level-V5 .rank-level-text,
+.rank-level-badge.level-V6 .rank-level-text,
+.rank-level-badge.level-V7 .rank-level-text,
+.rank-level-badge.level-V8 .rank-level-text,
+.rank-level-badge.level-V9 .rank-level-text,
+.rank-level-badge.level-V10 .rank-level-text {
+  font-size: 17rpx;
+  font-weight: 600;
+  letter-spacing: 0;
 }
 
 /* VP Set baR合伙人 - 彩虹至尊版 */

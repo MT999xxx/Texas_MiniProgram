@@ -170,41 +170,65 @@ export class CouponsService {
       return this.getLegacyWineVoucherCoupons(memberId, status);
     }
 
-    const wineVouchers = batches
-      .flatMap((batch) => {
-        const remainingQuantity = Number(batch.remainingQuantity || 0);
-        const effectiveExpiresAt = getEffectiveWineVoucherBatchExpiresAt(batch);
-        const isExpired = effectiveExpiresAt <= now;
-        const batchStatus = remainingQuantity <= 0
-          ? UserCouponStatus.USED
-          : isExpired
-            ? UserCouponStatus.EXPIRED
-            : UserCouponStatus.AVAILABLE;
-        const displayCount = remainingQuantity > 0 ? remainingQuantity : 1;
+    const member = typeof this.membershipService?.findMemberById === 'function'
+      ? await this.membershipService.findMemberById(memberId).catch(() => null)
+      : null;
+    const representedBatchTotal = batches.reduce(
+      (sum, batch) => sum + Math.max(0, Number(batch.remainingQuantity || 0)),
+      0,
+    );
 
-        return Array.from({ length: displayCount }, (_, index) => ({
-          id: `wine-voucher-${batch.id}-${remainingQuantity > 0 ? index + 1 : batchStatus.toLowerCase()}`,
+    const wineVouchers = batches.flatMap((batch) => {
+      const quantity = Math.max(0, Number(batch.quantity || 0));
+      const remainingQuantity = Math.max(0, Number(batch.remainingQuantity || 0));
+      const usedQuantity = Math.max(0, quantity - remainingQuantity);
+      const effectiveExpiresAt = getEffectiveWineVoucherBatchExpiresAt(batch);
+      const remainingStatus = effectiveExpiresAt <= now
+        ? UserCouponStatus.EXPIRED
+        : UserCouponStatus.AVAILABLE;
+
+      const createVoucher = (itemStatus: UserCouponStatus, index: number) => ({
+          id: itemStatus === UserCouponStatus.AVAILABLE
+            ? `wine-voucher-${batch.id}-${index + 1}`
+            : `wine-voucher-${batch.id}-${itemStatus.toLowerCase()}-${index + 1}`,
           kind: 'WINE_VOUCHER',
           memberId,
-          status: batchStatus,
+          status: itemStatus,
           startTime: batch.createdAt,
           endTime: effectiveExpiresAt,
-          remainingQuantity: remainingQuantity > 0 ? 1 : 0,
+          remainingQuantity: itemStatus === UserCouponStatus.AVAILABLE ? 1 : 0,
+          displayQuantity: 1,
           quantity: 1,
           voucherBatchId: batch.id,
           voucherPackageId: batch.sourceId,
           coupon: {
-            id: `wine-voucher-coupon-${batch.id}-${remainingQuantity > 0 ? index + 1 : batchStatus.toLowerCase()}`,
+            id: `wine-voucher-coupon-${batch.id}-${itemStatus.toLowerCase()}-${index + 1}`,
             name: batch.packageName || '酒券',
             type: 'WINE_VOUCHER',
-            value: remainingQuantity > 0 ? 1 : 0,
+            value: 1,
             description: '酒券15天有效，过期自动失效',
             minMemberLevel: null,
           },
-        }));
-      })
+        });
+
+      return [
+        ...Array.from({ length: usedQuantity }, (_, index) => (
+          createVoucher(UserCouponStatus.USED, index)
+        )),
+        ...Array.from({ length: remainingQuantity }, (_, index) => (
+          createVoucher(remainingStatus, index)
+        )),
+      ];
+    });
+
+    const legacyRemainder = Math.max(
+      0,
+      Number(member?.wineVouchers || 0) - representedBatchTotal,
+    );
+    const legacyVouchers = this.createLegacyWineVoucherCoupons(memberId, legacyRemainder);
+
+    return [...wineVouchers, ...legacyVouchers]
       .filter((item) => !status || item.status === status);
-    return batches.length > 0 ? wineVouchers : this.getLegacyWineVoucherCoupons(memberId, status);
   }
 
   private async getLegacyWineVoucherCoupons(memberId: string, status?: UserCouponStatus) {
@@ -218,6 +242,11 @@ export class CouponsService {
       return [];
     }
 
+    return this.createLegacyWineVoucherCoupons(memberId, remainingQuantity);
+  }
+
+  private createLegacyWineVoucherCoupons(memberId: string, quantity: number) {
+    if (quantity <= 0) return [];
     const now = new Date();
     const fallbackExpiresAt = new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000);
     return [{
@@ -227,14 +256,16 @@ export class CouponsService {
       status: UserCouponStatus.AVAILABLE,
       startTime: now,
       endTime: fallbackExpiresAt,
-      remainingQuantity,
-      quantity: remainingQuantity,
+      remainingQuantity: quantity,
+      displayQuantity: quantity,
+      quantity,
       voucherBatchId: null,
+      voucherPackageId: null,
       coupon: {
         id: `legacy-wine-voucher-coupon-${memberId}`,
         name: '酒券',
         type: 'WINE_VOUCHER',
-        value: remainingQuantity,
+        value: quantity,
         description: '历史酒券，请尽快使用',
         minMemberLevel: null,
       },

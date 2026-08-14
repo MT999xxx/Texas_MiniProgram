@@ -1,78 +1,67 @@
 <view class="container redesign-bg">
   <view class="hero-bg-lux-member"></view>
-  
-  <!-- 顶部导航 -->
+
   <view class="nav-header">
-    <view class="back-btn" bindtap="goBack">
-      <text class="back-icon">‹</text>
-    </view>
-    <text class="nav-title">会员权益</text>
+    <view class="back-btn" bindtap="goBack"><text class="back-icon">‹</text></view>
+    <text class="nav-title">会员等级</text>
     <view class="nav-placeholder"></view>
   </view>
 
-  <!-- 等级卡片轮播 -->
-  <swiper 
-    class="level-swiper" 
-    current="{{currentLevel}}" 
-    bindchange="onSwiperChange"
-    previous-margin="40rpx"
-    next-margin="40rpx"
-    circular="{{true}}"
-  >
-    <swiper-item wx:for="{{memberLevels}}" wx:key="id">
-      <view class="level-card {{item.darkText ? 'dark-text' : ''}}" style="background: {{item.bgGradient}};">
-        <!-- 背景大V盾牌 -->
-        <view class="v-shield-bg">
-          <text class="v-shield-text">V</text>
-        </view>
-        
-        <view class="card-header">
-          <view class="level-v-mark">V<text class="v-num">{{item.id}}</text></view>
-          <text class="level-name">{{item.name}}</text>
-        </view>
+  <view class="level-overview">
+    <text class="brand-mark">Set baR</text>
+    <text class="overview-title">尊享等级</text>
+    <view class="overview-data">
+      <text>当前 V{{actualLevel}}</text>
+    </view>
+  </view>
 
-        <view class="card-footer">
-          <view class="status-info">
-            <text class="status-tag">{{item.status}}</text>
-            <text class="progress-text" wx:if="{{item.progress}}">，{{item.progress}}</text>
+  <swiper
+    class="level-swiper"
+    current="{{currentLevel}}"
+    bindchange="onSwiperChange"
+    previous-margin="48rpx"
+    next-margin="48rpx"
+  >
+    <swiper-item wx:for="{{memberLevels}}" wx:key="code">
+      <view class="level-card" style="--level-accent: {{item.accent}};">
+        <image class="level-badge" src="{{item.icon}}" mode="aspectFill"></image>
+        <view class="level-copy">
+          <view class="level-heading">
+            <text class="level-code">{{item.code}}</text>
+            <text class="level-name">{{item.name}}</text>
           </view>
-          <text class="rule-link">规则说明 ></text>
+          <text class="level-status">{{item.status}}</text>
         </view>
       </view>
     </swiper-item>
-
   </swiper>
 
-  <!-- 等级指示器 -->
-  <view class="level-indicators">
-    <view 
-      wx:for="{{memberLevels}}" 
-      wx:key="id"
-      class="indicator {{currentLevel === index ? 'active' : ''}}"
-      style="background: {{currentLevel === index ? item.color : 'rgba(255,255,255,0.3)'}};"
-      bindtap="onIndicatorTap"
-      data-index="{{index}}"
-    ></view>
+  <scroll-view class="level-indicators" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="indicator-row">
+      <view
+        wx:for="{{memberLevels}}"
+        wx:key="code"
+        class="indicator {{currentLevel === index ? 'active' : ''}}"
+        bindtap="onIndicatorTap"
+        data-index="{{index}}"
+      >{{item.code}}</view>
+    </view>
+  </scroll-view>
+
+  <view class="benefits-section">
+    <view class="benefit-header">
+      <text class="benefit-kicker">升级奖励</text>
+      <text class="benefit-level">{{memberLevels[currentLevel].code}}</text>
+    </view>
+    <text class="benefit-name">{{memberLevels[currentLevel].name}}</text>
+    <text class="benefit-detail">{{memberLevels[currentLevel].reward}}</text>
+    <view class="benefit-note">
+      达到对应等级后生成待发奖励，由管理员确认后到账；跨级时逐级累计生成。
+    </view>
   </view>
 
-  <!-- 当前等级福利列表 -->
-  <view class="benefits-section glass-panel gold-border">
-    <view class="section-title">
-      <text class="title-text">会员权益</text>
-    </view>
-    
-    <view class="benefits-empty">
-      <text>会员权益内容待更新</text>
-    </view>
-  </view>
-
-  <!-- 立即充值按钮 -->
   <view class="recharge-action">
-    <button class="btn-primary recharge-btn" bindtap="goRecharge">
-      立即开通 {{memberLevels[currentLevel].name}}
-    </button>
+    <button class="btn-primary recharge-btn" bindtap="goRecharge">前往充值</button>
   </view>
-
-  <!-- 底部占位 -->
-  <view style="height: 60rpx;"></view>
+  <view class="safe-bottom"></view>
 </view>

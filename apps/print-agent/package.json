@@ -1,0 +1,10 @@
+{
+  "name": "print-agent",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test test/*.test.js",
+    "test-print": "node src/index.js --test"
+  }
+}

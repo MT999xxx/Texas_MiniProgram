@@ -59,6 +59,22 @@ export class MemberEntity {
   @Column({ type: 'int', default: 0 })
   wineVouchers!: number;
 
+  @ApiProperty({ description: '累计充值金额（元）' })
+  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
+  totalRechargeAmount!: number;
+
+  @ApiProperty({ description: '月赛门票数量' })
+  @Column({ type: 'int', default: 0 })
+  monthlyTickets!: number;
+
+  @ApiProperty({ description: '已建立奖励基线或已生成奖励的最高等级' })
+  @Column({ type: 'int', default: 1 })
+  membershipRewardLevel!: number;
+
+  @ApiProperty({ description: '是否已完成历史会员奖励基线初始化' })
+  @Column({ default: false })
+  membershipRewardInitialized!: boolean;
+
   @ApiProperty({ type: String, format: 'date-time' })
   @CreateDateColumn()
   createdAt!: Date;

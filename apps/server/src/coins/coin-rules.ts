@@ -1,12 +1,15 @@
 export const COIN_RECHARGE_PACKAGES = [
-  { id: 'coin-500', amount: 500, coins: 60, bonusPoints: 30000, label: '500元' },
-  { id: 'coin-1000', amount: 1000, coins: 150, bonusPoints: 80000, label: '1000元' },
-  { id: 'coin-2000', amount: 2000, coins: 400, bonusPoints: 200000, label: '2000元' },
-  { id: 'coin-5000', amount: 5000, coins: 1000, bonusPoints: 600000, label: '5000元' },
+  { id: 'coin-500', amount: 500, baseCoins: 500, bonusCoins: 60, coins: 560, bonusPoints: 30000, label: '500元' },
+  { id: 'coin-1000', amount: 1000, baseCoins: 1000, bonusCoins: 150, coins: 1150, bonusPoints: 80000, label: '1000元' },
+  { id: 'coin-2000', amount: 2000, baseCoins: 2000, bonusCoins: 400, coins: 2400, bonusPoints: 200000, label: '2000元' },
+  { id: 'coin-5000', amount: 5000, baseCoins: 5000, bonusCoins: 1000, coins: 6000, bonusPoints: 600000, label: '5000元' },
 ] as const;
 
 export const WINE_VOUCHER_VALID_DAYS = 15;
 export const WINE_VOUCHER_PURCHASE_BONUS_POINTS = 8000;
+export const MONTHLY_REBUY_WINE_VOUCHER_BONUS_POINTS = 15000;
+export const WEEKLY_REBUY_WINE_VOUCHER_BONUS_POINTS = 10000;
+export const DAILY_REBUY_WINE_VOUCHER_BONUS_POINTS = 10000;
 export const POINTS_PER_CONSUMED_COIN = 50;
 
 export const WINE_VOUCHER_PACKAGES = [
@@ -85,23 +88,58 @@ export function getCoinConsumptionBonusPoints(coins: number): number {
   return Math.floor(Number(coins || 0) * POINTS_PER_CONSUMED_COIN);
 }
 
-export function isNoBonusWineVoucherMenuItem(item: { name?: string }): boolean {
+export type WineVoucherMenuItemBenefits = {
+  bonusPoints: number;
+  voucherCount: number;
+};
+
+export function getWineVoucherMenuItemBenefits(
+  item: { name?: string; category?: { name?: string } },
+): WineVoucherMenuItemBenefits {
+  if (!isWineVoucherMenuItem(item)) {
+    return { bonusPoints: 0, voucherCount: 0 };
+  }
+
   const itemName = item.name || '';
-  return itemName.includes('周赛');
+  const normalizedName = itemName.toLowerCase();
+  const isRebuy = itemName.includes('补码');
+
+  if (itemName.includes('月赛')) {
+    return isRebuy
+      ? { bonusPoints: MONTHLY_REBUY_WINE_VOUCHER_BONUS_POINTS, voucherCount: 1 }
+      : { bonusPoints: 0, voucherCount: 0 };
+  }
+
+  if (itemName.includes('周赛')) {
+    return isRebuy
+      ? { bonusPoints: WEEKLY_REBUY_WINE_VOUCHER_BONUS_POINTS, voucherCount: 1 }
+      : { bonusPoints: 0, voucherCount: 0 };
+  }
+
+  if (normalizedName.includes('sng')) {
+    return { bonusPoints: 0, voucherCount: 0 };
+  }
+
+  if (itemName.includes('日常赛') && isRebuy) {
+    return { bonusPoints: DAILY_REBUY_WINE_VOUCHER_BONUS_POINTS, voucherCount: 1 };
+  }
+
+  return { bonusPoints: WINE_VOUCHER_PURCHASE_BONUS_POINTS, voucherCount: 1 };
+}
+
+export function isNoBonusWineVoucherMenuItem(
+  item: { name?: string; category?: { name?: string } },
+): boolean {
+  const benefits = getWineVoucherMenuItemBenefits(item);
+  return benefits.bonusPoints === 0 && benefits.voucherCount === 0;
 }
 
 export function getWineVoucherMenuItemBonusPoints(item: { name?: string; category?: { name?: string } }): number {
-  if (!isWineVoucherMenuItem(item)) {
-    return 0;
-  }
-  if (isNoBonusWineVoucherMenuItem(item)) {
-    return 0;
-  }
-  return WINE_VOUCHER_PURCHASE_BONUS_POINTS;
+  return getWineVoucherMenuItemBenefits(item).bonusPoints;
 }
 
 export function isWineVoucherGrantableMenuItem(item: { name?: string; category?: { name?: string } }): boolean {
-  return isWineVoucherMenuItem(item) && !isNoBonusWineVoucherMenuItem(item);
+  return getWineVoucherMenuItemBenefits(item).voucherCount > 0;
 }
 
 export function isWineVoucherMenuItem(item: { name?: string; category?: { name?: string } }): boolean {

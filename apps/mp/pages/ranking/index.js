@@ -1,5 +1,6 @@
 // pages/ranking/index.js
 const rankingApi = require('../../api/ranking');
+const { getMembershipLevel } = require('../../utils/membership-levels');
 
 Page({
   data: {
@@ -122,16 +123,20 @@ Page({
       }
 
       // 格式化列表数据
-      const rankingList = rankings.map(item => ({
-        rank: item.rank,
-        name: item.nickname || `用户${item.id ? item.id.toString().slice(-4) : 'xxxx'}`,
-        score: this.formatScore(item.points),
-        avatar: (item.avatar && item.avatar.startsWith('http') && !item.avatar.startsWith('http://tmp'))
-          ? item.avatar
-          : '/images/huiyuan2.jpg',
-        levelCode: item.levelCode || 'V1',
-        levelName: item.levelName || ''
-      }));
+      const rankingList = rankings.map(item => {
+        const level = getMembershipLevel(item.levelCode);
+        return {
+          rank: item.rank,
+          name: item.nickname || `用户${item.id ? item.id.toString().slice(-4) : 'xxxx'}`,
+          score: this.formatScore(item.points),
+          avatar: (item.avatar && item.avatar.startsWith('http') && !item.avatar.startsWith('http://tmp'))
+            ? item.avatar
+            : '/images/huiyuan2.jpg',
+          levelCode: level.code,
+          levelName: level.name,
+          levelIcon: level.icon
+        };
+      });
 
       console.log('格式化后的排行榜:', rankingList);
 
@@ -143,7 +148,8 @@ Page({
           rank: myRank.rank || '未上榜',
           name: myRank.nickname || '我',
           score: this.formatScore(myRank.points),
-          avatar: myRank.avatar || '/images/huiyuan2.jpg'
+          avatar: myRank.avatar || '/images/huiyuan2.jpg',
+          level: getMembershipLevel(myRank.levelCode)
         };
       } else {
         // 如果API没返回我的排名，尝试从列表中查找

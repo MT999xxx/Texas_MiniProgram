@@ -7,6 +7,7 @@ import { MembershipService } from '../membership/membership.service';
 import { OrderEntity } from '../orders/order.entity';
 import { MemberEntity } from '../membership/member.entity';
 import { getCoinConsumptionBonusPoints, isWineVoucherMenuItem } from '../coins/coin-rules';
+import { getStoredMembershipLevelRule } from '../membership/membership-level-rules';
 
 @Injectable()
 export class LoyaltyService {
@@ -76,17 +77,16 @@ export class LoyaltyService {
 
       // 计算排行榜数据
       const rankings = members.map((member, index) => {
-        const code = member.level?.code || member.levelCode || 'V1';
-        const name = member.level?.name || '';
+        const level = this.getMemberLevel(member);
         return {
           rank: index + 1,
           id: member.id,
           nickname: member.nickname || '匿名用户',
           avatar: member.avatar,
           points: member.points,
-          levelCode: code,
-          levelName: `${code}${name}`,
-          levelNumber: member.level?.threshold || 0
+          levelCode: level.code,
+          levelName: level.name,
+          levelNumber: level.level
         };
       });
 
@@ -110,14 +110,16 @@ export class LoyaltyService {
       });
 
       if (member) {
+        const level = this.getMemberLevel(member);
         return {
           rank: null,
           id: member.id,
           nickname: member.nickname,
           avatar: member.avatar,
           points: 0,
-          levelName: member.level?.name || 'V1 普通会员',
-          levelNumber: member.level?.threshold || 0
+          levelCode: level.code,
+          levelName: level.name,
+          levelNumber: level.level
         };
       }
     }
@@ -188,17 +190,16 @@ export class LoyaltyService {
 
       return entries.map(entry => {
         const member = entry.member;
-        const code = member?.level?.code || member?.levelCode || 'V1';
-        const name = member?.level?.name || '';
+        const level = this.getMemberLevel(member);
         return {
           rank: entry.rank,
           id: member?.id,
           nickname: member?.nickname || '匿名用户',
           avatar: member?.avatar,
           points: member?.points || 0,
-          levelCode: code,
-          levelName: `${code}${name}`,
-          levelNumber: member?.level?.threshold || 0,
+          levelCode: level.code,
+          levelName: level.name,
+          levelNumber: level.level,
         };
       });
     } catch (error) {
@@ -225,5 +226,15 @@ export class LoyaltyService {
   /** 移除单个冠军赛排名 */
   async removeChampionEntry(type: ChampionType, memberId: string) {
     return this.championRepo.delete({ type, memberId });
+  }
+
+  private getMemberLevel(member?: MemberEntity | null) {
+    const storedLevel = getStoredMembershipLevelRule(member?.levelCode);
+    if (storedLevel) return storedLevel;
+    return {
+      code: member?.levelCode || 'V1',
+      level: 0,
+      name: member?.level?.name || (member?.levelCode === 'VP' ? '三条A合伙人' : '尊荣白银'),
+    };
   }
 }

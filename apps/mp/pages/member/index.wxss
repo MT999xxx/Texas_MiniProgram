@@ -196,6 +196,36 @@ page {
   color: #4a1a90;
 }
 
+/* V7-V10 高阶会员采用深色珠宝主题 */
+.luxury-card.level-theme-v7,
+.luxury-card.level-theme-v8,
+.luxury-card.level-theme-v9,
+.luxury-card.level-theme-v10 {
+  background: #11100f;
+  color: #E6C678;
+  border-color: rgba(230, 198, 120, 0.38);
+  box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.38);
+}
+
+.luxury-card.level-theme-v7 .level-v,
+.luxury-card.level-theme-v7 .level-num,
+.luxury-card.level-theme-v7 .level-title,
+.luxury-card.level-theme-v7 .growth-text,
+.luxury-card.level-theme-v8 .level-v,
+.luxury-card.level-theme-v8 .level-num,
+.luxury-card.level-theme-v8 .level-title,
+.luxury-card.level-theme-v8 .growth-text,
+.luxury-card.level-theme-v9 .level-v,
+.luxury-card.level-theme-v9 .level-num,
+.luxury-card.level-theme-v9 .level-title,
+.luxury-card.level-theme-v9 .growth-text,
+.luxury-card.level-theme-v10 .level-v,
+.luxury-card.level-theme-v10 .level-num,
+.luxury-card.level-theme-v10 .level-title,
+.luxury-card.level-theme-v10 .growth-text {
+  color: #E6C678;
+}
+
 .luxury-card::after {
   content: 'V';
   position: absolute;
@@ -218,28 +248,53 @@ page {
 
 .level-box {
   display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.member-level-emblem {
+  width: 78rpx;
+  height: 78rpx;
+  flex-shrink: 0;
+  margin-right: 18rpx;
+  border-radius: 16rpx;
+  border: 1rpx solid rgba(230, 198, 120, 0.42);
+  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.4);
+}
+
+.level-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.level-code-row {
+  display: flex;
   align-items: baseline;
+  line-height: 1;
 }
 
 .level-v {
   font-style: italic;
-  font-size: 48rpx;
+  font-size: 28rpx;
   color: #E6C678;
   font-weight: 800;
   margin-right: 4rpx;
 }
 
 .level-num {
-  font-size: 56rpx;
+  font-size: 38rpx;
   font-weight: 800;
   color: #E6C678;
-  margin-right: 16rpx;
+  margin-right: 0;
 }
 
 .level-title {
-  font-size: 24rpx;
+  margin-top: 8rpx;
+  font-size: 22rpx;
   color: rgba(230, 198, 120, 0.8);
-  letter-spacing: 2rpx;
+  letter-spacing: 0;
+  white-space: nowrap;
 }
 
 .growth-box {

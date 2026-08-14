@@ -3,6 +3,9 @@ const authManager = require('../../utils/auth');
 const coinsApi = require('../../api/coins');
 const util = require('../../utils/util');
 const PaymentUtils = require('../../utils/payment');
+const { getMembershipLevel } = require('../../utils/membership-levels');
+
+const MEMBER_LEVEL_THRESHOLDS = [0, 1000, 3000, 10000, 20000, 30000, 40000, 50000, 60000, 70000];
 
 Page({
 
@@ -21,7 +24,10 @@ Page({
       level: 'V1',
       levelNum: 1,
       levelName: '尊荣白银',
-      nextLevelDiff: 500,
+      levelIcon: '/images/membership/v1.jpg',
+      nextLevelDiff: 1000,
+      isMaxLevel: false,
+      totalRechargeAmount: 0,
       growthPercent: 0
     },
     stats: {
@@ -38,10 +44,10 @@ Page({
     // 充值弹窗
     showRechargePopup: false,
     rechargeOptions: [
-      { amount: 500, coins: 60, bonus: 30000, desc: '60金币 · 赠送30000积分' },
-      { amount: 1000, coins: 150, bonus: 80000, desc: '150金币 · 赠送80000积分' },
-      { amount: 2000, coins: 400, bonus: 200000, desc: '400金币 · 赠送200000积分' },
-      { amount: 5000, coins: 1000, bonus: 600000, desc: '1000金币 · 赠送600000积分' }
+      { amount: 500, coins: 560, bonusCoins: 60, bonus: 30000, desc: '到账560金币（赠60）· 赠送30000积分' },
+      { amount: 1000, coins: 1150, bonusCoins: 150, bonus: 80000, desc: '到账1150金币（赠150）· 赠送80000积分' },
+      { amount: 2000, coins: 2400, bonusCoins: 400, bonus: 200000, desc: '到账2400金币（赠400）· 赠送200000积分' },
+      { amount: 5000, coins: 6000, bonusCoins: 1000, bonus: 600000, desc: '到账6000金币（赠1000）· 赠送600000积分' }
     ],
     selectedAmount: 500,
     inputAmount: '',
@@ -546,16 +552,30 @@ Page({
         util.animateNumber(this, 'stats.coins', res.coins || 0);
         util.animateNumber(this, 'stats.points', res.points || 0);
 
-        // 解析等级编码获取等级数字（VP 等非数字后缀需映射）
-        const levelCode = res.levelCode || 'V1';
-        const levelCodeMap = { V1: 1, V2: 2, V3: 3, V4: 4, V5: 5, VP: 6 };
-        const levelNum = levelCodeMap[levelCode] || parseInt(levelCode.replace('V', '')) || 1;
+        // 解析等级编码，并按累计充值门槛显示升级进度
+        const level = getMembershipLevel(res.levelCode);
+        const levelCode = level.code;
+        const levelNum = level.level;
+        const totalRechargeAmount = Number(res.totalRechargeAmount || 0);
+        const currentThreshold = MEMBER_LEVEL_THRESHOLDS[levelNum - 1] || 0;
+        const nextThreshold = MEMBER_LEVEL_THRESHOLDS[levelNum];
+        const isMaxLevel = levelNum >= MEMBER_LEVEL_THRESHOLDS.length;
+        const segmentSize = isMaxLevel ? 1 : Math.max(1, nextThreshold - currentThreshold);
+        const growthPercent = isMaxLevel
+          ? 100
+          : Math.min(100, Math.max(0, ((totalRechargeAmount - currentThreshold) / segmentSize) * 100));
 
         this.setData({
           'stats.wineVouchers': res.wineVouchers ?? 0,
           voucherExpiryReminder: res.wineVoucherExpiryReminder || '',
+          'memberInfo.level': levelCode,
           'memberInfo.levelNum': levelNum,
-          'memberInfo.levelName': res.levelName || '尊荣白银',
+          'memberInfo.levelName': level.name,
+          'memberInfo.levelIcon': level.icon,
+          'memberInfo.totalRechargeAmount': totalRechargeAmount,
+          'memberInfo.nextLevelDiff': isMaxLevel ? 0 : Math.max(0, nextThreshold - totalRechargeAmount),
+          'memberInfo.isMaxLevel': isMaxLevel,
+          'memberInfo.growthPercent': growthPercent,
           loading: false
         });
         if (res.wineVoucherExpiryReminder) {

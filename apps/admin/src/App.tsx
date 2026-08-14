@@ -11,6 +11,7 @@ import DepositReview from './pages/DepositReview';
 import Transactions from './pages/Transactions';
 import ChampionRanking from './pages/ChampionRanking';
 import Settings from './pages/Settings';
+import MembershipRewards from './pages/MembershipRewards';
 import MainLayout from './components/Layout/MainLayout';
 import AuthRoute from './components/AuthRoute';
 
@@ -49,6 +50,7 @@ function App() {
               <Route path="menu" element={<Menu />} />
               <Route path="wine-vouchers" element={<WineVouchers />} />
               <Route path="members" element={<Members />} />
+              <Route path="membership-rewards" element={<MembershipRewards />} />
               <Route path="deposit-review" element={<DepositReview />} />
               <Route path="transactions" element={<Transactions />} />
               <Route path="orders" element={<Orders />} />

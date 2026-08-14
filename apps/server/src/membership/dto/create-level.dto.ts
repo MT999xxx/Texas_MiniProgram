@@ -12,7 +12,7 @@ export class CreateLevelDto {
   @MaxLength(48)
   name!: string;
 
-  @ApiProperty({ description: '积分门槛', minimum: 0 })
+  @ApiProperty({ description: '累计充值门槛（元）', minimum: 0 })
   @IsNumber()
   @Min(0)
   threshold!: number;

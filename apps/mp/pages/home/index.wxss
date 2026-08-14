@@ -104,6 +104,60 @@ page {
   box-shadow: 0 0 20rpx rgba(214, 74, 59, 0.9);
 }
 
+.venue-status-row {
+  display: flex;
+  gap: 12rpx;
+  margin-top: 20rpx;
+  width: 100%;
+}
+
+.venue-status-item {
+  flex: 1;
+  min-width: 0;
+  height: 46rpx;
+  padding: 0 16rpx;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  border-radius: 23rpx;
+  background: rgba(5, 5, 6, 0.38);
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(18rpx);
+}
+
+.status-dot {
+  width: 8rpx;
+  height: 8rpx;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.location-dot {
+  background: #E6C678;
+  box-shadow: 0 0 12rpx rgba(230, 198, 120, 0.65);
+}
+
+.wifi-dot {
+  background: #D64A3B;
+  box-shadow: 0 0 12rpx rgba(214, 74, 59, 0.65);
+}
+
+.status-label {
+  flex-shrink: 0;
+  font-size: 15rpx;
+  color: rgba(248, 245, 236, 0.52);
+}
+
+.status-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15rpx;
+  color: rgba(248, 245, 236, 0.72);
+}
+
 .hero-copy {
   margin-top: auto;
   width: 520rpx;

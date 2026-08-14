@@ -243,10 +243,16 @@ export default function Members() {
             ),
         },
         {
-            title: '累计消费',
-            dataIndex: 'totalSpent',
-            key: 'totalSpent',
+            title: '累计充值',
+            dataIndex: 'totalRechargeAmount',
+            key: 'totalRechargeAmount',
             render: (amount: number | string) => `¥${amount ? Number(amount).toFixed(2) : '0.00'}`,
+        },
+        {
+            title: '月赛门票',
+            dataIndex: 'monthlyTickets',
+            key: 'monthlyTickets',
+            render: (value: number) => `${value || 0}张`,
         },
         {
             title: '注册时间',

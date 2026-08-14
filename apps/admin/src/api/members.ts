@@ -10,6 +10,8 @@ export interface Member {
     wineVouchers: number;
     lotteryChances: number;
     totalSpent: number;
+    totalRechargeAmount: number;
+    monthlyTickets: number;
     levelCode?: string;
     level?: {
         code: string;
@@ -18,6 +20,34 @@ export interface Member {
     };
     createdAt: string;
     updatedAt: string;
+}
+
+export type MembershipRewardStatus = 'PENDING' | 'ISSUED' | 'CANCELLED';
+
+export interface MembershipRewardGrant {
+    id: string;
+    memberId: string;
+    member: Member;
+    levelCode: string;
+    levelName: string;
+    threshold: number;
+    points: number;
+    coins: number;
+    wineVouchers: number;
+    monthlyTickets: number;
+    status: MembershipRewardStatus;
+    remark?: string;
+    issuedAt?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface UpdateMembershipRewardPayload {
+    points: number;
+    coins: number;
+    wineVouchers: number;
+    monthlyTickets: number;
+    remark?: string;
 }
 
 export interface PointDeposit {
@@ -74,5 +104,20 @@ export const memberApi = {
     async updateLevel(id: string, levelCode: string | null) {
         const response = await client.patch(`/membership/members/${id}/level`, { levelCode });
         return response.data;
+    },
+
+    async listRewards(status?: MembershipRewardStatus) {
+        const response = await client.get('/membership/rewards', { params: { status } });
+        return response.data as MembershipRewardGrant[];
+    },
+
+    async updateReward(id: string, payload: UpdateMembershipRewardPayload) {
+        const response = await client.patch(`/membership/rewards/${id}`, payload);
+        return response.data as MembershipRewardGrant;
+    },
+
+    async issueReward(id: string) {
+        const response = await client.post(`/membership/rewards/${id}/issue`);
+        return response.data as MembershipRewardGrant;
     },
 };

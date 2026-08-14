@@ -15,6 +15,7 @@ import { WineVoucherOptionsService } from './wine-voucher-options.service';
 import { MemberEntity } from '../membership/member.entity';
 import { OrdersModule } from '../orders/orders.module';
 import { AdminNotificationsModule } from '../notifications/admin-notifications.module';
+import { MembershipModule } from '../membership/membership.module';
 
 @Module({
     imports: [
@@ -30,6 +31,7 @@ import { AdminNotificationsModule } from '../notifications/admin-notifications.m
         ]),
         OrdersModule,
         AdminNotificationsModule,
+        MembershipModule,
     ],
     controllers: [CoinsController, WineVoucherOptionsController],
     providers: [CoinsService, WechatPayService, WineVoucherOptionsService],

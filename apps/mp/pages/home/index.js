@@ -13,6 +13,8 @@ Page({
     modalVisible: false,
     modalTitle: '',
     modalContent: '',
+    locationText: '获取中',
+    wifiText: '检测中',
     // 签到相关
     showCheckInPopup: false,
     checkInStatus: {
@@ -26,11 +28,83 @@ Page({
 
   onLoad: function (options) {
     console.log('home page onLoad');
+    this.loadLocationStatus();
   },
 
   onShow: function () {
+    this.loadNetworkStatus();
     // 页面显示时检查签到状态
     this.checkLoginAndLoadCheckIn();
+  },
+
+  /**
+   * 获取首页定位状态。失败时静默降级，不影响首页其他功能。
+   */
+  loadLocationStatus: function () {
+    if (typeof wx.getLocation !== 'function') {
+      this.setData({ locationText: '当前设备不支持' });
+      return;
+    }
+
+    wx.getLocation({
+      type: 'gcj02',
+      isHighAccuracy: false,
+      success: ({ latitude, longitude }) => {
+        const lat = Number(latitude);
+        const lng = Number(longitude);
+        if (Number.isFinite(lat) && Number.isFinite(lng)) {
+          this.setData({ locationText: `${lat.toFixed(3)}, ${lng.toFixed(3)}` });
+          return;
+        }
+        this.setData({ locationText: '暂不可用' });
+      },
+      fail: () => {
+        this.setData({ locationText: '未开启' });
+      }
+    });
+  },
+
+  /**
+   * 显示当前网络状态；连接 Wi-Fi 时尽量读取网络名称。
+   */
+  loadNetworkStatus: function () {
+    wx.getNetworkType({
+      success: ({ networkType }) => {
+        if (networkType !== 'wifi') {
+          const labels = {
+            none: '未连接',
+            unknown: '状态未知'
+          };
+          this.setData({ wifiText: labels[networkType] || `${networkType.toUpperCase()} 网络` });
+          return;
+        }
+
+        this.loadConnectedWifiName();
+      },
+      fail: () => {
+        this.setData({ wifiText: '状态未知' });
+      }
+    });
+  },
+
+  loadConnectedWifiName: function () {
+    if (typeof wx.startWifi !== 'function' || typeof wx.getConnectedWifi !== 'function') {
+      this.setData({ wifiText: '已连接' });
+      return;
+    }
+
+    wx.startWifi({
+      complete: () => {
+        wx.getConnectedWifi({
+          success: ({ wifi }) => {
+            this.setData({ wifiText: wifi?.SSID || '已连接' });
+          },
+          fail: () => {
+            this.setData({ wifiText: '已连接' });
+          }
+        });
+      }
+    });
   },
 
   /**
