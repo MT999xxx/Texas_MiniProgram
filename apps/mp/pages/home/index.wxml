@@ -7,7 +7,7 @@
     <view class="top-line">
       <view class="brand-mark">
         <text class="brand-name">Set baR</text>
-        <text class="brand-sub">德州酒廊 · 鸡尾酒吧</text>
+        <text class="brand-sub">酒廊 · 鸡尾酒吧</text>
       </view>
       <view class="open-chip">
         <view class="open-dot"></view>
@@ -16,11 +16,11 @@
     </view>
 
     <view class="venue-status-row">
-      <view class="venue-status-item">
+      <!-- <view class="venue-status-item">
         <view class="status-dot location-dot"></view>
         <text class="status-label">定位</text>
         <text class="status-value">{{locationText}}</text>
-      </view>
+      </view> -->
       <view class="venue-status-item">
         <view class="status-dot wifi-dot"></view>
         <text class="status-label">Wi-Fi</text>
@@ -40,7 +40,7 @@
           <text class="action-sub">酒水与小食</text>
         </view>
       </view>
-      <view class="primary-action reserve-action" bindtap="goToReservation">
+      <view wx:if="{{tableEntryVisible}}" class="primary-action reserve-action" bindtap="goToReservation">
         <image class="action-icon" src="/images/icons/reserve-gold.svg" mode="aspectFit" />
         <view class="action-copy">
           <text class="action-title">预约桌台</text>

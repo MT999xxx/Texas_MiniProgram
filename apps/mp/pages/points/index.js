@@ -24,7 +24,7 @@ Page({
       { id: '1', name: '5元代金券', description: '全场通用', points: 500 },
       { id: '2', name: '10元代金券', description: '全场通用', points: 1000 },
       { id: '3', name: '特调鸡尾酒', description: '限量款', points: 800 },
-      { id: '4', name: '德州扑克筹码', description: '纪念版', points: 1500 },
+      { id: '4', name: '扑克筹码', description: '纪念版', points: 1500 },
       { id: '5', name: '会员升级券', description: '直升一级', points: 2000 }
     ],
     isLoggedIn: false,

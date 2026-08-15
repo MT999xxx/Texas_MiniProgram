@@ -19,7 +19,8 @@ Component({
                 pagePath: "/pages/table/index",
                 text: "桌台",
                 iconPath: "/images/icons/tables-muted.svg",
-                selectedIconPath: "/images/icons/tables-red.svg"
+                selectedIconPath: "/images/icons/tables-red.svg",
+                hidden: true
             },
             {
                 pagePath: "/pages/ranking/index",

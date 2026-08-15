@@ -27,7 +27,7 @@
           </view>
           
           <view class="type-lux-chip" wx:if="{{item.type}}">
-            {{item.type === 'TOURNAMENT' ? '德州赛事' : ''}}
+            {{item.type === 'TOURNAMENT' ? '赛事' : ''}}
             {{item.type === 'PROMOTION' ? '会员礼遇' : ''}}
             {{item.type === 'SPECIAL' ? '限定专场' : ''}}
             {{item.type === 'HOLIDAY' ? '节日活动' : ''}}

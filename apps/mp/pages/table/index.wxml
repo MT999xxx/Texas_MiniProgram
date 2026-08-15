@@ -5,7 +5,7 @@
   <view class="header-bar">
     <view class="table-brand">
       <text class="store-name">实时桌台</text>
-      <text class="store-sub">Set baR 德州酒廊</text>
+      <text class="store-sub">Set baR 酒廊</text>
     </view>
     <view class="rule-btn" bindtap="showRules">预约规则</view>
   </view>

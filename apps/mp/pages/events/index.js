@@ -218,15 +218,15 @@ Page({
     const baseEvents = [
       {
         id: '1',
-        name: '新年德州扑克大赛',
-        description: '迎新春德州扑克锦标赛，丰厚奖品等你来拿！比赛采用无限注德州扑克规则，设有多个级别适合不同水平的玩家参与。',
+        name: '新年大赛',
+        description: '迎新春扑克锦标赛，丰厚奖品等你来拿！比赛采用规则，设有多个级别适合不同水平的玩家参与。',
         type: 'TOURNAMENT',
         coverImage: '',
         maxParticipants: 100,
         currentParticipants: 45,
         entryFee: 500,
         rewardPoints: 2000,
-        location: '德州主题酒吧VIP包厅',
+        location: '主题酒吧VIP包厅',
         minMemberLevel: 2,
         requiresRegistration: true
       },
@@ -240,13 +240,13 @@ Page({
         currentParticipants: 23,
         entryFee: 0,
         rewardPoints: 300,
-        location: '德州主题酒吧全场',
+        location: '主题酒吧全场',
         minMemberLevel: 1,
         requiresRegistration: true
       },
       {
         id: '3',
-        name: '德州扑克入门课程',
+        name: '扑克入门课程',
         description: '专业教练教学，从基础规则到进阶技巧，适合新手玩家。课程包含理论讲解和实战练习，助你快速提升牌技水平。',
         type: 'SPECIAL',
         coverImage: '',
@@ -254,7 +254,7 @@ Page({
         currentParticipants: 12,
         entryFee: 200,
         rewardPoints: 500,
-        location: '德州主题酒吧培训室',
+        location: '主题酒吧培训室',
         minMemberLevel: 1,
         requiresRegistration: true
       }

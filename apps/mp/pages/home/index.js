@@ -8,6 +8,7 @@ console.log('home/index.js loaded');
 
 Page({
   data: {
+    tableEntryVisible: false,
     // 暂时使用本地图片，避免CDN 404问题
     bgUrl: '/images/setbar-panther-hero.jpg',
     modalVisible: false,
@@ -317,7 +318,7 @@ Page({
    */
   onShareAppMessage: function () {
     return {
-      title: 'Set baR · 德州酒廊与鸡尾酒吧',
+      title: 'Set baR · 酒廊与鸡尾酒吧',
       path: '/pages/home/index',
       imageUrl: '/images/setbar-panther-hero.jpg'
     };
@@ -328,7 +329,7 @@ Page({
    */
   onShareTimeline: function () {
     return {
-      title: 'Set baR · 德州酒廊与鸡尾酒吧',
+      title: 'Set baR · 酒廊与鸡尾酒吧',
       imageUrl: '/images/setbar-panther-hero.jpg'
     };
   }

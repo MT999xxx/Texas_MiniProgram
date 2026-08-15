@@ -33,13 +33,6 @@
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json",
-  "permission": {
-    "scope.userLocation": {
-      "desc": "用于在首页显示当前定位状态"
-    }
-  },
-  "requiredPrivateInfos": [
-    "getLocation"
-  ],
+
   "__usePrivacyCheck__": true
 }

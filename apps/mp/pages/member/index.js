@@ -677,7 +677,7 @@ Page({
           memberId: userInfo.memberId || userInfo.id || '',
           userInfo: {
             avatar: validAvatar,
-            nickname: userInfo.nickname || userInfo.nickName || '德州爱好者', // Handle both nickName and nickname
+            nickname: userInfo.nickname || userInfo.nickName || '爱好者', // Handle both nickName and nickname
             id: userInfo.id || ''
           }
         });

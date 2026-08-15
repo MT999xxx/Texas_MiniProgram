@@ -335,7 +335,7 @@ Page({
   // 分享
   onShareAppMessage() {
     return {
-      title: '德州积分充值，多种套餐选择！',
+      title: '积分充值，多种套餐选择！',
       path: '/pages/recharge/index',
       imageUrl: '/assets/share-recharge.jpg'
     };
